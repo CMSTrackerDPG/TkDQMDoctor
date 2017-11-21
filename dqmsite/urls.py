@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^helper/', include('certhelper.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^', include('certhelper.urls')),
 ]

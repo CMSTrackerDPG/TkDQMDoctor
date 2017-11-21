@@ -1,22 +1,26 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from django.template import loader
+from django.views import generic
 
 from .models import RunInfo
 
 
-def detail(request, runinfo_id):
-    runinfo = get_object_or_404(RunInfo, pk=runinfo_id)
-    return render(request, 'certhelper/detail.html', {'runinfo': runinfo})
+def index(request):
+    return render(request, 'certhelper/index.html')
 
-def list(request):
-    l = RunInfo.objects.all()
-    template = loader.get_template('certhelper/list.html')
-    context = {'list': l, }
-    return HttpResponse(template.render(context, request))
+
+class DetailView(generic.DetailView):
+    model = RunInfo
+    template_name = 'certhelper/detail.html'
+
+class ListView(generic.ListView):
+    template_name = 'certhelper/list.html'
+    context_object_name = 'list'
+
+    def get_queryset(self):
+        return RunInfo.objects.all()
 
 def helper(request):
     return render(request, 'certhelper/helper.html')
 
-def index(request):
-    return render(request, 'certhelper/index.html')
