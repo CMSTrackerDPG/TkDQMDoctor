@@ -1,28 +1,5 @@
-<center><h2>Helper</h2></center>
-
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<form>
-{% csrf_token %}
-<div>
-    Title: <input type="text"/>
-</div>
-
-<div>
-    Comment: <input type="textarea"/>
-</div>
-
-<div>
-    Reference Run Number:<input type="text"/>
-</div>
-
-<div>
-    <input type="submit" value="Check" />
-</div>
+<form action="/your-name/" method="post">
+    <label for="your_name">Your name: </label>
+    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
+    <input type="submit" value="OK">
 </form>
-
-
-<br>
-<br>
-<br>
-<a href="{% url 'certhelper:index' %}">Back to index</a>

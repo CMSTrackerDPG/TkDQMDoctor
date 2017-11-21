@@ -4,7 +4,7 @@
 {% if list %}
     <ul>
     {% for runinfo in list %}
-        <li><a href="{% url 'certhelper:detail' runinfo.id %}">{{ runinfo.title }}</a></li>
+        <li><a href="{% url 'certhelper:detail' runinfo.id %}">{{ runinfo.run_number }}</a></li>
         <!-- <h5>{{ runinfo.date|date:"Y-m-d" }}<a href="{% url 'certhelper:detail' runinfo.id %}"> {{runinfo.title}}</a></h5> -->
     {% endfor %}
     </ul>
