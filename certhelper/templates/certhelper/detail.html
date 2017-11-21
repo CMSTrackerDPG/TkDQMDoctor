@@ -1,0 +1,18 @@
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<center><h2>Run Information Detail</h2></center>
+
+<p><b>Title: </b>{{runinfo.title}} </p>
+<p><b>Comment: </b> {{runinfo.comment}} </p>
+<p><b>number: </b> {{runinfo.number}} </p>
+
+<pre>
+    ==================== Run Registry Copy Pasta ====================
+{{runinfo.title}}
+{{runinfo.comment}}
+{{runinfo.number}}
+</pre> 
+<br>
+<br>
+<br>
+<a href="{% url 'certhelper:list' %}">Back list of runs</a>
