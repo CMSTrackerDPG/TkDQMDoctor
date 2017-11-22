@@ -1,12 +1,14 @@
 from django.db import models
 
 class RunInfo(models.Model):
-    run_number = models.IntegerField(default=0)
-    number_of_ls = models.IntegerField(default=0)
-    integrated_luminosity = models.IntegerField(default=0)
-    pixel_status = models.BooleanField(default=False)
-    sistrip_status = models.BooleanField(default=False)
-    tracking_status = models.BooleanField(default=False)
+    run_number = models.IntegerField()
+    reference_run_number = models.IntegerField()
+
+    number_of_ls = models.IntegerField()
+    integrated_luminosity = models.DecimalField(max_digits=20, decimal_places=10)
+    pixel = models.BooleanField()
+    sistrip = models.BooleanField()
+    tracking = models.BooleanField()
     comment = models.TextField()
 
     def __str__(self):

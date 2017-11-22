@@ -1,19 +1,46 @@
-<center><h2>List of all Run Infos</h2></center>
+<h2>List of al Runs</h2>
+<a href="{% url 'certhelper:index' %}">Back to index</a>
 
-
+</br></br>
 {% if list %}
-    <ul>
+<!-- Table -->
+<table border="1" width="100%">
+    <tr>
+        <th>Run</th>
+        <th>number of LS</th> 
+        <th>Int. Luminosity</th>
+        <th>Pixel</th>
+        <th>SiStrip</th>
+        <th>Tracking</th>
+        <th>Comments</th>
+    </tr>     
     {% for runinfo in list %}
-        <li><a href="{% url 'certhelper:detail' runinfo.id %}">{{ runinfo.run_number }}</a></li>
-        <!-- <h5>{{ runinfo.date|date:"Y-m-d" }}<a href="{% url 'certhelper:detail' runinfo.id %}"> {{runinfo.title}}</a></h5> -->
+    <tr>
+        <td>{{runinfo.run_number }}</td>
+        <td>{{runinfo.number_of_ls}}</td>
+        <td>{{runinfo.integrated_luminosity}}</td>
+        <td>{{runinfo.pixel}}</td>
+        <td>{{runinfo.sistrip}}</td>
+        <td>{{runinfo.tracking}}</td>
+        <td>{{runinfo.comment}}</td>
+        <td><a href="{% url 'certhelper:detail' runinfo.id %}">Details</a></td>                    
+        <td><a href="{% url 'certhelper:update' runinfo.id %}">Edit</a></td>                    
+        <td><a href="{% url 'certhelper:delete' runinfo.id %}">Delete</a></td>            
+        
+    </tr>
     {% endfor %}
-    </ul>
-{% else %}
+</table>
+<a href="{% url 'certhelper:create' %}">Add a Run</a>
 
+</br></br>
+<!-- Elog Style output -->
+<pre>
+=============Runs Checked============
+Run	number of LS	Int. Luminosity		Pixel	SiStrip	  Tracking	Comments
+{% for runinfo in list %}
+{{runinfo.run_number }} {{runinfo.number_of_ls}} {{runinfo.integrated_luminosity}} {{runinfo.pixel}} {{runinfo.sistrip}} {{runinfo.tracking}} {{runinfo.comment}}{% endfor %}
+</pre>
+
+{% else %}
 <p>No entries are available.</p>
 {% endif %}
-
-<br>
-<br>
-<br>
-<a href="{% url 'certhelper:index' %}">Back to index</a>

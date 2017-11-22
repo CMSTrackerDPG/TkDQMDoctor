@@ -1,0 +1,12 @@
+<h2>Add a new Run</h2>
+
+<a href="{% url 'certhelper:index' %}">Back to index</a></br></br></br>
+
+<form method="POST" action=""> {% csrf_token %}
+    <table>
+    {{form.as_table}}
+</table>
+    <input type="submit" value="Add to staged">
+</form>
+
+
