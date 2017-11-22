@@ -6,13 +6,16 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
 
 from .models import RunInfo
+from .forms import RunInfoForm
 
 def index(request):
     return render(request, 'certhelper/index.html')
 
-class DetailView(generic.DetailView):
+class CreateRun(generic.CreateView):
     model = RunInfo
-    template_name = 'certhelper/detail.html'
+    form_class = RunInfoForm
+    template_name_suffix = '_form'
+    success_url = '/'
 
 class ListView(generic.ListView):
     template_name = 'certhelper/list.html'
@@ -21,19 +24,14 @@ class ListView(generic.ListView):
     def get_queryset(self):
         return RunInfo.objects.all()
 
-class CreateRun(generic.CreateView):
-    model = RunInfo
-    fields = '__all__'
-    template_name_suffix = '_form'
-    success_url = '/list'
-
 class UpdateRun(generic.UpdateView):
     model = RunInfo
-    fields = '__all__'
-    success_url = '/list'
+    form_class = RunInfoForm
+    success_url = '/'
     template_name_suffix = '_update_form'
 
 class DeleteRun(generic.DeleteView):
     model = RunInfo
-    success_url = '/list'
+    form_class = RunInfoForm
+    success_url = '/'
     template_name_suffix = '_delete_form'

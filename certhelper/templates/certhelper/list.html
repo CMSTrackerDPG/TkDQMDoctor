@@ -1,10 +1,10 @@
-<h2>List of al Runs</h2>
-<a href="{% url 'certhelper:index' %}">Back to index</a>
+<h2>List of all Runs</h2>
 
 </br></br>
-{% if list %}
 <!-- Table -->
-<table border="1" width="100%">
+<div> 
+        
+<table  border="1" width="100%">
     <tr>
         <th>Run</th>
         <th>number of LS</th> 
@@ -12,8 +12,8 @@
         <th>Pixel</th>
         <th>SiStrip</th>
         <th>Tracking</th>
-        <th>Comments</th>
-    </tr>     
+    </tr>
+
     {% for runinfo in list %}
     <tr>
         <td>{{runinfo.run_number }}</td>
@@ -22,25 +22,16 @@
         <td>{{runinfo.pixel}}</td>
         <td>{{runinfo.sistrip}}</td>
         <td>{{runinfo.tracking}}</td>
-        <td>{{runinfo.comment}}</td>
-        <td><a href="{% url 'certhelper:detail' runinfo.id %}">Details</a></td>                    
         <td><a href="{% url 'certhelper:update' runinfo.id %}">Edit</a></td>                    
-        <td><a href="{% url 'certhelper:delete' runinfo.id %}">Delete</a></td>            
-        
+        <td><a href="{% url 'certhelper:delete' runinfo.id %}">Delete</a></td>                    
     </tr>
+    
     {% endfor %}
-</table>
-<a href="{% url 'certhelper:create' %}">Add a Run</a>
 
-</br></br>
 <!-- Elog Style output -->
-<pre>
-=============Runs Checked============
-Run	number of LS	Int. Luminosity		Pixel	SiStrip	  Tracking	Comments
-{% for runinfo in list %}
-{{runinfo.run_number }} {{runinfo.number_of_ls}} {{runinfo.integrated_luminosity}} {{runinfo.pixel}} {{runinfo.sistrip}} {{runinfo.tracking}} {{runinfo.comment}}{% endfor %}
-</pre>
+<!-- Probably best way is to have a query to the db -->
+</table>
+<input type="button" onclick="location.href={% url 'certhelper:create' %};" value="Add new Run"/>
+<input type="button" onclick="location.href='#'" value="Generate Elog"/>
 
-{% else %}
-<p>No entries are available.</p>
-{% endif %}
+</div>

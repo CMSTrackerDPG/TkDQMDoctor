@@ -1,9 +1,6 @@
 <h2>Delete Run</h2>
-<a href="{% url 'certhelper:index' %}">Back to index</a>
-
-
 <form action="" method="post">{% csrf_token %}
-        <p>Are you sure you want to delete this RunInfo?</p>
+        <p>Do you want to delete: </p>
         <table border="1" width="100%">
                 <tr>
                     <th>Run</th>
@@ -12,7 +9,6 @@
                     <th>Pixel</th>
                     <th>SiStrip</th>
                     <th>Tracking</th>
-                    <th>Comments</th>
                 </tr>     
                 <tr>
                     <td>{{object.run_number }}</td>
@@ -21,8 +17,8 @@
                     <td>{{object.pixel}}</td>
                     <td>{{object.sistrip}}</td>
                     <td>{{object.tracking}}</td>
-                    <td>{{object.comment}}</td>                   
                 </tr>
             </table>
-        <input type="submit" value="Confirm" />
+        <input type="submit" value="Yes" />
+        <input type="button" onclick="location.href='{% url 'certhelper:list' %}'" value="No"/>
 </form>
