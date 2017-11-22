@@ -1,6 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
+from .models import ReferenceInfo
 from .models import RunInfo
+
+class ReferenceInfoForm(ModelForm):
+    class Meta:
+        model = ReferenceInfo
+        fields = '__all__'
 
 class RunInfoForm(ModelForm):
     class Meta:

@@ -8,6 +8,9 @@ from django.views.generic.edit import FormView
 from .models import RunInfo
 from .forms import RunInfoForm
 
+from .models import ReferenceInfo
+from .forms import ReferenceInfoForm
+
 def index(request):
     return render(request, 'certhelper/index.html')
 
@@ -17,12 +20,19 @@ class CreateRun(generic.CreateView):
     template_name_suffix = '_form'
     success_url = '/'
 
-class ListView(generic.ListView):
+class ListRuns(generic.ListView):
     template_name = 'certhelper/list.html'
     context_object_name = 'list'
 
     def get_queryset(self):
         return RunInfo.objects.all()
+
+class ListBlocks(generic.ListView):
+    template_name = 'certhelper/references.html'
+    context_object_name = 'references'
+
+    def get_queryset(self):
+        return ReferenceInfo.objects.all()
 
 class UpdateRun(generic.UpdateView):
     model = RunInfo
