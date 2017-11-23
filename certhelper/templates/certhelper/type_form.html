@@ -1,9 +1,7 @@
-<h2>Add a new Run</h2>
-
+<h2>Add a new Type</h2>
 
 <form method="POST" action=""> {% csrf_token %}
     <table>
-    <tr><th></th> <th><input type="button" onclick="location.href='{% url 'certhelper:createtype' %}'" value="+"/></th></tr>
     {{form.as_table}}
     </table>
     <input type="submit" value="Confirm">

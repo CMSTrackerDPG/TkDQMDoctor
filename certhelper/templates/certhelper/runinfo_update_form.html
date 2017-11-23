@@ -1,9 +1,10 @@
 <h2>Edit Run</h2>
 
 <form method="POST" action=""> {% csrf_token %}
-        <table>
-        {{form.as_table}}
+    <table>
+    <tr><th></th> <th><input type="button" onclick="location.href='{% url 'certhelper:createtype' %}'" value="+"/></th></tr>            
+    {{form.as_table}}
     </table>
-        <input type="submit" value="Apply">
-        <input type="button" onclick="location.href='{% url 'certhelper:list' %}'" value="Abort"/>        
+    <input type="submit" value="Apply">
+    <input type="button" onclick="location.href='{% url 'certhelper:list' %}'" value="Abort"/>        
 </form>

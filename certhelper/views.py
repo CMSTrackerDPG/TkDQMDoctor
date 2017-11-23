@@ -5,11 +5,8 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
 
-from .models import RunInfo
-from .forms import RunInfoForm
-
-from .models import ReferenceInfo
-from .forms import ReferenceInfoForm
+from .models import *
+from .forms import *
 
 def index(request):
     return render(request, 'certhelper/index.html')
@@ -25,14 +22,14 @@ class ListRuns(generic.ListView):
     context_object_name = 'list'
 
     def get_queryset(self):
-        return RunInfo.objects.all()
+        return RunInfo.objects.all().order_by('run_number')
 
 class ListBlocks(generic.ListView):
     template_name = 'certhelper/references.html'
     context_object_name = 'references'
 
     def get_queryset(self):
-        return ReferenceInfo.objects.all()
+        return ReferenceRun.objects.all()
 
 class UpdateRun(generic.UpdateView):
     model = RunInfo
@@ -45,3 +42,17 @@ class DeleteRun(generic.DeleteView):
     form_class = RunInfoForm
     success_url = '/'
     template_name_suffix = '_delete_form'
+
+
+class CreateType(generic.CreateView):
+    model = Type
+    form_class = TypeForm
+    template_name_suffix = '_form'
+    success_url = '/create'
+
+class SummaryView(generic.ListView):
+    template_name = 'certhelper/summary.html'
+    context_object_name = 'runs'
+
+    def get_queryset(self):
+        return RunInfo.objects.all()

@@ -1,11 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
-from .models import ReferenceInfo
-from .models import RunInfo
+from .models import *
 
-class ReferenceInfoForm(ModelForm):
+class ReferenceRunForm(ModelForm):
     class Meta:
-        model = ReferenceInfo
+        model = ReferenceRun
         fields = '__all__'
 
 class RunInfoForm(ModelForm):
@@ -16,11 +15,15 @@ class RunInfoForm(ModelForm):
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
 
-        is_pixel_ok = cleaned_data.get('pixel')
-        is_sistrip_ok = cleaned_data.get('sistrip')
-        is_tracking_ok = cleaned_data.get('tracking')
+        is_pixel_good = cleaned_data.get('pixel')=='Good'
 
-        if not is_pixel_ok:
+        if not is_pixel_good:
             self.add_error(None, ValidationError("pixel is false. THIS cant be because so and so"))
 
         return cleaned_data
+
+
+class TypeForm(ModelForm):
+    class Meta:
+        model = Type
+        fields = '__all__'

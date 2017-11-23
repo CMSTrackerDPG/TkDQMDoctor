@@ -1,24 +1,12 @@
 <h2>List of all References</h2>
 
+<a href="{% url 'certhelper:list' %}">Staged runs</a>
 </br></br>
-<!-- Table -->
-<div> 
-        
-<table border="1" width="90%">
-    <tr>
-        <th>Type</th>
-        <th>Dataset</th>
-        <th>Reference Run Number</th> 
+<ul>
+{% for reference in references %}
+<li><h3>{{reference.run_number}}</h3></li>
+{% endfor %}
 
-    </tr>
-
-    {% for reference in references %}
-    <tr>
-        <td>{{reference.type}}</td>            
-        <td>{{reference.dataset}}</td>            
-        <td>{{reference.reference_run_number}}</td>                    
-    </tr>
-    {% endfor %}
-</table>
-
-</div>
+</ul>
+</br></br></br></br>
+<a href="https://twiki.cern.ch/twiki/bin/viewauth/CMS/TrackerOfflineReferenceRuns">This</a>  is where we need to import the ReferenceDB from

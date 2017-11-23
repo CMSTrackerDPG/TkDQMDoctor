@@ -1,21 +1,41 @@
 from django.db import models
 
 
-class ReferenceInfo(models.Model):
-    type                  = models.CharField(max_length=100)
-    dataset               = models.CharField(max_length=200)
-    reference_run_number  = models.IntegerField()
-
+class ReferenceRun(models.Model):
+    run_number = models.IntegerField()
     def __str__(self):
-        return str(str(self.reference_run_number) + " " + self.type)
+        return str(self.run_number)
+
+
+class Type(models.Model):
+    RECO_CHOICES      = (('Express','Express'),('Prompt','Prompt'))
+    RUNTYPE_CHOICES   = (('Cosmics','Cosmics'),('Collisions','Collisions'))
+    BFIELD_CHOICES    = (('0 Tesla','0 Tesla'),('3.8 Tesla','3.8 Tesla'))
+    BEAMTYPE_CHOICES  = (('P-P','P-P'),('Hi-P','Hi-P'),('Hi-Hi', 'Hi-Hi'))
+
+    reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
+    runtype               = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
+    bfield                = models.CharField(max_length=30, choices=BFIELD_CHOICES)
+    beamtype              = models.CharField(max_length=30, choices=BEAMTYPE_CHOICES)
+    dataset               = models.CharField(max_length=150)
+    class Meta:
+        unique_together = ["reco", "runtype", "bfield", "beamtype", "dataset"]
+        
+    def __str__(self):
+        return str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " | " + str(self.dataset)
 
 
 class RunInfo(models.Model):
-    reference_info        = models.ForeignKey(ReferenceInfo, on_delete=models.CASCADE, related_name='runinfos')
+    GOOD_BAD_CHOICES  = (('Good','Good'),('Bad','Bad'))
+    
+    type                  = models.ForeignKey(Type)
+    reference             = models.ForeignKey(ReferenceRun)
     run_number            = models.IntegerField()
     number_of_ls          = models.IntegerField()
     integrated_luminosity = models.DecimalField(max_digits=20, decimal_places=2)
-    pixel                 = models.BooleanField()
-    sistrip               = models.BooleanField()
-    tracking              = models.BooleanField()
+    pixel                 = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
+    sistrip               = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
+    tracking              = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
     comment               = models.TextField()
+
+
