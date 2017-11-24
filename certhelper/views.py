@@ -21,11 +21,6 @@ class CreateRun(generic.CreateView):
     success_url = '/'
 
 def listruns(request):
-    # template_name = 'certhelper/list.html'
-    # context_object_name = 'list'
-
-    # def get_queryset(self):
-    #     return RunInfo.objects.all().order_by('run_number')
     table = RunInfoTable(RunInfo.objects.all())
     RequestConfig(request).configure(table)
     return render(request, 'certhelper/list.html', {'table': table})
@@ -62,3 +57,16 @@ class SummaryView(generic.ListView):
 
     def get_queryset(self):
         return RunInfo.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super(SummaryView, self).get_context_data(**kwargs)
+        
+        context['sorted_by_type'] = RunInfo.objects.all().order_by('type')
+
+        ids = RunInfo.objects.all().values_list('reference').distinct()
+        context['refs'] = ReferenceRun.objects.filter(id__in=ids)
+        return context
+
+
+class ClearSession(generic.DetailView):
+    pass

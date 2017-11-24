@@ -6,6 +6,7 @@ app_name = 'certhelper'
 urlpatterns = [
     # url(r'^$', views.index, name='index'),
     url(r'^$', views.listruns, name='list'),
+    url(r'^clearsession/$', views.ClearSession.as_view(), name='clearsession'),
     url(r'^summary/$', views.SummaryView.as_view(), name='summary'),
     url(r'^references/$', views.ListBlocks.as_view(), name='references'),
     url(r'^create/$', views.CreateRun.as_view(), name='create'),

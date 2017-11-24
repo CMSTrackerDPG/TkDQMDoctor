@@ -1,17 +1,11 @@
 from django.db import models
 
-class ReferenceRun(models.Model):
-    reference_run = models.IntegerField()
-
-    def __str__(self):
-        return str(self.reference_run)
+RECO_CHOICES      = (('Express','Express'),('Prompt','Prompt'))
+RUNTYPE_CHOICES   = (('Cosmics','Cosmics'),('Collisions','Collisions'))
+BFIELD_CHOICES    = (('0 Tesla','0 Tesla'),('3.8 Tesla','3.8 Tesla'))
+BEAMTYPE_CHOICES  = (('P-P','P-P'),('Hi-P','Hi-P'),('Hi-Hi', 'Hi-Hi'))
 
 class Type(models.Model):
-    RECO_CHOICES      = (('Express','Express'),('Prompt','Prompt'))
-    RUNTYPE_CHOICES   = (('Cosmics','Cosmics'),('Collisions','Collisions'))
-    BFIELD_CHOICES    = (('0 Tesla','0 Tesla'),('3.8 Tesla','3.8 Tesla'))
-    BEAMTYPE_CHOICES  = (('P-P','P-P'),('Hi-P','Hi-P'),('Hi-Hi', 'Hi-Hi'))
-
     reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype               = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
     bfield                = models.CharField(max_length=30, choices=BFIELD_CHOICES)
@@ -23,6 +17,20 @@ class Type(models.Model):
     def __str__(self):
         return str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " | " + str(self.dataset)
 
+
+class ReferenceRun(models.Model):
+    reference_run  = models.IntegerField()
+    reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
+    runtype               = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
+    bfield                = models.CharField(max_length=30, choices=BFIELD_CHOICES)
+    beamtype              = models.CharField(max_length=30, choices=BEAMTYPE_CHOICES)
+    dataset               = models.CharField(max_length=150)
+
+    class Meta:
+        unique_together = ["reference_run", "reco", "runtype", "bfield", "beamtype", "dataset"]
+
+    def __str__(self):
+        return str(self.reference_run) + " " +  str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " | " + str(self.dataset)
 
 class RunInfo(models.Model):
     GOOD_BAD_CHOICES  = (('Good','Good'),('Bad','Bad'))
