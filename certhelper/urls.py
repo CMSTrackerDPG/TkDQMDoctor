@@ -5,7 +5,7 @@ from . import views
 app_name = 'certhelper'
 urlpatterns = [
     # url(r'^$', views.index, name='index'),
-    url(r'^$', views.ListRuns.as_view(), name='list'),
+    url(r'^$', views.listruns, name='list'),
     url(r'^summary/$', views.SummaryView.as_view(), name='summary'),
     url(r'^references/$', views.ListBlocks.as_view(), name='references'),
     url(r'^create/$', views.CreateRun.as_view(), name='create'),
