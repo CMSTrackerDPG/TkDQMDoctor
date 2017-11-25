@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm
+from django.forms import ModelForm, TextInput
 from .models import *
 
 class ReferenceRunForm(ModelForm):
@@ -26,4 +26,4 @@ class RunInfoForm(ModelForm):
 class TypeForm(ModelForm):
     class Meta:
         model = Type
-        fields = '__all__'
+        fields = ["reco", "runtype", "bfield", "beamtype", "dataset"]

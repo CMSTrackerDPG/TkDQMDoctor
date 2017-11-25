@@ -1,17 +1,28 @@
 {% load static %}
 <link rel="stylesheet" href="{% static "certhelper/style.css" %}" />
 
-<h2>List of Runs</h2>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<a href="{% url 'certhelper:references' %}">Available References</a>
-</br></br></br></br>
+<h1 align="center">List of Runs</h1>
 
+<div class="row">
+        <div class="col-sm-12 text-right">
+                <button  type="button"  class="btn btn-link" onclick="location.href={% url 'certhelper:references' %};">Reference Runs</button>
+                <button  type="button"  class="btn btn-link" onclick="location.href={% url 'certhelper:clearsession' %};">New Session</button>
+        </div>
+    </div>
+</div>
+</br>
 {% load render_table from django_tables2 %}
 {% render_table table %}
+<div class="row">
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-default" onclick="location.href={% url 'certhelper:create' %};"><span class="glyphicon glyphicon-plus"></span> Add Run</button>                
+            <button type="button" class="btn btn-default" onclick="location.href={% url 'certhelper:summary' %};">Generate Summary</button>            
+        </div>
+    </div>
+</div>
 
-<input type="button" onclick="location.href={% url 'certhelper:create' %};" value="Add new Run"/>
-<input type="button" onclick="location.href={% url 'certhelper:summary' %};" value="Generate Summary"/>
-
-</br></br></br></br>
-<input type="button" onclick="location.href={% url 'certhelper:clearsession' %};" value="Start a new session"/>
 
