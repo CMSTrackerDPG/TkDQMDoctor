@@ -1,0 +1,8 @@
+<h2>Start new session</h2>
+Starting a new session will clear the current table of runs.</br>
+Do you wish to continue?
+<form action="{% url 'certhelper:clearsession' %}" method="post">
+        {% csrf_token %}        
+        <input type="submit" value="Yes" />
+        <input type="button" onclick="location.href='{% url 'certhelper:list' %}'" value="No"/>
+</form>

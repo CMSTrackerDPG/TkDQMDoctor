@@ -68,5 +68,9 @@ class SummaryView(generic.ListView):
         return context
 
 
-class ClearSession(generic.DetailView):
-    pass
+def clearsession(request):
+    if request.method == 'POST':
+        RunInfo.objects.all().delete()
+        return HttpResponseRedirect('/')
+
+    return render(request, 'certhelper/clearsession.html')
