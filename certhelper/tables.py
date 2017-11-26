@@ -32,4 +32,4 @@ class RunInfoTable(tables.Table):
         'sistrip',
         'tracking',
         'comment')
-        attrs = {'class': 'table table-hover'}
+        attrs = {'class': 'table table table-hover table-bordered'}

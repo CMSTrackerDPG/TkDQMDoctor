@@ -4,28 +4,29 @@
 
 <h1 align="center">Add Type</h1>
 {% load myfilters %}
-
 <form method="POST" action=""> {% csrf_token %}
-    <table class="">
+    <table class="table table-condensed" style="width:25%;" align="center">
         <tr>
-            <td>{{form.reco.label}}: </td>
+            <td>{{form.reco.label}}</td>
             <td>{{form.reco|addclass:'form-control'}}</td>
         </tr>
         <tr>
-            <td>{{form.runtype.label}}: </td>
+            <td>{{form.runtype.label}}</td>
             <td>{{form.runtype|addclass:'form-control'}}</td>
         </tr>
         <tr>
-            <td>{{form.bfield.label}}: </td>
+            <td>{{form.bfield.label}}</td>
             <td>{{form.bfield|addclass:'form-control'}}</td>
         </tr>
         <tr>
-            <td>{{form.beamtype.label}}: </td>
+            <td>{{form.beamtype.label}}</td>
             <td>{{form.beamtype|addclass:'form-control'}}</td>
         </tr>        
     </table>
-    <button type="submit" class="btn btn-default">Confirm</button>
-    <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'">Abort</button>
+    <div align="center">
+        <button type="submit" class="btn btn-default">Confirm</button>
+        <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'">Abort</button>
+    </div>
 </form>
 
 
