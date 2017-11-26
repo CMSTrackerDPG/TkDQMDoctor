@@ -7,35 +7,36 @@
 {% regroup sorted_by_type by trackermap as trackermap_list %}
 <pre>
 =============Reference Runs===============
-{% for r in refs%}
-    {{r}}
+{% for ref in refs%}
+{{ref}}
 {% endfor %}
 
 =============Runs Checked=================
 {% for type_id in type_list%} {% for item in type_id.list %} 
         {% if forloop.first %}
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Type {{ forloop.parentloop.counter }}: {{item.type.reco}}
 Dataset {{ forloop.parentloop.counter}}: {{item.type.dataset}}
-
-  Run	 Ref  #ls  int_lum   pi  st   tr   comment
-        {% endif %}
- {{ item.run_number }} {{ item.reference.reference_run }}   {{ item.number_of_ls }}   {{ item.integrated_luminosity }}   {{ item.pixel }} {{ item.sistrip }} {{ item.tracking }}  {{item.comment}}{% endfor %}
-------------------------------------------
+Run	 Ref  #ls  int_lum   pi  st   tr   comment{% endif %}
+{{ item.run_number }} {{ item.reference.reference_run }}   {{ item.number_of_ls }}   {{ item.int_luminosity }}   {{ item.pixel }} {{ item.sistrip }} {{ item.tracking }}  {{item.comment}}{% endfor %}
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 {% endfor %}
 
 =============Tracker Maps=================
 Produced maps:
 {% for trackermap in type_list%}
-{% for item in trackermap.list %}{% if forloop.first %} Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Exists" %} {{item}}{% endif %}{% endfor %}{% endfor %}
-
+{% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Exists" %} {{item}}{% endif %}{% endfor %}{% endfor %}
 
 To be produced:
 {% for trackermap in type_list%}
-{% for item in trackermap.list %}{% if forloop.first %} Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Missing" %} {{item}}{% endif %}{% endfor %}{% endfor %}
+{% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Missing" %} {{item}}{% endif %}{% endfor %}{% endfor %}
 =============HDQM Trends==================
 =============Special Comments=============
-{{sorted_by_type}}
+Sum of Int Lumisections{% for int_lum_sum in group_luminosity%}
+Type {{ forloop.counter }}: {{int_lum_sum.total}}{% endfor %}
 
+Sum of Number of LS{% for numls_sum in group_numberls%}
+Type {{ forloop.counter }}: {{numls_sum.total}}{% endfor %}
 
 -------------List of Certified Runs-------
 

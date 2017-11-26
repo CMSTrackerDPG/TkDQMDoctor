@@ -5,6 +5,8 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
 
+from django.db.models import Sum
+
 from django_tables2 import RequestConfig
 
 from .models import *
@@ -65,6 +67,10 @@ class SummaryView(generic.ListView):
 
         ids = RunInfo.objects.all().values_list('reference').distinct()
         context['refs'] = ReferenceRun.objects.filter(id__in=ids)
+
+        tmpsorted = RunInfo.objects.all().order_by('type')
+        context['group_luminosity'] = tmpsorted.values('type').annotate(total=Sum('int_luminosity'))
+        context['group_numberls'] = tmpsorted.values('type').annotate(total=Sum('number_of_ls'))
         return context
 
 
