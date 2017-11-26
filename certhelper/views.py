@@ -36,7 +36,7 @@ class UpdateRun(generic.UpdateView):
     model = RunInfo
     form_class = RunInfoForm
     success_url = '/'
-    template_name_suffix = '_update_form'
+    template_name = 'certhelper/runinfo_form.html'
 
 class DeleteRun(generic.DeleteView):
     model = RunInfo

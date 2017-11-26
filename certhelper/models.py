@@ -2,7 +2,7 @@ from django.db import models
 
 RECO_CHOICES      = (('Express','Express'),('Prompt','Prompt'))
 RUNTYPE_CHOICES   = (('Cosmics','Cosmics'),('Collisions','Collisions'))
-BFIELD_CHOICES    = (('0 Tesla','0 Tesla'),('3.8 Tesla','3.8 Tesla'))
+BFIELD_CHOICES    = (('0 T','0 T'),('3.8 T','3.8 T'))
 BEAMTYPE_CHOICES  = (('P-P','P-P'),('Hi-P','Hi-P'),('Hi-Hi', 'Hi-Hi'))
 
 class Type(models.Model):
@@ -41,7 +41,7 @@ class RunInfo(models.Model):
     run_number            = models.IntegerField()
     trackermap            = models.CharField(max_length=7, choices=TRACKERMAP_CHOICES)
     number_of_ls          = models.IntegerField()
-    integrated_luminosity = models.DecimalField(max_digits=20, decimal_places=2)
+    int_luminosity        = models.DecimalField(max_digits=20, decimal_places=2)
     pixel                 = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
     sistrip               = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
     tracking              = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)

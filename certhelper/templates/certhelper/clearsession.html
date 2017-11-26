@@ -2,14 +2,15 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<h1 align="center">Start new session</h1>
-<h3 align="center">
+<h1 align="center">New Session</h1>
+</br>
+<h4 align="center">
 Starting a new session will delete the current table of runs.</br>
 Do you wish to continue?
-</h3>
+</h4>
 
 <form action="{% url 'certhelper:clearsession' %}" method="post" align="center">
         {% csrf_token %}        
-        <button type="submit" class="btn btn-default">Yes </button>
-        <button type="button" class="btn btn-default "onclick="location.href='{% url 'certhelper:list' %}'">No</button>
+        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok-sign"></span> Yes</button>
+        <button type="button" class="btn btn-default "onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove-sign"></span> No</button>
 </form>

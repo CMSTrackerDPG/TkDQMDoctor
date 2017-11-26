@@ -1,8 +1,11 @@
-<h1 align="center">Summary view</h1>
-<pre>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<h1 align="center">Summary</h1>
 {% regroup sorted_by_type by type_id as type_list %}
 {% regroup sorted_by_type by trackermap as trackermap_list %}
-
+<pre>
 =============Reference Runs===============
 {% for r in refs%}
     {{r}}
