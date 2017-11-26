@@ -7,21 +7,17 @@
 {% regroup sorted_by_type by trackermap as trackermap_list %}
 <pre>
 =============Reference Runs===============
-{% for ref in refs%}
-{{ref}}
-{% endfor %}
 
+{% for ref in refs%}{{ref}}
+{% endfor %}
 =============Runs Checked=================
-{% for type_id in type_list%} {% for item in type_id.list %} 
-        {% if forloop.first %}
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+{% for type_id in type_list%}{% for item in type_id.list %}{% if forloop.first %}
 Type {{ forloop.parentloop.counter }}: {{item.type.reco}}
 Dataset {{ forloop.parentloop.counter}}: {{item.type.dataset}}
 Run	 Ref  #ls  int_lum   pi  st   tr   comment{% endif %}
 {{ item.run_number }} {{ item.reference.reference_run }}   {{ item.number_of_ls }}   {{ item.int_luminosity }}   {{ item.pixel }} {{ item.sistrip }} {{ item.tracking }}  {{item.comment}}{% endfor %}
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 {% endfor %}
-
 =============Tracker Maps=================
 Produced maps:
 {% for trackermap in type_list%}
