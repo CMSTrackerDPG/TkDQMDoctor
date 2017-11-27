@@ -2,40 +2,68 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+{% load static %}
+<script src="{% static "certhelper/ascii-table/ascii-table.min.js" %}"></script>
+
 <h1 align="center">Summary</h1>
 {% regroup sorted_by_type by type_id as type_list %}
 {% regroup sorted_by_type by trackermap as trackermap_list %}
+
 <pre>
 =============Reference Runs===============
-
 {% for ref in refs%}{{ref}}
 {% endfor %}
-=============Runs Checked=================
-{% for type_id in type_list%}{% for item in type_id.list %}{% if forloop.first %}
-Type {{ forloop.parentloop.counter }}: {{item.type.reco}}
-Dataset {{ forloop.parentloop.counter}}: {{item.type.dataset}}
-Run	 Ref  #ls  int_lum   pi  st   tr   comment{% endif %}
-{{ item.run_number }} {{ item.reference.reference_run }}   {{ item.number_of_ls }}   {{ item.int_luminosity }}   {{ item.pixel }} {{ item.sistrip }} {{ item.tracking }}  {{item.comment}}{% endfor %}
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-{% endfor %}
-=============Tracker Maps=================
-Produced maps:
-{% for trackermap in type_list%}
-{% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Exists" %} {{item}}{% endif %}{% endfor %}{% endfor %}
+=============Runs Checked================
+<script>
+    {% for type_id in type_list%}
 
-To be produced:
-{% for trackermap in type_list%}
+    var table = new AsciiTable()
+    table.setHeading("Run", "Reference Run","Number of LS", "Int. Luminosity", "Pixel", "Strip", "Tracking", "Comment")
+    
+    {% for item in type_id.list %}
+    {% if forloop.first %}
+        document.write("Type {{ forloop.parentloop.counter }}: {{item.type.reco}}\nDataset {{ forloop.parentloop.counter}}: {{item.type.dataset}}\n")
+    {% endif %}
+
+    table.addRow('{{ item.run_number }}',
+                '{{ item.reference.reference_run }}',
+                '{{ item.number_of_ls }}',
+                '{{ item.int_luminosity }}',
+                '{{ item.pixel }}',
+                '{{ item.sistrip }}',
+                '{{ item.tracking }}',
+                '{{item.comment}}')
+
+    {% endfor %}    
+    document.write(table.toString())
+    document.write("\n\n")
+{% endfor %}  
+</script>
+=============Tracker Maps=================
+PRODUCED{% for trackermap in type_list%}
+{% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Exists" %} {{item}}{% endif %}{% endfor %}{% endfor %}
+------------------------------------------
+TO BE PRODUCED{% for trackermap in type_list%}
 {% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Missing" %} {{item}}{% endif %}{% endfor %}{% endfor %}
 =============HDQM Trends==================
 =============Special Comments=============
-Sum of Int Lumisections{% for int_lum_sum in group_luminosity%}
+SUM INTEGRATED LUMINOSITY{% for int_lum_sum in group_luminosity%}
 Type {{ forloop.counter }}: {{int_lum_sum.total}}{% endfor %}
-
-Sum of Number of LS{% for numls_sum in group_numberls%}
+------------------------------------------
+SUM NUMBER OF LS{% for numls_sum in group_numberls%}
 Type {{ forloop.counter }}: {{numls_sum.total}}{% endfor %}
+------------------------------------------
+List of runs certified as GOOD:{% for good_run in type_list%}
+{% for item in good_run.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.pixel == "Good" and item.sistrip == "Good" and item.tracking == "Good"%} {{item}}{% endif %}{% endfor %}{% endfor %}
 
--------------List of Certified Runs-------
+List of runs certified as BAD:{% for good_run in type_list%}
+{% for item in good_run.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.pixel == "Bad" or item.sistrip == "Bad" or item.tracking == "Bad"%} {{item}}{% endif %}{% endfor %}{% endfor %}
+------------------------------------------
+=============List of Certified Runs=============
 
 
-          >>>> COMMENT HERE <<<<          
+          >>>> COMMENT HERE <<<<   
+
+
+       
 </pre>

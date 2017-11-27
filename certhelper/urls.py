@@ -20,4 +20,7 @@ urlpatterns = [
     url(r'^checklists/pixel$', TemplateView.as_view(template_name='certhelper/checklists/pixel.html'), name='pixel_checklist'),
     url(r'^checklists/sistrip$', TemplateView.as_view(template_name='certhelper/checklists/sistrip.html'), name='sistrip_checklist'),
     url(r'^checklists/tracking$', TemplateView.as_view(template_name='certhelper/checklists/tracking.html'), name='tracking_checklist'),
+
+    # info
+    url(r'^info/comment', TemplateView.as_view(template_name='certhelper/info/comment.html'), name='comment_info'),
 ]

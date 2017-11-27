@@ -71,7 +71,7 @@
             <tr>
                 <td>{{form.comment.label}}</td>
                 <td>{{form.comment|addclass:'form-control'}}</td>
-                <td><button type="button" class="btn btn-link"><span class="glyphicon glyphicon-info-sign"></span> Info</button></td>                                
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</button></td>                                                              
             </tr>  
     </table>
     <div align="center">

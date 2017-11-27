@@ -5,7 +5,7 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
 
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from django_tables2 import RequestConfig
 
@@ -71,6 +71,9 @@ class SummaryView(generic.ListView):
         tmpsorted = RunInfo.objects.all().order_by('type')
         context['group_luminosity'] = tmpsorted.values('type').annotate(total=Sum('int_luminosity'))
         context['group_numberls'] = tmpsorted.values('type').annotate(total=Sum('number_of_ls'))
+
+        context['group_good'] = tmpsorted.filter(pixel="Good",sistrip="Good",tracking="Good")
+        context['group_bad'] = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
         return context
 
 
