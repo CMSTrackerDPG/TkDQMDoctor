@@ -7,24 +7,16 @@
 {% load myfilters %}
 
 <h1 align="center">List of Runs</h1>
-
-<div class="row">
-        <div class="col-sm-6 text-left">
-                <button type="button" class="btn btn-link" onclick="location.href={% url 'certhelper:create' %};"><span class="glyphicon glyphicon-plus-sign"></span> Add Run</button>                
-                <button type="button" class="btn btn-link" onclick="location.href={% url 'certhelper:summary' %};"><span class="glyphicon glyphicon-menu-hamburger"></span>Generate Summary</button>                            
-        </div>    
-        <div class="col-sm-6 text-right">
-                <button  type="button"  class="btn btn-link" onclick="location.href={% url 'certhelper:clearsession' %};"><span class="glyphicon glyphicon-user"></span>New Session</button>
+<div class="container" style="padding:0; margin:0; width:99%;"> 
+        <div class="row" >
+                <div class="col col-sm-4">
+                        <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
+                        <a href="{% url 'certhelper:summary' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-menu-hamburger"></span> Generate Summary</a>   
+                </div>                
+                <div class="col col-sm-8 text-right">                                
+                        <a href="{% url 'certhelper:clearsession' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-user"></span> New Session</a>
+                </div>
         </div>
-    </div>
 </div>
-</br>
-
 {% load render_table from django_tables2 %}
 {% render_table table %}
-
-<div align="center">
-
-</div>
-
-
