@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
 <h1 align="center">Summary</h1>
-<a href="{% url 'certhelper:list' %}" class="btn btn-link">Back to list</a>
+<a href="{% url 'certhelper:list' %}" class="btn btn-link"><span class="glyphicon glyphicon-home"></span> Back to overview</a>
 
 {% regroup sorted_by_type by type_id as type_list %}
 

@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^checklists/tracking$', TemplateView.as_view(template_name='certhelper/checklists/tracking.html'), name='tracking_checklist'),
 
     # info
+    url(r'^help/$', TemplateView.as_view(template_name='certhelper/info/help.html'), name='help'),
     url(r'^info/comment', TemplateView.as_view(template_name='certhelper/info/comment.html'), name='comment_info'),
 ]
