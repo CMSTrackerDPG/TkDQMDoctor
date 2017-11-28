@@ -84,8 +84,14 @@ class SummaryView(generic.ListView):
                                                            on a.type_id = b.ID 
                                                            group by b.ID, good 
                                                            order by type_id, -good""")
-        print(context['sums'])
 
+        context['tkmap'] = RunInfo.objects.raw("""SELECT  *
+                                                          from certhelper_runinfo a
+                                                          order by type_id, trackermap""")
+
+        context['certified'] = RunInfo.objects.raw("""SELECT *,(pixel='Good' and sistrip='Good' and tracking='Good') as good
+                                                                from certhelper_runinfo a
+                                                                order by type_id, -good""")                                                          
 
         return context
 

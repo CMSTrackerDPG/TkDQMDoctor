@@ -38,9 +38,9 @@ class RunInfo(models.Model):
 
     type                  = models.ForeignKey(Type)
     reference             = models.ForeignKey(ReferenceRun)
-    run_number            = models.IntegerField()
+    run_number            = models.PositiveIntegerField()
     trackermap            = models.CharField(max_length=7, choices=TRACKERMAP_CHOICES)
-    number_of_ls          = models.IntegerField()
+    number_of_ls          = models.PositiveIntegerField()
     int_luminosity        = models.DecimalField(max_digits=20, decimal_places=2)
     pixel                 = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
     sistrip               = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
