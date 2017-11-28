@@ -4,10 +4,13 @@ from django.template import loader
 from django.views import generic
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
+from django.db.models import Case, When, Value, BooleanField
 
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 
 from django_tables2 import RequestConfig
+
+
 
 from .models import *
 from .forms import *
@@ -62,18 +65,28 @@ class SummaryView(generic.ListView):
     
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
-        
-        context['sorted_by_type'] = RunInfo.objects.all().order_by('type')
 
         ids = RunInfo.objects.all().values_list('reference').distinct()
         context['refs'] = ReferenceRun.objects.filter(id__in=ids)
 
-        tmpsorted = RunInfo.objects.all().order_by('type')
-        context['group_luminosity'] = tmpsorted.values('type').annotate(total=Sum('int_luminosity'))
-        context['group_numberls'] = tmpsorted.values('type').annotate(total=Sum('number_of_ls'))
+        context['sorted_by_type'] = RunInfo.objects.all().order_by('type')
 
-        context['group_good'] = tmpsorted.filter(pixel="Good",sistrip="Good",tracking="Good")
-        context['group_bad'] = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
+        tmpsorted = RunInfo.objects.all().order_by('type')
+        good_runs = tmpsorted.filter(pixel="Good",sistrip="Good",tracking="Good")
+        bad_runs = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
+
+        
+        context['sums'] = RunInfo.objects.raw("""SELECT *,(pixel='Good' and sistrip='Good' and tracking='Good') as good, 
+                                                           SUM(number_of_ls) as sum_number_of_ls,
+                                                           SUM(int_luminosity) as sum_int_luminosity 
+                                                           FROM certhelper_runinfo a 
+                                                           inner join certhelper_type b 
+                                                           on a.type_id = b.ID 
+                                                           group by b.ID, good 
+                                                           order by type_id, -good""")
+        print(context['sums'])
+
+
         return context
 
 

@@ -15,7 +15,7 @@ class Type(models.Model):
         unique_together = ["reco", "runtype", "bfield", "beamtype", "dataset"]
         
     def __str__(self):
-        return str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " | " + str(self.dataset)
+        return str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " " + str(self.dataset)
 
 
 class ReferenceRun(models.Model):
@@ -30,7 +30,7 @@ class ReferenceRun(models.Model):
         unique_together = ["reference_run", "reco", "runtype", "bfield", "beamtype", "dataset"]
 
     def __str__(self):
-        return str(self.reference_run) + " " +  str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " | " + str(self.dataset)
+        return str(self.reference_run) + " " +  str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " " + str(self.dataset)
 
 class RunInfo(models.Model):
     GOOD_BAD_CHOICES  = (('Good','Good'),('Bad','Bad'))

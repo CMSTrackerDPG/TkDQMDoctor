@@ -1,13 +1,15 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
 {% load static %}
+<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
+<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <script src="{% static "certhelper/ascii-table/ascii-table.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
 <h1 align="center">Summary</h1>
 {% regroup sorted_by_type by type_id as type_list %}
 {% regroup sorted_by_type by trackermap as trackermap_list %}
+
+{% regroup sums by type_id as sums_regroup %}
+
 
 <pre>
 =============Reference Runs===============
@@ -43,27 +45,49 @@
 PRODUCED{% for trackermap in type_list%}
 {% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Exists" %} {{item}}{% endif %}{% endfor %}{% endfor %}
 ------------------------------------------
+
 TO BE PRODUCED{% for trackermap in type_list%}
 {% for item in trackermap.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.trackermap == "Missing" %} {{item}}{% endif %}{% endfor %}{% endfor %}
+------------------------------------------
+
 =============HDQM Trends==================
 =============Special Comments=============
-SUM INTEGRATED LUMINOSITY{% for int_lum_sum in group_luminosity%}
-Type {{ forloop.counter }}: {{int_lum_sum.total}}{% endfor %}
 ------------------------------------------
-SUM NUMBER OF LS{% for numls_sum in group_numberls%}
-Type {{ forloop.counter }}: {{numls_sum.total}}{% endfor %}
-------------------------------------------
-List of runs certified as GOOD:{% for good_run in type_list%}
+>>>> ANYTHING ELSE YOU WANT TO WRITE  <<<<
+------------------------------------------   
+
+------------Certified Runs----------------
+GOOD{% for good_run in type_list%}
 {% for item in good_run.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.pixel == "Good" and item.sistrip == "Good" and item.tracking == "Good"%} {{item}}{% endif %}{% endfor %}{% endfor %}
 
-List of runs certified as BAD:{% for good_run in type_list%}
-{% for item in good_run.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.pixel == "Bad" or item.sistrip == "Bad" or item.tracking == "Bad"%} {{item}}{% endif %}{% endfor %}{% endfor %}
-------------------------------------------
-=============List of Certified Runs=============
+BAD{% for bad_run in type_list%}
+{% for item in bad_run.list %}{% if forloop.first %}Type {{forloop.parentloop.counter}}:{% endif %}{% if item.pixel == "Bad" or item.sistrip == "Bad" or item.tracking == "Bad"%} {{item}}{% endif %}{% endfor %}{% endfor %}
 
+<!-- 
+TESTING
+{% for t in certified_regroup%}
+{{t}}
+    {% for item in t.list %}
+    {{item}}
+    {% endfor %}
+{% endfor %} -->
 
-          >>>> COMMENT HERE <<<<   
-
-
-       
+====================Sums==================
+<script>
+{% for t in sums_regroup%}
+    var table = new AsciiTable()
+    {% for item in t.list %}
+    {%if forloop.first%}     table.setHeading("Type {{forloop.parentloop.counter}}", "Sum of LS", "Sum of int. luminosity"){%endif%}
+    table.addRow('{% if item.good %}Good{%else%}Bad{%endif%}','{{item.sum_number_of_ls}}', '{{item.sum_int_luminosity}}')
+    {% endfor %}
+    document.write(table.toString() + '\n')
+{% endfor %}
+</script>
+=============List of Certified Runs=======
+ 
 </pre>
+
+
+//     {% if forloop.first %} document.write("Type {{forloop.parentloop.counter}}:\n") {% endif %}
+//     table.addRow('{% if item.is_good %}Good{%else%}Bad{%endif%}','{{item.sum_number_of_ls}}', '{{item.sum_int_luminosity}}')
+// document.write(table.toString() + '\n') -->

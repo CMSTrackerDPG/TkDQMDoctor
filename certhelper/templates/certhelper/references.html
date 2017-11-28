@@ -1,3 +1,8 @@
+{% load static %}
+<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
+<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+
 <h2>List of all References</h2>
 
 <a href="{% url 'certhelper:list' %}">Staged runs</a>
