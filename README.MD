@@ -36,7 +36,7 @@ This does not mean that you should not check the terminal output telling you how
 ## How to create the database from scratch
 
 * rm db.sqlite3
-* rm certhelper/migrations
+* rm -rf certhelper/migrations
 * python3 manage.py makemigrations certhelper
 * python3 manage.py migrate
 
