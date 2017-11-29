@@ -1,0 +1,24 @@
+{% load static %}
+<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
+<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+
+<h1 align="center">What is this website for?</h1>
+<a href="{% url 'certhelper:list' %}" class="btn btn-link"><span class="glyphicon glyphicon-home"></span> Back to overview</a>
+<div class="container" style="width:50%"> 
+    This website is here to help you certify runs.</br>
+    This is done by providing checklists and todo lists for the various stages of certifying runs. </br></br>
+    After you've certified the runs that you were assigned you can get a auto-generated run summary. </br>
+    </br>
+    TODO: This website is still being developed. Another goal is to create some sort of run-wizard (aka Doctor)
+    that can assists with issues that arise. These issues would then be stored in a databased and evaluated by an expert.
+    That expert would then provide information about that specific incident which would then be again fed into the run-wizard (doctor)
+    to improve guidance on similar problems in the future.
+        
+</div>
+
+<h1 align="center">What is this website NOT for?</h1>
+<div class="container" style="width:50%"> 
+    Dunno, maybe a section like this is also useful.</br>
+    Give links to other webpags/tools that might be interesting in this context. 
+</div>
