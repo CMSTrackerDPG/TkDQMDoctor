@@ -22,7 +22,7 @@
 {% endif %}
 
 <form method="POST" action=""> {% csrf_token %}
-    <table class="table table-condensed" style="width:25%;" align="center">
+    <table class="table table-condensed" style="width:30%;" align="center">
         <tr>
             <td>{{form.reco.label}}</td>
             <td>{{form.reco|addclass:'form-control'}}</td>
@@ -41,7 +41,7 @@
         </tr>
         <tr>
             <td>{{form.dataset.label}}</td>
-            <td>{{form.dataset|addclass:'form-control'}}</td>
+            <td>{{form.dataset}}</td>
         </tr>        
     </table>
     <div align="center">

@@ -3,7 +3,7 @@ from django.db import models
 RECO_CHOICES      = (('Express','Express'),('Prompt','Prompt'))
 RUNTYPE_CHOICES   = (('Cosmics','Cosmics'),('Collisions','Collisions'))
 BFIELD_CHOICES    = (('0 T','0 T'),('3.8 T','3.8 T'))
-BEAMTYPE_CHOICES  = (('P-P','P-P'),('Hi-P','Hi-P'),('Hi-Hi', 'Hi-Hi'))
+BEAMTYPE_CHOICES  = (('Proton-Proton','Proton-Proton'),('HeavyIon-Proton','HeavyIon-Proton'),('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
 
 class Type(models.Model):
     reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
@@ -45,7 +45,7 @@ class RunInfo(models.Model):
     pixel                 = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
     sistrip               = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
     tracking              = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
-    comment               = models.TextField()
+    comment               = models.TextField(blank=True)
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]
