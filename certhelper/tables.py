@@ -20,10 +20,10 @@ class RunInfoTable(tables.Table):
     class Meta:
         model = RunInfo
         fields = ('run_number', 
-        'type.reco',
-        'type.runtype',
-        'type.bfield',
-        'type.beamtype',
+        'type',
+        # 'type.runtype',
+        # 'type.bfield',
+        # 'type.beamtype',
         # 'type.dataset',
         'reference.reference_run',
         'trackermap',

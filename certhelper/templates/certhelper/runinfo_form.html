@@ -23,7 +23,7 @@
 {% endif %}
 
 <form method="POST" action=""> {% csrf_token %}
-    <table class="table table-condensed" style="width:50%;" align="center">
+    <table class="table table-condensed" style="max-width:650px;" align="center">
             <tr>
                 <td>{{form.type.label}}</td>
                 <td>{{form.type|addclass:'form-control'}} </td>

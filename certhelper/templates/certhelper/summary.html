@@ -26,7 +26,7 @@
     
     {% for item in type_id.list %}
         {% if forloop.first %}
-            document.write("Type {{ forloop.parentloop.counter }}: {{item.type.reco}}\nDataset {{ forloop.parentloop.counter}}: {{item.type.dataset}}\n")
+            document.write("Type {{ forloop.parentloop.counter }}: {{item.type}}\n")
         {% endif %}
 
     table.addRow('{{ item.run_number }}',
