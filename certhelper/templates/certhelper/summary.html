@@ -6,7 +6,7 @@
 
 <h1 align="center">Summary</h1>
 <a href="{% url 'certhelper:list' %}" class="btn btn-link"><span class="glyphicon glyphicon-menu-hamburger"></span> Back to list of runs</a>
-<button type="button" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-comment"></span> Special Comments</button>   
+<button type="button" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-pencil"></span> Special Comments</button>   
 <script>
     function show_special_comment_area() { 
         $('#comment_div').css('display', 'inline-block');
@@ -84,8 +84,7 @@ Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
     {% endfor %}
     document.write(table.toString() + '\n')
 {% endfor %}
-</script> 
-<div id=comment_div style="display: none;">
+</script><div id=comment_div style="display: none;">
 =============Special Comments=============     
 <p id=specialcomment_text></p><div id=formarea><textarea rows="4" cols="40" id=special_comment_textarea form="usrform">Enter text here...</textarea>
 <div align="center"><button type="button" class="btn btn-default" onclick="write_to_comment_area()"><span class="glyphicon glyphicon-ok"></span> Apply</button> <button type="button" class="btn btn-default" onclick="hide_comment_area()"><span class="glyphicon glyphicon-remove"></span> Remove</button></div></div></div>

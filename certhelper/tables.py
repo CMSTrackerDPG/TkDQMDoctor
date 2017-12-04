@@ -3,19 +3,8 @@ from django_tables2.utils import A
 from .models import RunInfo, ReferenceRun
 
 class RunInfoTable(tables.Table):
-    edit = tables.LinkColumn(
-    viewname = 'certhelper:update', 
-    args=[A('pk')],
-    text="edit",
-    accessor=A('__str__'),
-    orderable=False)
-
-    delete = tables.LinkColumn(
-    viewname = 'certhelper:delete', 
-    args=[A('pk')],
-    text="delete",
-    accessor=A('__str__'),
-    orderable=False)
+    edit   = tables.TemplateColumn('<a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-pencil"></a>', orderable=False)
+    delete = tables.TemplateColumn('<a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-trash"></a>', orderable=False)
 
     class Meta:
         model = RunInfo
