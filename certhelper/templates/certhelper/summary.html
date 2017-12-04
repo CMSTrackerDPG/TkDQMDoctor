@@ -5,15 +5,34 @@
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
 <h1 align="center">Summary</h1>
-<a href="{% url 'certhelper:list' %}" class="btn btn-link"><span class="glyphicon glyphicon-home"></span> Back to overview</a>
+<a href="{% url 'certhelper:list' %}" class="btn btn-link"> Back to list of runs</a>
+<button type="button" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-comment"></span> Special Comment</button>   
+<script>
+    function show_special_comment_area() { 
+        $('#comment_div').css('display', 'inline-block');
+        $('#formarea').css('display', 'inline-block');
+        $('#specialcomment_text').css('display', 'None'); 
+    }
+    
+    function write_to_comment_area() { 
+        var t = $('#special_comment_textarea').val();
+        $('#specialcomment_text').html(t); 
+        $('#formarea').css('display', 'None');
+        $('#specialcomment_text').css('display', 'inline-block');
+    }
+
+    function hide_comment_area() {
+        $('#comment_div').css('display', 'None'); 
+    }
+</script>
+</br>
 
 {% regroup sorted_by_type by type_id as type_list %}
-
 {% regroup sums by type_id as sums_regroup %}
 {% regroup tkmap by type_id as tkmap_regroup %}
 {% regroup certified by type_id as certified_regroup %}
 
-<pre>
+<pre id=summary>
 =============Reference Runs===============
 {% for ref in refs%}{{ref}}
 {% endfor %}
@@ -49,16 +68,13 @@ Type {{forloop.counter}}: {% regroup t.list by trackermap as tmpi %}
 {% for a in tmpi%} {% if a.grouper == "Exists" %}Produced{%else%}Todo    {%endif%}: {% for item in a.list %}{{item.run_number}}  {% endfor %}
 {% endfor %}{% endfor %}
 =============HDQM Trends==================
-=============Special Comments=============
-
-    -> !!! WRITE STUFF HERE !!! <-
 
 =============Certified Runs===============
 {% for t in certified_regroup%}
 Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
 {% for a in tmpi%} {%if a.grouper%}Good{%else%}Bad {%endif%}: {% for item in a.list %}{{item.run_number}}  {% endfor %}
 {% endfor %}{% endfor %}
-====================Sums==================
+=============Sum of Quantities============
 <script>
 {% for t in sums_regroup%}
     var table = new AsciiTable()
@@ -68,6 +84,9 @@ Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
     {% endfor %}
     document.write(table.toString() + '\n')
 {% endfor %}
-</script>
- 
+</script> 
+<div id=comment_div style="display: none;">
+=============Special Comments=============     
+<p id=specialcomment_text></p><div id=formarea><textarea rows="4" cols="40" id=special_comment_textarea form="usrform">Enter text here...</textarea>
+<button type="button" class="btn btn-default" onclick="write_to_comment_area()"><span class="glyphicon glyphicon-ok"></span> Apply</button><button type="button" class="btn btn-default" onclick="hide_comment_area()"><span class="glyphicon glyphicon-remove"></span> Remove</button></div></div>
 </pre>
