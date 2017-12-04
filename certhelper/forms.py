@@ -32,7 +32,7 @@ class RunInfoForm(ModelForm):
 class TypeForm(ModelForm):
     class Meta:
         model = Type
-        fields = ["reco", "runtype", "bfield", "beamtype", "dataset"]
+        fields = ["reco", "runtype", "bfield", "beamtype", "beamenergy", "dataset"]
         widgets = {
             'dataset': TextInput(attrs={ 'placeholder': "e.g. /Cosmics/Run2017F-PromptReco-v1/DQMIO", 'class': "form-control"}),
         }

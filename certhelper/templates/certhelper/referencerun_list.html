@@ -1,0 +1,10 @@
+{% load static %}
+<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
+<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+
+<h1 align="center">List of reference runs</h1>
+<a href="{% url 'certhelper:list' %}" class="btn btn-link"><span class="glyphicon glyphicon-menu-hamburger"></span> Back to list of runs</a>
+
+{% load render_table from django_tables2 %}
+{% render_table table %}

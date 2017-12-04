@@ -1,6 +1,6 @@
 import django_tables2 as tables
 from django_tables2.utils import A
-from .models import RunInfo
+from .models import RunInfo, ReferenceRun
 
 class RunInfoTable(tables.Table):
     edit = tables.LinkColumn(
@@ -21,11 +21,7 @@ class RunInfoTable(tables.Table):
         model = RunInfo
         fields = ('run_number', 
         'type',
-        # 'type.runtype',
-        # 'type.bfield',
-        # 'type.beamtype',
-        # 'type.dataset',
-        'reference.reference_run',
+        'reference_run.reference_run',
         'trackermap',
         'number_of_ls',
         'int_luminosity',
@@ -33,4 +29,11 @@ class RunInfoTable(tables.Table):
         'sistrip',
         'tracking',
         'comment')
+        attrs = {'class': 'table table table-hover table-bordered'}
+
+
+
+class ReferenceRunTable(tables.Table):
+    class Meta:
+        model = ReferenceRun
         attrs = {'class': 'table table table-hover table-bordered'}

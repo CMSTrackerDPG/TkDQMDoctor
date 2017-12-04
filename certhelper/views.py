@@ -8,7 +8,7 @@ from django.db.models import Case, When, Value, BooleanField
 
 from django.db.models import Sum, Q, F
 
-from django_tables2 import RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
 
 
 
@@ -30,12 +30,9 @@ def listruns(request):
     RequestConfig(request).configure(table)
     return render(request, 'certhelper/list.html', {'table': table})
 
-class ListBlocks(generic.ListView):
-    template_name = 'certhelper/references.html'
-    context_object_name = 'references'
-
-    def get_queryset(self):
-        return ReferenceRun.objects.all()
+class ListReferences(SingleTableView):
+    model = ReferenceRun
+    table_class = ReferenceRunTable
 
 class UpdateRun(generic.UpdateView):
     model = RunInfo
@@ -66,7 +63,7 @@ class SummaryView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
 
-        ids = RunInfo.objects.all().values_list('reference').distinct()
+        ids = RunInfo.objects.all().values_list('reference_run').distinct()
         context['refs'] = ReferenceRun.objects.filter(id__in=ids)
 
         context['sorted_by_type'] = RunInfo.objects.all().order_by('type')

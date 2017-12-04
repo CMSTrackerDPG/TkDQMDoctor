@@ -8,7 +8,7 @@ urlpatterns = [
     url(r'^$', views.listruns, name='list'),
     url(r'^clearsession/$', views.clearsession, name='clearsession'),
     url(r'^summary/$', views.SummaryView.as_view(), name='summary'),
-    url(r'^references/$', views.ListBlocks.as_view(), name='references'),
+    url(r'^references/$', views.ListReferences.as_view(), name='references'),
     url(r'^create/$', views.CreateRun.as_view(), name='create'),
     url(r'^createtype/$', views.CreateType.as_view(), name='createtype'),
 
