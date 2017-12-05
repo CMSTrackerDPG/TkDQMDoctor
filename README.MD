@@ -18,10 +18,24 @@ You need to take care that you have installed
 * python3 manage.py createsuperuser (follow the dialog)
 
 ## Run
-* python3 manage.py runserver
+* python3 manage.py runserver 
 * Open browser at http://localhost:8000/admin log in with the credentials you created.
 * Create a new ReferenceRun so that you can choose it in the "Add Run" Dialog
 * Open http://localhost:8000.
+* (Optional) create additional non-admin users that can access the protected parts of the website.
+
+# Deploy from jandreadesktop.cern.ch
+* ssh cernLogin@jandreadesktop.cern.ch
+* cd /home/jandrea/tkDQMDoctor/TkDQMDoctor
+* screen -r    (check for running sessions)
+* python3 manage.py runserver 128.141.84.249:8000
+
+If you want to keep the server running after you exit your session use 
+
+* screen
+* python3 manage.py runserver 128.141.84.249:8000
+* "Ctrl-a" "d"    (to deteach from the window)
+* The process is now running detached and you can quit the session without killing the process
 
 # When you change the database
 

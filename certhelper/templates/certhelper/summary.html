@@ -6,8 +6,7 @@
 
 <h1 align="center">Summary</h1>
 <a href="{% url 'certhelper:list' %}" class="btn btn-link"><span class="glyphicon glyphicon-menu-hamburger"></span> Back to list of runs</a>
-<button type="submit" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-plus"></span> Special Comments</button>   
-
+<a href="#comment_div" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-plus"></span> Special Comments</a>  
 </br>
 
 {% regroup sorted_by_type by type_id as type_list %}
@@ -86,8 +85,6 @@ Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
             $('#specialcomment_text').html(t); 
             $('#formarea').css('display', 'None');
             $('#specialcomment_text').css('display', 'inline-block');
-            location.href = "#formarea";
-            
             }
     
         function hide_comment_area() {
