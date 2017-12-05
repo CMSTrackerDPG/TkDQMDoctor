@@ -5,19 +5,13 @@ from django.views import generic
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
 from django.db.models import Case, When, Value, BooleanField
-
 from django.db.models import Sum, Q, F
-
 from django_tables2 import RequestConfig, SingleTableView
-
-
+from django.contrib.auth import logout
 
 from .models import *
 from .forms import *
 from .tables import *
-
-def index(request):
-    return render(request, 'certhelper/index.html')
 
 class CreateRun(generic.CreateView):
     model = RunInfo
@@ -99,3 +93,9 @@ def clearsession(request):
         return HttpResponseRedirect('/')
 
     return render(request, 'certhelper/clearsession.html')
+
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect('/')

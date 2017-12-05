@@ -3,10 +3,9 @@
 <script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
-
 {% load myfilters %}
 
-<h1 align="center">List of Runs</h1>
+<h1 align="center">List of certified runs</h1>
 <div class="container" style="padding:0; margin:0; width:99%;"> 
         <div class="row" >
                 <div class="col col-sm-6">
@@ -15,10 +14,16 @@
                         <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>   
                 </div>   
                 <div class="col col-sm-6 text-right">
-                        <a href="{% url 'certhelper:help' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-question-sign"></span> Help</a>                                                                                        
-                        <a href="{% url 'certhelper:clearsession' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-user"></span> New Session</a>                                                                
+                        <a href="{% url 'certhelper:help' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-question-sign"></span> Help</a>    
+                        {% if not user.is_authenticated %}                                                                                    
+                        <a href="{% url 'certhelper:login' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-user"></span> Login</a>                                                                
+                        {% else %}
+                        <a href="{% url 'certhelper:clearsession' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-repeat"></span> New Session</a>                                                                
+                        <a href="{% url 'certhelper:logout'  %} "  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-off"></span> Logout {{request.user.username}}</a>                                                                                        
+                        {% endif %}
                 </div>                
         </div>
 </div>
+
 {% load render_table from django_tables2 %}
 {% render_table table %}

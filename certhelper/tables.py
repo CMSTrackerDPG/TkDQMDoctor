@@ -3,8 +3,8 @@ from django_tables2.utils import A
 from .models import RunInfo, ReferenceRun
 
 class RunInfoTable(tables.Table):
-    edit   = tables.TemplateColumn('<a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-pencil"></a>', orderable=False)
-    delete = tables.TemplateColumn('<a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-trash"></a>', orderable=False)
+    edit   = tables.TemplateColumn('<div align="center"><a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-pencil"></a></div>', orderable=False)
+    delete = tables.TemplateColumn('<div align="center"><a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-trash"></a></div>', orderable=False)
 
     class Meta:
         model = RunInfo
