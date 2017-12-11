@@ -67,22 +67,49 @@ class SummaryView(generic.ListView):
         bad_runs = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
 
         
-        context['sums'] = RunInfo.objects.raw("""SELECT *,(pixel='Good' and sistrip='Good' and tracking='Good') as good, 
-                                                           SUM(number_of_ls) as sum_number_of_ls,
-                                                           SUM(int_luminosity) as sum_int_luminosity 
-                                                           FROM certhelper_runinfo a 
-                                                           inner join certhelper_type b 
-                                                           on a.type_id = b.ID 
-                                                           group by b.ID, good 
-                                                           order by type_id, -good""")
+        # context['sums'] = RunInfo.objects.raw("""SELECT *,((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat')) as good, 
+        #                                                    SUM(number_of_ls) as sum_number_of_ls,
+        #                                                    SUM(int_luminosity) as sum_int_luminosity 
+        #                                                    FROM certhelper_runinfo a 
+        #                                                    inner join certhelper_type b 
+        #                                                    on a.type_id = b.ID 
+        #                                                    group by b.ID, good 
+        #                                                    order by type_id, -good""")
+
+
+        context['sums'] = RunInfo.objects.raw("""SELECT *,
+        case runtype
+            when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+            when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+        end as good, 
+        SUM(number_of_ls) as sum_number_of_ls,
+        SUM(int_luminosity) as sum_int_luminosity 
+        FROM certhelper_runinfo a 
+        inner join certhelper_type b 
+        on a.type_id = b.ID 
+        group by b.ID, good 
+        order by type_id, -good""")        
+
 
         context['tkmap'] = RunInfo.objects.raw("""SELECT  *
                                                           from certhelper_runinfo a
                                                           order by type_id, trackermap""")
 
-        context['certified'] = RunInfo.objects.raw("""SELECT *,(pixel='Good' and sistrip='Good' and tracking='Good') as good
-                                                                from certhelper_runinfo a
-                                                                order by type_id, -good""")                                                          
+# DOES NOT TAKE Lowstat into a ccoutn
+        # context['certified'] = RunInfo.objects.raw("""SELECT *,((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat')) as good
+        #                                                         from certhelper_runinfo a
+        #                                                         order by type_id, -good""")                                                          
+
+
+        context['certified'] = RunInfo.objects.raw("""SELECT *,  
+        case runtype
+            when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+            when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+        end as good
+        from certhelper_runinfo a
+	    inner join certhelper_type b
+	    on a.type_id = b.ID 
+        order by type_id, -good""")               
 
         return context
 

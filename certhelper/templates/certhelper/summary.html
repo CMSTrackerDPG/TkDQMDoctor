@@ -50,10 +50,22 @@ Type {{forloop.counter}}: {% regroup t.list by trackermap as tmpi %}
 {% for a in tmpi%} {% if a.grouper == "Exists" %}Produced{%else%}Todo    {%endif%}: {% for item in a.list %}{{item.run_number}}  {% endfor %}
 {% endfor %}{% endfor %}
 =============HDQM Trends==================
-
 =============Certified Runs===============
+
+      **INFO** When is a RUN marked as 'Good'?
+Depends on runtype:
+| - - - - - - - - - - - - - - - - - - - - - - - - - - |
+|-(Collisions) pixel    = (Good OR Lowstat)   AND     |      
+|              sistrip  = (Good OR Lowstat)   AND     |
+|              tracking = (Good OR Lowstat)           |
+| - - - - - - - - - - - - - - - - - - - - - - - - - - |
+|-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |   
+|              tracking = (Good OR Lowstat)           |
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+
 {% for t in certified_regroup%}
-Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
+Type {{forloop.counter}}: {% regroup t.list by good as tmpi %} 
 {% for a in tmpi%} {%if a.grouper%}Good{%else%}Bad {%endif%}: {% for item in a.list %}{{item.run_number}}  {% endfor %}
 {% endfor %}{% endfor %}
 =============Sum of Quantities============
@@ -62,7 +74,7 @@ Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
     var table = new AsciiTable()
     {% for item in t.list %}
     {%if forloop.first%}     table.setHeading("Type {{forloop.parentloop.counter}}", "Sum of LS", "Sum of int. luminosity"){%endif%}
-    table.addRow('{% if item.good %}Good{%else%}Bad{%endif%}','{{item.sum_number_of_ls}}', '{{item.sum_int_luminosity}}')
+    table.addRow('{% if item.good %}Good{%else%}Bad {%endif%}','{{item.sum_number_of_ls}}', '{{item.sum_int_luminosity}}')
     {% endfor %}
     document.write(table.toString() + '\n')
 {% endfor %}

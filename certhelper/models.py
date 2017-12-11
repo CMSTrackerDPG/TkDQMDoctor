@@ -37,7 +37,7 @@ class ReferenceRun(models.Model):
         return str(self.reference_run) + " " +  str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " " + str(self.beamenergy) + " " + str(self.dataset)
 
 class RunInfo(models.Model):
-    GOOD_BAD_CHOICES  = (('Good','Good'),('Bad','Bad'))
+    GOOD_BAD_CHOICES  = (('Good','Good'), ('Bad','Bad'), ('Lowstat','Lowstat'), ('Excluded','Excluded'))
     TRACKERMAP_CHOICES  = (('Exists','Exists'),('Missing','Missing'))
 
     type                  = models.ForeignKey(Type)
@@ -46,9 +46,9 @@ class RunInfo(models.Model):
     trackermap            = models.CharField(max_length=7, choices=TRACKERMAP_CHOICES)
     number_of_ls          = models.PositiveIntegerField()
     int_luminosity        = models.DecimalField(max_digits=20, decimal_places=2)
-    pixel                 = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
-    sistrip               = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
-    tracking              = models.CharField(max_length=4, choices=GOOD_BAD_CHOICES)
+    pixel                 = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
+    sistrip               = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
+    tracking              = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
     comment               = models.TextField(blank=True)
 
     class Meta:
