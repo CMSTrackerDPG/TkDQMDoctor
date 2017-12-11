@@ -14,6 +14,17 @@
 {% regroup tkmap by type_id as tkmap_regroup %}
 {% regroup certified by type_id as certified_regroup %}
 
+<!-- **INFO** When is a RUN marked as 'Good'?
+Depends on runtype:
+| - - - - - - - - - - - - - - - - - - - - - - - - - - |
+|-(Collisions) pixel    = (Good OR Lowstat)   AND     |      
+|              sistrip  = (Good OR Lowstat)   AND     |
+|              tracking = (Good OR Lowstat)           |
+| - - - - - - - - - - - - - - - - - - - - - - - - - - |
+|-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |   
+|              tracking = (Good OR Lowstat)           |
+ - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+
 <pre id=summary>
 =============Reference Runs===============
 {% for ref in refs%}{{ref}}
@@ -51,19 +62,6 @@ Type {{forloop.counter}}: {% regroup t.list by trackermap as tmpi %}
 {% endfor %}{% endfor %}
 =============HDQM Trends==================
 =============Certified Runs===============
-
-      **INFO** When is a RUN marked as 'Good'?
-Depends on runtype:
-| - - - - - - - - - - - - - - - - - - - - - - - - - - |
-|-(Collisions) pixel    = (Good OR Lowstat)   AND     |      
-|              sistrip  = (Good OR Lowstat)   AND     |
-|              tracking = (Good OR Lowstat)           |
-| - - - - - - - - - - - - - - - - - - - - - - - - - - |
-|-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |   
-|              tracking = (Good OR Lowstat)           |
- - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-
 {% for t in certified_regroup%}
 Type {{forloop.counter}}: {% regroup t.list by good as tmpi %} 
 {% for a in tmpi%} {%if a.grouper%}Good{%else%}Bad {%endif%}: {% for item in a.list %}{{item.run_number}}  {% endfor %}
