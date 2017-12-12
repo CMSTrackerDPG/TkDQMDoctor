@@ -106,7 +106,7 @@ Forms are a way to display/input data into the database. You define your Form wh
 
 # ---------- models.py ----------
 class ReferenceRun(models.Model):
-    reference_run  = models.IntegerField()
+    reference_run         = models.IntegerField()
     reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype               = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
     bfield                = models.CharField(max_length=30, choices=BFIELD_CHOICES)
