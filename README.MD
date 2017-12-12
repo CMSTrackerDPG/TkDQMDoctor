@@ -104,7 +104,7 @@ Forms are a way to display/input data into the database. You define your Form wh
 
 ```python
 
----------- models.py ----------
+# ---------- models.py ----------
 class ReferenceRun(models.Model):
     reference_run  = models.IntegerField()
     reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
@@ -114,32 +114,40 @@ class ReferenceRun(models.Model):
     beamenergy            = models.CharField(max_length=10, choices=BEAMENERGY_CHOICES)
     dataset               = models.CharField(max_length=150)
 
----------- tables.py ----------
+# ---------- tables.py ----------
 class ReferenceRunTable(tables.Table):
     class Meta:
         model = ReferenceRun
         attrs = {'class': 'table table table-hover table-bordered'}
 
----------- forms.py ----------
+# ---------- forms.py ----------
 class ReferenceRunForm(ModelForm):
     class Meta:
         model = ReferenceRun
         fields = '__all__'
 
----------- views.py ----------
+# ---------- views.py ----------
 class ListReferences(SingleTableView):  # SingleTableView is part of django-tables2
     model = ReferenceRun                # and implements generation of a simple table
     table_class = ReferenceRunTable
 
----------- urls.py ----------
+# ---------- urls.py ----------
 url(r'^references/$', views.ListReferences.as_view(),  name='references')
 
 ```
 
-This is everything that is needed to define the ReferneceRun table, and display its entries in a table.
+This is everything that is needed to define the ReferneceRun table, and display its entries in a table. By looking at urls.py we can see that browsing [website]/refrences is going to call the ListReferences(SingleTableView) which uses the ReferenceRun model and the ReferenceRunTable class. All of which is going to be rendered in <code>referencerun_list.html</code>.
 
-```html
+All of which is rendered with:
+```javascript
+---------- referencerun_list.html ----------
 {% load static %}
 {% load render_table from django_tables2 %}
 {% render_table table %}
 ```
+
+
+The .html code snippet also demonstrates a very powerful tool in django. It's called the Django Template Language. In simple terms; you can pass variables in the view to html files which you can then access using curly braces syntax
+
+ <code>{{variable}} / {% inbuilt-function %}</code>
+
