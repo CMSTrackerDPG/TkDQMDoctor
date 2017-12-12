@@ -95,11 +95,6 @@ class SummaryView(generic.ListView):
                                                           from certhelper_runinfo a
                                                           order by type_id, trackermap""")
 
-# DOES NOT TAKE Lowstat into a ccoutn
-        # context['certified'] = RunInfo.objects.raw("""SELECT *,((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat')) as good
-        #                                                         from certhelper_runinfo a
-        #                                                         order by type_id, -good""")                                                          
-
 
         context['certified'] = RunInfo.objects.raw("""SELECT *,  
         case runtype
