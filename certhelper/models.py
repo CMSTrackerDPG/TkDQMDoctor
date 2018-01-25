@@ -19,8 +19,8 @@ from django.db import models
 RECO_CHOICES       = (('Express','Express'),('Prompt','Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES    = (('Cosmics','Cosmics'),('Collisions','Collisions'))
 BFIELD_CHOICES     = (('0 T','0 T'),('3.8 T','3.8 T'))
-BEAMTYPE_CHOICES   = (('Proton-Proton','Proton-Proton'),('HeavyIon-Proton','HeavyIon-Proton'),('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
-BEAMENERGY_CHOICES = (('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
+BEAMTYPE_CHOICES   = (('Cosmics','Cosmics'),('Proton-Proton','Proton-Proton'),('HeavyIon-Proton','HeavyIon-Proton'),('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
+BEAMENERGY_CHOICES = (('Cosmics','Cosmics'),('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
 
 class Type(models.Model):
     reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)

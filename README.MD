@@ -33,7 +33,7 @@ You need to take care that you have installed
 ## Remarks
 If you just cloned the repository to the machine it still needs some minor adjustments to run properly:
 
-* in settings.py add the "128.141.84.249:8000" to ALLOWED_HOSTS
+* in /dqmsite/settings.py add the "128.141.84.249" to ALLOWED_HOSTS
 * in settings.py scramble the SECRET_KEY (go wild on the keyboard)
 * consider DEBUG = False
 
