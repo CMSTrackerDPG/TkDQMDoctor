@@ -11,7 +11,7 @@ You need to take care that you have installed
 * pip3 install django-tables2
 
 ## Set up the project
-* git clone https://github.com/imKuehlschrank/TkDQMDoctor.git
+* git clone git@github.com:CMSTrackerDPG/TkDQMDoctor.git
 * cd TkDQMDoctor/
 * python3 manage.py makemigrations certhelper
 * python3 manage.py migrate
