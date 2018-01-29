@@ -1,24 +1,32 @@
 # How to develop locally
 
-You need to take care that you have installed
+## Prerequisits
 
 * python3
-* pip3
+* python3-venv
+* pip3 
 
-## Get all the requirements 
+## Set up your environment
 
-* pip3 install django
-* pip3 install django-tables2
-
+I highly suggest setting up a dedicated python environment, so that your other projects are not affected by the packages installed for TkDQMDoctor
+```
+* git clone https://github.com/CMSTrackerDPG/TkDQMDoctor.git  => Clone the git repo
+* cd TkDQMDoctor/                    => Where to set up the venv
+* python3 -m venv .                  => Set up venv
+* source bin/activate                => Activate the python environment
+* pip3 install -I django==1.11.7     => (next major version 2.xx breaks stuff, look into it)
+* pip3 install django-tables2        => django application that handles tables for us
+* deactivate                         => when you want to leave the venv
+```
 ## Set up the project
-* git clone git@github.com:CMSTrackerDPG/TkDQMDoctor.git
-* cd TkDQMDoctor/
+```
+(in activated environment)
 * python3 manage.py makemigrations certhelper
 * python3 manage.py migrate
 * python3 manage.py createsuperuser (follow the dialog)
-
+```
 ## Run
-* python3 manage.py runserver 
+*  <code>python3 manage.py runserver </code>
 * Open browser at http://localhost:8000/admin log in with the credentials you created.
 * Create a new ReferenceRun so that you can choose it in the "Add Run" Dialog
 * Open http://localhost:8000.
