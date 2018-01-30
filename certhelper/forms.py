@@ -83,7 +83,6 @@ class RunInfoForm(ModelForm):
 
         return cleaned_data
 
-
 class TypeForm(ModelForm):
     class Meta:
         model = Type

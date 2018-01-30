@@ -15,6 +15,8 @@ TypeForm           |  Type
 """
 
 from django.db import models
+from django.contrib.auth.models import User
+
 
 RECO_CHOICES       = (('Express','Express'),('Prompt','Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES    = (('Cosmics','Cosmics'),('Collisions','Collisions'))
@@ -38,7 +40,7 @@ class Type(models.Model):
 
 # ReferenceRun that should only be added by shift-leaders / staff
 class ReferenceRun(models.Model):
-    reference_run  = models.IntegerField()
+    reference_run         = models.IntegerField()
     reco                  = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype               = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
     bfield                = models.CharField(max_length=30, choices=BFIELD_CHOICES)
@@ -56,7 +58,7 @@ class ReferenceRun(models.Model):
 class RunInfo(models.Model):
     GOOD_BAD_CHOICES  = (('Good','Good'), ('Bad','Bad'), ('Lowstat','Lowstat'), ('Excluded','Excluded'))
     TRACKERMAP_CHOICES  = (('Exists','Exists'),('Missing','Missing'))
-
+    userid                = models.ForeignKey(User, blank=True)
     type                  = models.ForeignKey(Type)
     reference_run         = models.ForeignKey(ReferenceRun)
     run_number            = models.PositiveIntegerField()
@@ -73,7 +75,3 @@ class RunInfo(models.Model):
 
     def __str__(self):
         return str(self.run_number)
-
-
-
-

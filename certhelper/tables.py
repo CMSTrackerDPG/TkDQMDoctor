@@ -8,7 +8,26 @@ class RunInfoTable(tables.Table):
 
     class Meta:
         model = RunInfo
-        fields = ('run_number', 
+        fields = ('userid',
+        'run_number', 
+        'type',
+        'reference_run.reference_run',
+        'trackermap',
+        'number_of_ls',
+        'int_luminosity',
+        'pixel',
+        'sistrip',
+        'tracking',
+        'comment')
+        attrs = {'class': 'table table table-hover table-bordered'}
+
+
+class READONLYRunInfoTable(tables.Table):
+
+    class Meta:
+        model = RunInfo
+        fields = ('userid',
+        'run_number', 
         'type',
         'reference_run.reference_run',
         'trackermap',

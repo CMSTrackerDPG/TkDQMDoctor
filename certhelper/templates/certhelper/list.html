@@ -9,9 +9,13 @@
 <div class="container" style="padding:0; margin:0; width:99%;"> 
         <div class="row" >
                 <div class="col col-sm-6">
+                        {% if not user.is_authenticated %}                                                                                    
+                        <!-- Dont show any buttons if the user is not logged in -->
+                        {% else %}
                         <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
                         <a href="{% url 'certhelper:summary' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>   
                         <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>   
+                        {% endif %}
                 </div>   
                 <div class="col col-sm-6 text-right">
                         {% if user.is_staff %}                                                                
