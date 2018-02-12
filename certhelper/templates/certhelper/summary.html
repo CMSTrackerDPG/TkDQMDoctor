@@ -1,4 +1,7 @@
 {% load static %}
+<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
+<title>TkDQM Doc: Summary</title>
+
 <script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
 <script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <script src="{% static "certhelper/ascii-table/ascii-table.min.js" %}"></script>
@@ -6,7 +9,7 @@
 
 <h1 align="center">Summary</h1>
 <a href="{% url 'certhelper:list' %}" class="btn btn-link">Back to list of runs</a>
-<a href="#comment_div" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-plus"></span> Special Comments</a>  
+<a href="#comment_div" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-comment"></span> Add Special Comment</a>  
 </br>
 
 {% regroup sorted_by_type by type_id as type_list %}
