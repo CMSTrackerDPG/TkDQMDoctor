@@ -78,8 +78,8 @@ class RunInfoForm(ModelForm):
         is_tracking_good = cleaned_data.get('tracking')=='Good'
         comment_string = cleaned_data.get('comment')
 
-        if not (is_pixel_good and is_sistrip_good and is_tracking_good) and comment_string=="":
-            self.add_error(None, ValidationError("Pixel/SiStrip/Tracking is set to something other than 'Good'. You need to add a comment."))
+        if not (is_pixel_good and is_sistrip_good and is_tracking_good) :#and comment_string=="":
+            self.add_error(None, ValidationError("Pixel, SiStrip & Tracking are not logically consistent, you dummy.."))
 
         return cleaned_data
 
