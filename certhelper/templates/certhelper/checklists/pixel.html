@@ -6,11 +6,32 @@
 <script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
-<h1 align="center">Pixel Checklist</h1>
+<h1 align="center">Pixel Helper</h1>
 <div class="container">
-<h3><a name="Pixel_Plots"></a> Pixel Plots: </h3>
-<p />
-<strong>All plots available in shift/PixelPhase1</strong>:<BR>    <ol>
+
+This page contains the list of checks to be done for every run, but also some useful information about possible issues and links to the documentation.
+
+<h3>Pixel check list</h3> 
+
+
+(TO BE UPDATED WITH THE NEW <a href="/twiki/bin/view/CMS/SUMMARY" class="twikiLink">SUMMARY</a> MAPS FOR 2018)
+
+<ul>
+	<li>  Check the number of cluster plot and the trends. Make sure the Pixel detector is giving data, in the case the trend present some features (i.e dips or peaks) compare with the corresponding histogram in the Strip, if the feature is present also there this mean it is due to a change in trigger rate or to a luminosity scan. </li>
+	<li> Check the on-track cluster charge and size comparing against a suitable reference in particular check if the distributions match and the MPV value is stable. In case you find a distorted shape (i.e multiple peaks are visible), check with the help of the ROC maps if those clusters become from a particular region of the detector. Also the cluster charge for inner and outer ladder (one plot per layer) have to be checked against the reference.</li>
+	<li>Check the dead ROC number, if there is a difference with respect to the <strong>previous run</strong> (do not use the reference for this!), if so check the digi occupancy maps at ROC level and find the new holes (to be added to the shift report). The Pixel detector is fundamental for tracking, a new hole can cause issues in the reconstruction.  If a large area is dead, inform the SL and submit an ELog with title: "New hole(s) in the Pixel detector" attaching an image showing clearly where the new hole appear.</li>
+	<li>If there are no new holes and the charge distributions are fine, the Pixel detector most probably is in a good shape. </li>
+	<li>You can then check the Error plot to see if there aren't issues in the readout. Finally check the hit efficiency and the residuals to make sure that the tracking is behaving.</li>
+</ul> 
+
+<h3>Tips for investigating potential issues </h3> 
+
+
+
+<h3><a name="Pixel_Plots"></a> Descriptions of pixel plots </h3>
+
+Here are descriptions of all the PixelPhase1 plots presented in the "quick collection" of the DQM Gui.
+<p /> <ol>
 <li style="list-style-type: lower-roman;"> Report Summary Map <a href="https://twiki.cern.ch/twiki/bin/view/CMS/PixelPhase1OfflineDQMHistoDescription#Pixel_Report_Summary_Map" target="_top">description</a>
 </li> <li style="list-style-type: lower-roman;"> Number of clusters and trend in Pixel Barrel and Forward <a href="https://twiki.cern.ch/twiki/bin/view/CMS/PixelPhase1OfflineDQMHistoDescription#Nclus" target="_top">description</a>
 </li> <li style="list-style-type: lower-roman;"> Cluster charge and size (On Track) <a href="https://twiki.cern.ch/twiki/bin/view/CMS/PixelPhase1OfflineDQMHistoDescription#Cluster_charge_and_size_on_track" target="_top">description</a>
@@ -36,23 +57,9 @@
 <li style="list-style-type: lower-roman;"> historic DQM trend plots: average cluster charge, cluster size, digi charge, Residuals (mean and RMS), hit efficiency, fraction of digis in clusters <a href="https://twiki.cern.ch/twiki/bin/view/CMS/PixelPhase1OfflineDQMHistoDescription#Historic_DQM_plots" target="_top">description</a>
 </li></ol> 
 <p />
-<h4><a name="Suggested_sequence_AN1"></a> Suggested sequence </h4>
-(TO BE UPDATED WITH THE NEW <a href="/twiki/bin/view/CMS/SUMMARY" class="twikiLink">SUMMARY</a> MAPS FOR 2018)
-Check the number of cluster plot and the trends to make sure the Pixel detector is giving data, in the case the trend present some features (i.e dips or peaks) compare with the corresponding histogram in the Strip, if the feature is present also there this mean it is due to a change in trigger rate or to a luminosity scan. 
-<p />
-Then check the on-track cluster charge and size comparing against a suitable reference in particular check if the distributions match and the MPV value is stable. In case you find a distorted shape (i.e multiple peaks are visible), check with the help of the ROC maps if those clusters become from a particular region of the detector. Also the cluster charge for inner and outer ladder (one plot per layer) have to be checked against the reference.
-<p />
-Check the dead ROC number, if there is a difference with respect to the <strong>previous run</strong> (do not use the reference for this!), if so check the digi occupancy maps at ROC level and find the new holes (to be added to the shift report). The Pixel detector is fundamental for tracking, a new hole can cause issues in the reconstruction.  If a large area is dead, inform the SL and submit an ELog with title: "New hole(s) in the Pixel detector" attaching an image showing clearly where the new hole appear.
-<p />
-If there are no new holes and the charge distributions are fine, the Pixel detector most probably is in a good shape. 
-<p />
-You can then check the Error plot to see if there aren't issues in the readout. Finally check the hit efficiency and the residuals to make sure that the tracking is behaving.
-<p />
+
+
+
+
 </div>
 
-</br> </br>
-</br> </br>
-</br> </br>
-</br> </br>
-</br> </br>
-</br> </br>

@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/delete/$', login_required(views.DeleteRun.as_view()), name='delete'),
 
     # checklists
+    url(r'^checklists/general$',    TemplateView.as_view(template_name='certhelper/checklists/general.html'),    name='general_checklist'),
     url(r'^checklists/trackermap$', TemplateView.as_view(template_name='certhelper/checklists/trackermap.html'), name='trackermap_checklist'),
     url(r'^checklists/pixel$',      TemplateView.as_view(template_name='certhelper/checklists/pixel.html'),      name='pixel_checklist'),
     url(r'^checklists/sistrip$',    TemplateView.as_view(template_name='certhelper/checklists/sistrip.html'),    name='sistrip_checklist'),

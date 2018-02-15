@@ -6,39 +6,41 @@
 <script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
-<h1 align="center">Tracking Checklist</h1>
-<h3><a name="Tracking_Plots"></a> Tracking Plots: </h3>
-<p />
-<p />
-<strong>Plots in QuickCollection</strong>:<BR>    <ol>
-<li style="list-style-type: lower-roman;"> the Report Summary Map <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Tracking_Report_Summary_Map" target="_top">description</a>
-</li> <li style="list-style-type: lower-roman;"> track parameters (#Tracks, Pt, Eta, Phi, Chi2, #hits) <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Track_parameters_Tracks_Pt_Eta_P" target="_top">description</a>
-</li></ol> 
-<p />
-<h4><a name="Tracker_Maps_AN1"></a> Tracker Maps </h4>
- <strong>Other Plots</strong>:<BR>  <ol>
-<li style="list-style-type: lower-roman;"> the <em>Tracker Maps</em>  which have to be produced by offline shifter right after checking the plots in the GUI  (see instructions): <ul>
-<li> Valid, Missing, Inactive hits <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Description_of_Tracker_Maps" target="_top">description</a>
-</li></ul> 
-</li></ol> 
-<p />
-<h4><a name="HDQM_trends_AN2"></a> HDQM trends </h4> <ol>
-<li style="list-style-type: lower-roman;"> historic DQM trend plots: average number of rec-hits per track, average pT, average chi2/ndof  <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Description_of_Trend_Plots_from" target="_top">description</a>
-</li></ol> 
-<p />
-<h4><a name="Suggested_sequence_AN2"></a> Suggested sequence </h4>
-  1 Check GUI plots (Tracking plots are quite a few, in the GUI they are all located in the same folder)
-  1 Check TkMaps
-<p />
-Before the end of the shift, check the <strong>HDQM trends</strong> including all the runs taken during the week (for cosmics, collisions in Express and Prompt)
-<p />
-<h2><a name="Identify_bad_components"></a> Identify bad components </h2>
-<p />
-Finally, having inspected all the plots, and hence having the "big picture" of data quality, it is time to investigate on bad components:
-<p /> <ul>
-<li> are there any new BAD component with respect the previous run in the same conditions?
-</li> <li> If yes, what is the reason to be flagged as bad?
-</li> <li> did we recover some "known" bad component?
-</li></ul> 
-<p />
+<h1 align="center">Tracking Helper</h1>
 
+
+
+<div class="container">
+
+<h3><a name="Suggested_sequence_AN2"></a> Tracking checks </h3>
+
+<ul>
+    <li> Check GUI plots (Tracking plots are quite a few, in the GUI they are all located in the same folder)</li>
+    <li>Check TkMaps</li>
+    <li>Before the end of the shift, check the <strong>HDQM trends</strong> including all the runs taken during the week (for cosmics, collisions in Express and Prompt)</li>
+</ul> 
+
+Finally, having inspected all the plots, and hence having the "big picture" of data quality, it is time to investigate on bad components:
+<ul> 
+	<li> are there any new BAD component with respect the previous run in the same conditions?</li>
+	<li> If yes, what is the reason to be flagged as bad?</li>
+	<li> did we recover some "known" bad component?</li>
+</ul> 
+
+
+
+<h3><a name="Tracking_Plots"></a> Description of the Tracking Plots: </h3>
+
+<ul>
+
+   <li> the Report Summary Map <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Tracking_Report_Summary_Map" target="_top"> description</a> </li>
+
+   <li> track parameters (#Tracks, Pt, Eta, Phi, Chi2, #hits) <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Track_parameters_Tracks_Pt_Eta_P" target="_top"> description </a></li>
+
+   <li> the Tracker Maps  which have to be produced by offline shifter right after checking the plots in the GUI  (see instructions): Valid, Missing, Inactive hits <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Description_of_Tracker_Maps" target="_top"> description </a> </li>
+   
+   <li> istoric !DQM trend plots: average number of rec-hits per track, average pT, average chi2/ndof <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackingOfflineDQMHistoDescription#Description_of_Trend_Plots_from" target="_top"> description </a></li>
+
+</ul>
+
+</div>
