@@ -10,8 +10,6 @@ from django_tables2 import RequestConfig, SingleTableView
 from django.contrib.auth import logout
 from django.db.models.expressions import RawSQL
 
-
-
 from .models import *
 from .forms import *
 from .tables import *
@@ -44,6 +42,7 @@ def listruns(request):
     RequestConfig(request).configure(table)
 
     return render(request, 'certhelper/list.html', {'table': table})
+
 
 class ListReferences(SingleTableView):
     """Display ReferenceRuns in a tableview

@@ -69,9 +69,12 @@ class RunInfo(models.Model):
     sistrip               = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
     tracking              = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
     comment               = models.TextField(blank=True)
+    date                  = models.DateField()
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]
 
     def __str__(self):
         return str(self.run_number)
+
+

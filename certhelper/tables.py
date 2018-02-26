@@ -18,7 +18,8 @@ class RunInfoTable(tables.Table):
         'pixel',
         'sistrip',
         'tracking',
-        'comment')
+        'comment',
+        'date')
         attrs = {'class': 'table table table-hover table-bordered'}
 
 
@@ -36,7 +37,8 @@ class READONLYRunInfoTable(tables.Table):
         'pixel',
         'sistrip',
         'tracking',
-        'comment')
+        'comment',
+        'date')
         attrs = {'class': 'table table table-hover table-bordered'}
 
 

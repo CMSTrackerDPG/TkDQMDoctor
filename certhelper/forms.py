@@ -57,6 +57,9 @@ from django.forms import ModelForm, TextInput, Textarea
 from .models import *
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
 class ReferenceRunForm(ModelForm):
     class Meta:
         model = ReferenceRun
@@ -67,7 +70,8 @@ class RunInfoForm(ModelForm):
         model = RunInfo
         fields = '__all__'
         widgets = {
-            'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: pb⁻¹ "})
+            'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: pb⁻¹ "}),
+            'date': DateInput()
         }
 
     def clean(self):
@@ -82,6 +86,7 @@ class RunInfoForm(ModelForm):
             self.add_error(None, ValidationError("Pixel, SiStrip & Tracking are not logically consistent, you dummy.."))
 
         return cleaned_data
+
 
 class TypeForm(ModelForm):
     class Meta:
