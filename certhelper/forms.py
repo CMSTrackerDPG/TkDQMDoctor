@@ -53,9 +53,9 @@ to a lot of you attributes of the Model.
 
 
 from django.core.exceptions import ValidationError
+from django import forms
 from django.forms import ModelForm, TextInput, Textarea
 from .models import *
-
 
 class DateInput(forms.DateInput):
     input_type = 'date'
