@@ -70,7 +70,7 @@ class RunInfoForm(ModelForm):
         model = RunInfo
         fields = '__all__'
         widgets = {
-            'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: pb⁻¹ "}),
+            'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: /pb "}),
             'date': DateInput()
         }
 
@@ -78,12 +78,22 @@ class RunInfoForm(ModelForm):
         cleaned_data = super(RunInfoForm, self).clean()
 
         is_pixel_good = cleaned_data.get('pixel')=='Good'
+        is_pixel_bad = cleaned_data.get('pixel')=='Bad'
         is_sistrip_good = cleaned_data.get('sistrip')=='Good'
+        is_sistrip_bad = cleaned_data.get('sistrip')=='Bad'
         is_tracking_good = cleaned_data.get('tracking')=='Good'
         comment_string = cleaned_data.get('comment')
+        #is_cosmic_run = (cleaned_data.get('Type')).get('runtype')=='Cosmics'
+	
+	#if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
+        #   self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
-        if not (is_pixel_good and is_sistrip_good and is_tracking_good) :#and comment_string=="":
-            self.add_error(None, ValidationError("Pixel, SiStrip & Tracking are not logically consistent, you dummy.."))
+	   
+        #if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
+        #   self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
+	   
+        if (is_sistrip_bad and is_tracking_good ) :#and comment_string=="":
+           self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
         return cleaned_data
 
