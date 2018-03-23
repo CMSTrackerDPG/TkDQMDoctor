@@ -35,15 +35,18 @@ Depends on runtype:
 =============Runs Checked================
 <script>
     {% for type_id in type_list%}
-
+    
     var table = new AsciiTable()
     table.setHeading("Run", "Reference Run","Number of LS", "Int. Luminosity", "Pixel", "Strip", "Tracking", "Comment")
     
     {% for item in type_id.list %}
         {% if forloop.first %}
+        	
             document.write("Type {{ forloop.parentloop.counter }}: {{item.type}}\n")
+            
+            
         {% endif %}
-
+	
     table.addRow('{{ item.run_number }}',
                 '{{ item.reference_run.reference_run }}',
                 '{{ item.number_of_ls }}',
@@ -58,6 +61,7 @@ Depends on runtype:
     document.write("\n\n")
 {% endfor %}  
 </script>
+
 =============Tracker Maps=================
 {% for t in tkmap_regroup%}
 Type {{forloop.counter}}: {% regroup t.list by trackermap as tmpi %}
@@ -83,6 +87,11 @@ Type {{forloop.counter}}: {% regroup t.list by good as tmpi %}
 =============Special Comments=============     
 <p id=specialcomment_text></p><div id=formarea><textarea rows="4" cols="40" id=special_comment_textarea form="usrform" placeholder="Enter text here" ></textarea>
 <div align="center"><button type="button" class="btn btn-default" onclick="write_to_comment_area()"><span class="glyphicon glyphicon-ok"></span> Apply</button> <button type="button" class="btn btn-default" onclick="hide_comment_area()"><span class="glyphicon glyphicon-remove"></span> Remove</button></div></div></div>
+
+============= Link to the Prompt Feedback plots============
+
+Please add the link
+
 </pre>
 
 
