@@ -16,6 +16,7 @@ I highly suggest setting up a dedicated python environment, so that your other p
 * source bin/activate                => Activate the python environment
 * pip3 install -I django==1.11.7     => (next major version 2.xx breaks stuff, look into it)
 * pip3 install django-tables2        => django application that handles tables for us
+* pip3 install terminaltables         => python application that generates an AsciiTable
 * deactivate                         => when you want to leave the venv
 ```
 ## Set up the project
