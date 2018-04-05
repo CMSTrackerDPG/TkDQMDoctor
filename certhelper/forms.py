@@ -56,6 +56,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 from django.forms import ModelForm, TextInput, Textarea
 from .models import *
+from django.utils import timezone
 
 class DateInput(forms.DateInput):
     input_type = 'date'
@@ -66,12 +67,13 @@ class ReferenceRunForm(ModelForm):
         fields = '__all__'
 
 class RunInfoForm(ModelForm):
+    date = forms.DateField(widget=forms.SelectDateWidget(years=range(2017, timezone.now().year + 2)))
     class Meta:
         model = RunInfo
         fields = '__all__'
         widgets = {
             'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: /pb "}),
-            'date': DateInput()
+            #'date': DateInput()
         }
 
     def clean(self):
