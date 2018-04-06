@@ -67,7 +67,10 @@ class ReferenceRunForm(ModelForm):
         fields = '__all__'
 
 class RunInfoForm(ModelForm):
-    date = forms.DateField(widget=forms.SelectDateWidget(years=range(2017, timezone.now().year + 2)))
+    date = forms.DateField(
+        widget=forms.SelectDateWidget(years=range(2017, timezone.now().year + 2)),
+        initial=timezone.now()
+    )
     class Meta:
         model = RunInfo
         fields = '__all__'
