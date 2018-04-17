@@ -36,11 +36,19 @@
         </div>
 </div>
 
+{% load widget_tweaks %}
+
 <form method ="get">
     <table>
         <tr>
-            <td>{{ filter.form.as_p }}</td>
-            <td><button type="submit">Filter</button></td>
+            <td>
+            {# {{ filter.form.as_p }} #}
+            {% render_field filter.form.date %}
+            </td>
+            <td><button type="submit">
+                <span class="glyphicon glyphicon-search"></span>
+                Filter
+            </button></td>
         </tr>
     </table>
 </form>
