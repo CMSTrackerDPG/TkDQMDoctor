@@ -2,56 +2,81 @@
 <link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
 <title>TkDQM Doc: List</title>
 
+<script>
+    function setFilterDateToToday() {
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.getMonth() + 1;
+        var year = today.getFullYear();
+        document.getElementById("id_date_day").value = day;
+        document.getElementById("id_date_month").value = month;
+        document.getElementById("id_date_year").value = year;
+    }
+
+    function setFilterDateToAll() {
+        document.getElementById("id_date_day").value = 0;
+        document.getElementById("id_date_month").value = 0;
+        document.getElementById("id_date_year").value = 0;
+    }
+</script>
+
 <script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
 <script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
 
 {% load myfilters %}
-
-<h1 align="center">List of certified runs</h1>
-<div class="container" style="padding:0; margin:0; width:99%;"> 
-        <div class="row" >
-                <div class="col col-sm-6">
-                        {% if not user.is_authenticated %}                                                                                    
-                        <!-- Dont show any buttons if the user is not logged in -->
-                        {% else %}
-                        <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
-                        <a href="{% url 'certhelper:summary' %}?date={{ the_date }}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
-                        <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>   
-                        {% endif %}
-                </div>   
-                <div class="col col-sm-6 text-right">
-                        {% if user.is_staff %}                                                                
-                        <a href="{% url 'admin:index'  %} "  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-cog"></span> Admin Settings</a>                                                                                        
-                        {% endif %}
-
-                        <a href="{% url 'certhelper:help' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-question-sign"></span> Help</a>    
-                        {% if not user.is_authenticated %}                                                                                    
-                        <a href="{% url 'certhelper:login' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-user"></span> Login</a>                                                                
-                        {% else %}
-                        {# <a href="{% url 'certhelper:clearsession' %}"  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-repeat"></span> New Session</a> #}
-                        <a href="{% url 'certhelper:logout' %} "  type="button"  class="btn btn-link"><span class="glyphicon glyphicon-off"></span> Logout {{request.user.username}}</a>
-                        {% endif %}
-                </div>                
-        </div>
-</div>
-
 {% load widget_tweaks %}
 
-<form method ="get">
-    <table>
-        <tr>
-            <td>
-            {# {{ filter.form.as_p }} #}
-            {% render_field filter.form.date %}
-            </td>
-            <td><button type="submit">
-                <span class="glyphicon glyphicon-search"></span>
-                Filter
-            </button></td>
-        </tr>
-    </table>
-</form>
+<h1 align="center">List of certified runs</h1>
+<div class="container" style="padding:0; margin:0; width:99%;">
+    <div class="row">
+        <div class="col col-sm-6">
+            {% if not user.is_authenticated %}
+                <!-- Dont show any buttons if the user is not logged in -->
+            {% else %}
+                <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
+                <a href="{% url 'certhelper:summary' %}?date={{ the_date }}" type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
+                <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>
+            {% endif %}
+        </div>
+        <div class="col col-sm-6 text-right">
+            {% if user.is_staff %}
+                <a href="{% url 'admin:index' %} " type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-cog"></span> Admin Settings</a>
+            {% endif %}
+
+            <a href="{% url 'certhelper:help' %}" type="button" class="btn btn-link"><span
+                    class="glyphicon glyphicon-question-sign"></span> Help</a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'certhelper:login' %}" type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-user"></span> Login</a>
+            {% else %}
+                <a href="{% url 'certhelper:logout' %} " type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-off"></span> Logout {{ request.user.username }}</a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8">
+            <form class="form-inline" method="get">
+                Show:
+                <div class="form-group">
+                    <button type="button" class="btn btn-info" onclick="setFilterDateToAll()">All</button>
+                    <button type="button" class="btn btn-info" onclick="setFilterDateToToday()">Today</button>
+                </div>
+                <div class="form-group">
+                    {% render_field filter.form.date %}
+                </div>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% load render_table from django_tables2 %}
 {% render_table table %}
