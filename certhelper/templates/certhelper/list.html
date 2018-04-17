@@ -16,7 +16,7 @@
                         <!-- Dont show any buttons if the user is not logged in -->
                         {% else %}
                         <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
-                        <a href="{% url 'certhelper:summary' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>   
+                        <a href="{% url 'certhelper:summary' %}?date={{ the_date }}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
                         <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>   
                         {% endif %}
                 </div>   
@@ -35,6 +35,15 @@
                 </div>                
         </div>
 </div>
+
+<form method ="get">
+    <table>
+        <tr>
+            <td>{{ filter.form.as_p }}</td>
+            <td><button type="submit">Filter</button></td>
+        </tr>
+    </table>
+</form>
 
 {% load render_table from django_tables2 %}
 {% render_table table %}
