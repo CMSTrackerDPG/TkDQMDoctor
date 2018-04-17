@@ -2,6 +2,24 @@
 <link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
 <title>TkDQM Doc: List</title>
 
+<script>
+    function setFilterDateToToday() {
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.getMonth()+1;
+        var year = today.getFullYear();
+        document.getElementById("id_date_day").value = day;
+        document.getElementById("id_date_month").value = month;
+        document.getElementById("id_date_year").value = year;
+    }
+
+    function setFilterDateToAll() {
+        document.getElementById("id_date_day").value = 0;
+        document.getElementById("id_date_month").value = 0;
+        document.getElementById("id_date_year").value = 0;
+    }
+</script>
+
 <script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
 <script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
@@ -41,6 +59,8 @@
 <form method ="get">
     <table>
         <tr>
+            <td><button id="showAllButton" type="button" onclick="setFilterDateToAll()">Set All</button></td>
+            <td><button id="showTodayButton" type="button" onclick="setFilterDateToToday()">Set Today</button></td>
             <td>
             {# {{ filter.form.as_p }} #}
             {% render_field filter.form.date %}
