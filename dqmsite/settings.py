@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['128.141.84.249', '127.0.0.1','localhost']
 INSTALLED_APPS = [
     'django_tables2',
     'django_filters',
+    'widget_tweaks',
     'certhelper.apps.CerthelperConfig',
     'django.contrib.admin',
     'django.contrib.auth',
