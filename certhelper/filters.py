@@ -10,8 +10,10 @@ class RunInfoFilter(django_filters.FilterSet):
         'date',
         label='Date',
         lookup_expr='contains',
-        widget=forms.SelectDateWidget(years=range(2018, timezone.now().year + 1)),
-        initial=timezone.now
+        widget=forms.SelectDateWidget(
+            years=range(2018, timezone.now().year + 1),
+            attrs={'class': 'form-control'},
+        ),
     )
 
     class Meta:
