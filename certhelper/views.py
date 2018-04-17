@@ -1,20 +1,16 @@
-from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse
-from django.template import loader
-from django.views import generic
-from django.http import HttpResponseRedirect
-from django.views.generic.edit import FormView
-from django.db.models import Case, When, Value, BooleanField
-from django.db.models import Sum, Q, F
-from django_tables2 import RequestConfig, SingleTableView
 from django.contrib.auth import logout
-from django.db.models.expressions import RawSQL
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views import generic
+from django_tables2 import RequestConfig, SingleTableView
+from terminaltables import AsciiTable
 
-from .models import *
+from certhelper.filters import RunInfoFilter
+from certhelper.utilities import get_date_string, is_valid_date
 from .forms import *
 from .tables import *
 
-from terminaltables import AsciiTable
 
 class CreateRun(generic.CreateView):
     """Form which allows for creation of a new entry in RunInfo
@@ -29,6 +25,7 @@ class CreateRun(generic.CreateView):
         form_class.instance.userid = self.request.user
         return super(CreateRun, self).form_valid(form_class)
 
+
 def listruns(request):
     """passes all RunInfo objects to list.html
     """
@@ -37,13 +34,27 @@ def listruns(request):
     # In case the user is not logged in we show all objects
     # but remove the edit and remove buttons from the tableview.
     if request.user.is_authenticated():
-        table = RunInfoTable(RunInfo.objects.filter(userid=request.user))
+        run_info_list = RunInfo.objects.filter(userid=request.user)
+        run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
+        table = RunInfoTable(run_info_filter.qs)
     else:
-        table = READONLYRunInfoTable(RunInfo.objects.all())
+        run_info_list = RunInfo.objects.all()
+        run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
+        table = READONLYRunInfoTable(run_info_filter.qs)
 
     RequestConfig(request).configure(table)
 
-    return render(request, 'certhelper/list.html', {'table': table})
+    year = request.GET.get('date_year', '')
+    month = request.GET.get('date_month', '')
+    day = request.GET.get('date_day', '')
+
+    the_date = get_date_string(year, month, day)
+
+    return render(request, 'certhelper/list.html', {
+        'table': table,
+        'filter': run_info_filter,
+        'the_date': the_date,
+    })
 
 
 class ListReferences(SingleTableView):
@@ -53,6 +64,7 @@ class ListReferences(SingleTableView):
 
     model = ReferenceRun
     table_class = ReferenceRunTable
+
 
 class UpdateRun(generic.UpdateView):
     """Updates a specific Run from the RunInfo table
@@ -66,6 +78,7 @@ class UpdateRun(generic.UpdateView):
     def form_valid(self, form_class):
         form_class.instance.userid = self.request.user
         return super(UpdateRun, self).form_valid(form_class)
+
 
 class DeleteRun(generic.DeleteView):
     """Deletes a specific Run from the RunInfo table    
@@ -85,6 +98,7 @@ class CreateType(generic.CreateView):
     form_class = TypeForm
     template_name_suffix = '_form'
     success_url = '/create'
+
 
 class SummaryAsciiTable:
     """
@@ -112,6 +126,7 @@ class SummaryAsciiTable:
         table.inner_row_border = True
         return table.table
 
+
 class SummaryView(generic.ListView):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
@@ -121,27 +136,36 @@ class SummaryView(generic.ListView):
     context_object_name = 'runs'
 
     def get_queryset(self):
-        return RunInfo.objects.filter(userid=self.request.user)
+        date_filter_value = self.request.GET.get('date', None)
+        if is_valid_date(date_filter_value):
+            return RunInfo.objects.filter(userid=self.request.user, date=date_filter_value)
+        else:
+            return RunInfo.objects.filter(userid=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
 
+        date_filter_value = self.request.GET.get('date', None)
+        date_is_valid = is_valid_date(date_filter_value)
+
         """Retrieve all runs from the current user"""
-        CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
+        if date_is_valid:
+            CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user, date=date_filter_value)
+        else:
+            CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
 
+        """Extract the containing Reference Runs"""
         ids = CurrentUserRunInfos.values_list('reference_run').distinct()
-
         context['refs'] = ReferenceRun.objects.filter(id__in=ids)
 
+        """Sort the Runs by Type"""
         context['sorted_by_type'] = CurrentUserRunInfos.order_by('type')
 
         tmpsorted = CurrentUserRunInfos.order_by('type')
-        good_runs = tmpsorted.filter(pixel="Good",sistrip="Good",tracking="Good")
+        good_runs = tmpsorted.filter(pixel="Good", sistrip="Good", tracking="Good")
         bad_runs = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
 
-        userRunInfoTypes = RunInfo \
-            .objects \
-            .filter(userid=self.request.user) \
+        userRunInfoTypes = CurrentUserRunInfos \
             .values('type') \
             .order_by('type', 'run_number') \
             .distinct()
@@ -181,20 +205,35 @@ class SummaryView(generic.ListView):
         context["ascii_tables"] = ascii_tables
 
         # ====================================================================================================================
-         
-        context['sums'] = RunInfo.objects.raw("""SELECT *,
-        case runtype
-            when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-        end as good, 
-        SUM(number_of_ls) as sum_number_of_ls,
-        SUM(int_luminosity) as sum_int_luminosity 
-        FROM certhelper_runinfo a 
-        inner join certhelper_type b 
-        on a.type_id = b.ID
-        where userid_id = %s  
-        group by b.ID, good
-        order by type_id, -good""", [self.request.user.id]) 
+
+        if(date_is_valid):
+            context['sums'] = RunInfo.objects.raw("""SELECT *,
+            case runtype
+                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+            end as good, 
+            SUM(number_of_ls) as sum_number_of_ls,
+            SUM(int_luminosity) as sum_int_luminosity 
+            FROM certhelper_runinfo a 
+            inner join certhelper_type b 
+            on a.type_id = b.ID
+            where userid_id = %s and date = %s
+            group by b.ID, good
+            order by type_id, -good""", [self.request.user.id, date_filter_value])
+        else:
+            context['sums'] = RunInfo.objects.raw("""SELECT *,
+            case runtype
+                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+            end as good, 
+            SUM(number_of_ls) as sum_number_of_ls,
+            SUM(int_luminosity) as sum_int_luminosity 
+            FROM certhelper_runinfo a 
+            inner join certhelper_type b 
+            on a.type_id = b.ID
+            where userid_id = %s
+            group by b.ID, good
+            order by type_id, -good""", [self.request.user.id])
 
         # ====================================================================================================================
 
@@ -205,27 +244,40 @@ class SummaryView(generic.ListView):
         # When is a RUN marked as 'Good'?
         # Depends on runtype:
         # | - - - - - - - - - - - - - - - - - - - - - - - - - - |
-        # |-(Collisions) pixel    = (Good OR Lowstat)   AND     |      
+        # |-(Collisions) pixel    = (Good OR Lowstat)   AND     |
         # |              sistrip  = (Good OR Lowstat)   AND     |
         # |              tracking = (Good OR Lowstat)           |
         # | - - - - - - - - - - - - - - - - - - - - - - - - - - |
-        # |-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |   
+        # |-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |
         # |              tracking = (Good OR Lowstat)           |
-        #  - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+        #  - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        context['certified'] = RunInfo.objects.raw('''SELECT *,
-        case runtype
-            when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-        end as good
-        from certhelper_runinfo a
-	    inner join certhelper_type b
-	    on a.type_id = b.ID
-        where userid_id = %s
-        order by type_id, -good''', [self.request.user.id])          
+        if date_is_valid:
+            context['certified'] = RunInfo.objects.raw('''SELECT *,
+            case runtype
+                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+            end as good
+            from certhelper_runinfo a
+            inner join certhelper_type b
+            on a.type_id = b.ID
+            where userid_id = %s and date = %s
+            order by type_id, -good''', [self.request.user.id, date_filter_value])
+        else:
+            context['certified'] = RunInfo.objects.raw('''SELECT *,
+            case runtype
+                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
+            end as good
+            from certhelper_runinfo a
+            inner join certhelper_type b
+            on a.type_id = b.ID
+            where userid_id = %s
+            order by type_id, -good''', [self.request.user.id])
         # ====================================================================================================================
-        
+
         return context
+
 
 def clearsession(request):
     """Deletes all the entries in the RunInfo table and redicrets to '/'.
@@ -238,10 +290,9 @@ def clearsession(request):
     return render(request, 'certhelper/clearsession.html')
 
 
-
 def logout_view(request):
     """ Logout current user
     """
-        
+
     logout(request)
     return HttpResponseRedirect('/')
