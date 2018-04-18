@@ -137,10 +137,12 @@ class SummaryView(generic.ListView):
 
     def get_queryset(self):
         date_filter_value = self.request.GET.get('date', None)
+        runinfo_queryset = RunInfo.objects.filter(userid=self.request.user)
+
         if is_valid_date(date_filter_value):
-            return RunInfo.objects.filter(userid=self.request.user, date=date_filter_value)
-        else:
-            return RunInfo.objects.filter(userid=self.request.user)
+            runinfo_queryset = runinfo_queryset.filter(date=date_filter_value)
+
+        return runinfo_queryset
 
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
@@ -149,10 +151,9 @@ class SummaryView(generic.ListView):
         date_is_valid = is_valid_date(date_filter_value)
 
         """Retrieve all runs from the current user"""
+        CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
         if date_is_valid:
-            CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user, date=date_filter_value)
-        else:
-            CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
+            CurrentUserRunInfos = CurrentUserRunInfos.filter(date=date_filter_value)
 
         """Extract the containing Reference Runs"""
         ids = CurrentUserRunInfos.values_list('reference_run').distinct()
