@@ -25,6 +25,38 @@ BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'), 
 BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=30, help_text="Title for the category of problems found")
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return str(self.name)
+
+
+class SubCategory(models.Model):
+    name = models.CharField(max_length=30)
+    parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return str(self.name)
+
+
+class SubSubCategory(models.Model):
+    name = models.CharField(max_length=30)
+    parent_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Type(models.Model):
     reco = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
@@ -75,6 +107,9 @@ class RunInfo(models.Model):
     tracking = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
     comment = models.TextField(blank=True)
     date = models.DateField()
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    subsubcategory = models.ForeignKey(SubSubCategory, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]

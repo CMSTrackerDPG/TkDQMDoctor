@@ -207,7 +207,7 @@ class SummaryView(generic.ListView):
 
         # ====================================================================================================================
 
-        if(date_is_valid):
+        if (date_is_valid):
             context['sums'] = RunInfo.objects.raw("""SELECT *,
             case runtype
                 when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
@@ -297,3 +297,21 @@ def logout_view(request):
 
     logout(request)
     return HttpResponseRedirect('/')
+
+
+def load_subcategories(request):
+    category_id = request.GET.get('categoryid')
+    if(category_id):
+        subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
+    else:
+        subcategories = SubCategory.objects.none()
+    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subcategories})
+
+
+def load_subsubcategories(request):
+    subcategory_id = request.GET.get('subcategoryid')
+    if(subcategory_id):
+        subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
+    else:
+        subsubcategories = SubCategory.objects.none()
+    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
