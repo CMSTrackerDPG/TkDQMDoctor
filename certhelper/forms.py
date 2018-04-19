@@ -51,54 +51,78 @@ Option2 on the other hand is prefered if you want to add styling (bootstrap clas
 to a lot of you attributes of the Model.
 """
 
-
 from django.core.exceptions import ValidationError
 from django import forms
 from django.forms import ModelForm, TextInput, Textarea
 from .models import *
 from django.utils import timezone
 
+
 class DateInput(forms.DateInput):
     input_type = 'date'
+
 
 class ReferenceRunForm(ModelForm):
     class Meta:
         model = ReferenceRun
         fields = '__all__'
 
+
 class RunInfoForm(ModelForm):
     date = forms.DateField(
         widget=forms.SelectDateWidget(years=range(2017, timezone.now().year + 2)),
-        initial=timezone.now()
+        initial=timezone.now
     )
+
     class Meta:
         model = RunInfo
         fields = '__all__'
         widgets = {
-            'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: /pb "}),
-            #'date': DateInput()
+            'int_luminosity': TextInput(attrs={'placeholder': "Unit: /pb "}),
+            # 'date': DateInput()
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        """" Initialize the Subcategories empty, only the subcategories corresponding
+        to the particular category should be shown, when selected"""
+        self.fields['subcategory'].queryset = SubCategory.objects.none()
+        self.fields['subsubcategory'].queryset = SubSubCategory.objects.none()
+
+        if 'category' in self.data and self.data['category']:  # if category is set in RunInfo Form
+            try:
+                category_id = self.data.get('category')
+                self.fields['subcategory'].queryset = SubCategory.objects.filter(parent_category=category_id)
+                if 'subcategory' in self.data and self.data['subcategory']:
+                    subcategory_id = self.data.get('subcategory')
+                    self.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(parent_category=subcategory_id)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:  # if a RunInfo model instance already exists, (edit button pressed)
+            if self.instance.category:  # if category is not empty
+                self.fields['subcategory'].queryset = self.instance.category.subcategory_set
+                if self.instance.subcategory:
+                    self.fields['subsubcategory'].queryset = self.instance.subcategory.subsubcategory_set
 
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
 
-        is_pixel_good = cleaned_data.get('pixel')=='Good'
-        is_pixel_bad = cleaned_data.get('pixel')=='Bad'
-        is_sistrip_good = cleaned_data.get('sistrip')=='Good'
-        is_sistrip_bad = cleaned_data.get('sistrip')=='Bad'
-        is_tracking_good = cleaned_data.get('tracking')=='Good'
+        is_pixel_good = cleaned_data.get('pixel') == 'Good'
+        is_pixel_bad = cleaned_data.get('pixel') == 'Bad'
+        is_sistrip_good = cleaned_data.get('sistrip') == 'Good'
+        is_sistrip_bad = cleaned_data.get('sistrip') == 'Bad'
+        is_tracking_good = cleaned_data.get('tracking') == 'Good'
         comment_string = cleaned_data.get('comment')
-        #is_cosmic_run = (cleaned_data.get('Type')).get('runtype')=='Cosmics'
-	
-	#if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
+        # is_cosmic_run = (cleaned_data.get('Type')).get('runtype')=='Cosmics'
+
+        # if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
         #   self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
-	   
-        #if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
+        # if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
         #   self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
-	   
-        if (is_sistrip_bad and is_tracking_good ) :#and comment_string=="":
-           self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
+
+        if is_sistrip_bad and is_tracking_good:  # and comment_string=="":
+            self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
         return cleaned_data
 
@@ -108,5 +132,6 @@ class TypeForm(ModelForm):
         model = Type
         fields = ["reco", "runtype", "bfield", "beamtype", "beamenergy", "dataset"]
         widgets = {
-            'dataset': TextInput(attrs={ 'placeholder': "e.g. /Cosmics/Run2017F-PromptReco-v1/DQMIO", 'class': "form-control"}),
+            'dataset': TextInput(
+                attrs={'placeholder': "e.g. /Cosmics/Run2017F-PromptReco-v1/DQMIO", 'class': "form-control"}),
         }

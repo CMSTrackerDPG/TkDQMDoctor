@@ -137,10 +137,12 @@ class SummaryView(generic.ListView):
 
     def get_queryset(self):
         date_filter_value = self.request.GET.get('date', None)
+        runinfo_queryset = RunInfo.objects.filter(userid=self.request.user)
+
         if is_valid_date(date_filter_value):
-            return RunInfo.objects.filter(userid=self.request.user, date=date_filter_value)
-        else:
-            return RunInfo.objects.filter(userid=self.request.user)
+            runinfo_queryset = runinfo_queryset.filter(date=date_filter_value)
+
+        return runinfo_queryset
 
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
@@ -149,10 +151,9 @@ class SummaryView(generic.ListView):
         date_is_valid = is_valid_date(date_filter_value)
 
         """Retrieve all runs from the current user"""
+        CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
         if date_is_valid:
-            CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user, date=date_filter_value)
-        else:
-            CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
+            CurrentUserRunInfos = CurrentUserRunInfos.filter(date=date_filter_value)
 
         """Extract the containing Reference Runs"""
         ids = CurrentUserRunInfos.values_list('reference_run').distinct()
@@ -206,7 +207,7 @@ class SummaryView(generic.ListView):
 
         # ====================================================================================================================
 
-        if(date_is_valid):
+        if (date_is_valid):
             context['sums'] = RunInfo.objects.raw("""SELECT *,
             case runtype
                 when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
@@ -296,3 +297,21 @@ def logout_view(request):
 
     logout(request)
     return HttpResponseRedirect('/')
+
+
+def load_subcategories(request):
+    category_id = request.GET.get('categoryid')
+    if(category_id):
+        subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
+    else:
+        subcategories = SubCategory.objects.none()
+    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subcategories})
+
+
+def load_subsubcategories(request):
+    subcategory_id = request.GET.get('subcategoryid')
+    if(subcategory_id):
+        subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
+    else:
+        subsubcategories = SubCategory.objects.none()
+    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
