@@ -11,78 +11,93 @@
 {% load myfilters %}
 
 {% if form.errors %}
-{% for field in form %}
-    {% for error in field.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
         <div class="alert alert-danger">
             <strong>{{ error|escape }}</strong>
         </div>
     {% endfor %}
-{% endfor %}
-{% for error in form.non_field_errors %}
-    <div class="alert alert-danger">
-        <strong>{{ error|escape }}</strong>
-    </div>
-{% endfor %}
 {% endif %}
 
 <form method="POST" action=""> {% csrf_token %}
     <table class="table table-condensed" style="max-width:650px;" align="center">
-            <tr>
-                <td>{{form.type.label}}</td>
-                <td>{{form.type|addclass:'form-control'}} </td>
-                <td><button type="button" class="btn btn-link" onclick="location.href='{% url 'certhelper:createtype' %}'"><span class="glyphicon glyphicon-plus-sign"></span> Add Type</button></td>
-            </tr>
-            <tr>
-                <td>{{form.reference_run.label}}</td>
-                <td>{{form.reference_run|addclass:'form-control'}}</td>
-            </tr>
-            <tr>
-                <td>{{form.run_number.label}}</td>
-                <td>{{form.run_number|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:general_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-            </tr>
-            <tr>
-                <td>{{form.trackermap.label}}</td>
-                <td>{{form.trackermap|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:trackermap_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-            </tr>
-            <tr>
-                <td>{{form.number_of_ls.label}}</td>
-                <td>{{form.number_of_ls|addclass:'form-control'}}</td>
-            </tr>
-            <tr>
-                <td>{{form.int_luminosity.label}} </td>
-                <td>{{form.int_luminosity|addclass:'form-control'}}</td>               
-            </tr>
+        <tr>
+            <td>{{form.type.label}}</td>
+            <td>{{form.type|addclass:'form-control'}} </td>
+            <td><button type="button" class="btn btn-link" onclick="location.href='{% url 'certhelper:createtype' %}'"><span class="glyphicon glyphicon-plus-sign"></span> Add Type</button></td>
+        </tr>
+        <tr>
+            <td>{{form.reference_run.label}}</td>
+            <td>{{form.reference_run|addclass:'form-control'}}</td>
+        </tr>
+        <tr>
+            <td>{{form.run_number.label}}</td>
+            <td>{{form.run_number|addclass:'form-control'}}</td>
+            <td><a type="button" class="btn btn-link" href='{% url 'certhelper:general_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+        </tr>
+        <tr>
+            <td>{{form.trackermap.label}}</td>
+            <td>{{form.trackermap|addclass:'form-control'}}</td>
+            <td><a type="button" class="btn btn-link" href='{% url 'certhelper:trackermap_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+        </tr>
+        <tr>
+            <td>{{form.number_of_ls.label}}</td>
+            <td>{{form.number_of_ls|addclass:'form-control'}}</td>
+        </tr>
+        <tr>
+            <td>{{form.int_luminosity.label}} </td>
+            <td>{{form.int_luminosity|addclass:'form-control'}}</td>
+        </tr>
 
-            <tr>
-                <td>{{form.pixel.label}}</td>
-                <td>{{form.pixel|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:pixel_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-                </tr>
+        <tr>
+            <td>{{form.pixel.label}}</td>
+            <td>{{form.pixel|addclass:'form-control'}}</td>
+            <td><a type="button" class="btn btn-link" href='{% url 'certhelper:pixel_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+        </tr>
 
-            <tr>
-                <td>{{form.sistrip.label}}</td>
-                <td>{{form.sistrip|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:sistrip_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>                    
-            </tr>                
+        <tr>
+            <td>{{form.sistrip.label}}</td>
+            <td>{{form.sistrip|addclass:'form-control'}}</td>
+            <td><a type="button" class="btn btn-link" href='{% url 'certhelper:sistrip_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+        </tr>
 
-            <tr>
-                <td>{{form.tracking.label}}</td>
-                <td>{{form.tracking|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>                    
-            </tr>    
-            
-            <tr>
-                <td>{{form.comment.label}}</td>
-                <td>{{form.comment|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</button></td>                                                              
-            </tr>
-            
-            <tr>
-                <td>{{form.date.label}}</td>
-                <td>{{form.date}}</td>
-            </tr>  
+        <tr>
+            <td>{{form.tracking.label}}</td>
+            <td>{{form.tracking|addclass:'form-control'}}</td>
+            <td><a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+        </tr>
+
+        <tr>
+            <td>{{form.category.label}}</td>
+            <td>{{form.category|addclass:'form-control'}}</td>
+        </tr>
+
+        <tr>
+            <td>{{form.subcategory.label}}</td>
+            <td>{{form.subcategory|addclass:'form-control'}}</td>
+        </tr>
+
+        <tr>
+            <td>{{form.subsubcategory.label}}</td>
+            <td>{{form.subsubcategory|addclass:'form-control'}}</td>
+        </tr>
+
+        <tr>
+            <td>{{form.comment.label}}</td>
+            <td>{{form.comment|addclass:'form-control'}}</td>
+            <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</button></td>
+        </tr>
+
+        <tr>
+            <td>{{form.date.label}}</td>
+            <td>{{form.date}}</td>
+        </tr>
 
     </table>
     <div align="center">
@@ -90,5 +105,39 @@
         <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
     </div>
 </form>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    $("#id_category").change(function () {
+        var category_id = $(this).val();  // get the selected category_id from the dropdown menu
+
+        $.ajax({
+            url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
+            data: {
+                'categoryid': category_id  // add the category_id to the GET parameters
+            },
+            success: function (data) {  // date is the return of the load_subcategories view function
+                $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
+            }
+        });
+        $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+    });
+
+    $("#id_subcategory").change(function () {
+        var subcategory_id = $(this).val();
+
+        $.ajax({
+            url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
+            data: {
+                'subcategoryid': subcategory_id
+            },
+            success: function (data) {
+                $("#id_subsubcategory").html(data);
+            }
+        });
+    });
+</script>
+
 
 
