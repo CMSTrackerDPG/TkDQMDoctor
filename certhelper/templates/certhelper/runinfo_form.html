@@ -78,12 +78,12 @@
             <td>{{form.category|addclass:'form-control'}}</td>
         </tr>
 
-        <tr>
+        <tr id="subcategory_row">
             <td>{{form.subcategory.label}}</td>
             <td>{{form.subcategory|addclass:'form-control'}}</td>
         </tr>
 
-        <tr>
+        <tr id="subsubcategory_row">
             <td>{{form.subsubcategory.label}}</td>
             <td>{{form.subsubcategory|addclass:'form-control'}}</td>
         </tr>
@@ -122,6 +122,12 @@
             }
         });
         $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+
+        if(category_id != ""){
+    		$("#subcategory_row").show()
+        } else {
+    		$("#subcategory_row").hide()
+        }
     });
 
     $("#id_subcategory").change(function () {
@@ -136,6 +142,12 @@
                 $("#id_subsubcategory").html(data);
             }
         });
+
+        if(subcategory_id != ""){
+    		$("#subsubcategory_row").show()
+        } else {
+    		$("#subsubcategory_row").hide()
+        }
     });
 </script>
 
