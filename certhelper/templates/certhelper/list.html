@@ -62,21 +62,74 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-8">
+        <div class="col col-sm-12 text-center">
             <form class="form-inline" method="get">
-                Show:
                 <div class="form-group">
+                    <strong>Category:</strong>
+                    {% render_field filter.form.category|add_class:"form-control" %}
+                    {% render_field filter.form.subcategory|add_class:"form-control" %}
+                    {% render_field filter.form.subsubcategory|add_class:"form-control" %}
+                    <div class="form-group">&nbsp;&nbsp;</div>
+                    <strong>Date:</strong>
                     <button type="button" class="btn btn-info" onclick="setFilterDateToAll()">All</button>
                     <button type="button" class="btn btn-info" onclick="setFilterDateToToday()">Today</button>
-                </div>
-                <div class="form-group">
                     {% render_field filter.form.date %}
                 </div>
+                <div class="form-group">&nbsp;&nbsp;</div>
                 <button type="submit" class="btn btn-primary">Filter</button>
             </form>
         </div>
+
     </div>
 </div>
 
 {% load render_table from django_tables2 %}
 {% render_table table %}
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    if( $("#id_subcategory").val() == "" ){
+        $("#id_subcategory").hide()
+        $("#id_subsubcategory").hide()
+    }
+    $("#id_category").change(function () {
+        var category_id = $(this).val();  // get the selected category_id from the dropdown menu
+
+        $.ajax({
+            url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
+            data: {
+                'categoryid': category_id  // add the category_id to the GET parameters
+            },
+            success: function (data) {  // date is the return of the load_subcategories view function
+                $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
+            }
+        });
+        $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+
+        if(category_id != ""){
+            $("#id_subcategory").show()
+        } else {
+            $("#id_subcategory").hide()
+        }
+    });
+
+    $("#id_subcategory").change(function () {
+        var subcategory_id = $(this).val();
+
+        $.ajax({
+            url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
+            data: {
+                'subcategoryid': subcategory_id
+            },
+            success: function (data) {
+                $("#id_subsubcategory").html(data);
+            }
+        });
+
+        if(subcategory_id != ""){
+            $("#id_subsubcategory").show()
+        } else {
+            $("#id_subsubcategory").hide()
+        }
+    });
+</script>
