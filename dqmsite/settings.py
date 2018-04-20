@@ -24,7 +24,14 @@ SECRET_KEY = '&abrvr_0h(940(q_6(=+@m9uzhc)n&qvou*g-7fzw8%oh9y^4k'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['tkdqmdoctor.web.cern.ch', 'test-tkdqmdoctor.web.cern.ch', '128.141.84.249', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    'dev-tkdqmdoctor.web.cern.ch',
+    'tkdqmdoctor.web.cern.ch',
+    'test-tkdqmdoctor.web.cern.ch',
+    '128.141.84.249',
+    '127.0.0.1',
+    'localhost'
+]
 
 # Application definition
 
@@ -78,7 +85,8 @@ WSGI_APPLICATION = 'dqmsite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+         #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': '/eos/project/t/tkdqmdoctor/develop/db.sqlite3',
     }
 }
 
