@@ -1,5 +1,4 @@
 from django.contrib.auth import logout
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
@@ -7,7 +6,8 @@ from django_tables2 import RequestConfig, SingleTableView
 from terminaltables import AsciiTable
 
 from certhelper.filters import RunInfoFilter
-from certhelper.utilities import get_date_string, is_valid_date
+from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
+from certhelper.utilities.utilities import get_date_string, is_valid_date
 from .forms import *
 from .tables import *
 
@@ -127,157 +127,44 @@ class SummaryAsciiTable:
         return table.table
 
 
-class SummaryView(generic.ListView):
+def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
     where it is then displayed.
     """
-    template_name = 'certhelper/summary.html'
-    context_object_name = 'runs'
+    runs = RunInfo.objects.filter(userid=request.user)
 
-    def get_queryset(self):
-        date_filter_value = self.request.GET.get('date', None)
-        runinfo_queryset = RunInfo.objects.filter(userid=self.request.user)
+    date_filter_value = request.GET.get('date', None)
 
-        if is_valid_date(date_filter_value):
-            runinfo_queryset = runinfo_queryset.filter(date=date_filter_value)
+    if is_valid_date(date_filter_value):
+        runs = runs.filter(date=date_filter_value)
 
-        return runinfo_queryset
+    context = {}
 
-    def get_context_data(self, **kwargs):
-        context = super(SummaryView, self).get_context_data(**kwargs)
+    reference_run_ids = runs.values_list('reference_run').distinct()
+    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
 
-        date_filter_value = self.request.GET.get('date', None)
-        date_is_valid = is_valid_date(date_filter_value)
+    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
 
-        """Retrieve all runs from the current user"""
-        CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
-        if date_is_valid:
-            CurrentUserRunInfos = CurrentUserRunInfos.filter(date=date_filter_value)
+    runinfotypelists = []  # create one runinfotypelist per type
 
-        """Extract the containing Reference Runs"""
-        ids = CurrentUserRunInfos.values_list('reference_run').distinct()
-        context['refs'] = ReferenceRun.objects.filter(id__in=ids)
+    for run in runs:
+        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
+            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
+        runinfotypelists[-1].add_run(run)
 
-        """Sort the Runs by Type"""
-        context['sorted_by_type'] = CurrentUserRunInfos.order_by('type')
+    context['runs'] = []
+    context['tk_maps'] = []
+    context['certified_runs'] = []
+    context['sums'] = []
 
-        tmpsorted = CurrentUserRunInfos.order_by('type')
-        good_runs = tmpsorted.filter(pixel="Good", sistrip="Good", tracking="Good")
-        bad_runs = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
+    for runinfotypelist in runinfotypelists:
+        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
+        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
+        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
+        context['sums'].append(runinfotypelist.get_sums_ascii_table())
 
-        userRunInfoTypes = CurrentUserRunInfos \
-            .values('type') \
-            .order_by('type', 'run_number') \
-            .distinct()
-
-        columnDescription = ["Run", "Reference Run", "Number of LS", "Int. Luminosity", "Pixel", "Strip", "Tracking",
-                             "Comment"]
-
-        """ Get a list of unique type ids (for cosmics, prompt, etc.)"""
-        type_id_list = []
-        for entry in userRunInfoTypes:
-            if entry['type'] not in type_id_list:
-                type_id_list.append(entry['type'])
-
-        """ Create one AsciiTable per Type and fill it with the appropriate data"""
-        ascii_tables = []
-        for type_id in type_id_list:
-            userRunInfosPerType = CurrentUserRunInfos.filter(type_id=type_id).order_by("run_number")
-
-            """Extract the type from the first element, all types in that list are the same"""
-            the_type = userRunInfosPerType[0].type
-            """Create a AsciiTable with just the column descriptions as the first row"""
-            ascii_tables.append(SummaryAsciiTable(the_type, columnDescription))
-            for run in userRunInfosPerType:
-                """ add a new row to the lastly created AsciiTable"""
-                ascii_tables[-1].add_row([
-                    run.run_number,
-                    run.reference_run.reference_run,
-                    run.number_of_ls,
-                    run.int_luminosity,
-                    run.pixel,
-                    run.sistrip,
-                    run.tracking,
-                    run.comment
-                ])
-
-        """Provide the context for the summary template"""
-        context["ascii_tables"] = ascii_tables
-
-        # ====================================================================================================================
-
-        if (date_is_valid):
-            context['sums'] = RunInfo.objects.raw("""SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good, 
-            SUM(number_of_ls) as sum_number_of_ls,
-            SUM(int_luminosity) as sum_int_luminosity 
-            FROM certhelper_runinfo a 
-            inner join certhelper_type b 
-            on a.type_id = b.ID
-            where userid_id = %s and date = %s
-            group by b.ID, good
-            order by type_id, -good""", [self.request.user.id, date_filter_value])
-        else:
-            context['sums'] = RunInfo.objects.raw("""SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good, 
-            SUM(number_of_ls) as sum_number_of_ls,
-            SUM(int_luminosity) as sum_int_luminosity 
-            FROM certhelper_runinfo a 
-            inner join certhelper_type b 
-            on a.type_id = b.ID
-            where userid_id = %s
-            group by b.ID, good
-            order by type_id, -good""", [self.request.user.id])
-
-        # ====================================================================================================================
-
-        context['tkmap'] = CurrentUserRunInfos.order_by('type_id', 'trackermap')
-
-        # ====================================================================================================================
-
-        # When is a RUN marked as 'Good'?
-        # Depends on runtype:
-        # | - - - - - - - - - - - - - - - - - - - - - - - - - - |
-        # |-(Collisions) pixel    = (Good OR Lowstat)   AND     |
-        # |              sistrip  = (Good OR Lowstat)   AND     |
-        # |              tracking = (Good OR Lowstat)           |
-        # | - - - - - - - - - - - - - - - - - - - - - - - - - - |
-        # |-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |
-        # |              tracking = (Good OR Lowstat)           |
-        #  - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        if date_is_valid:
-            context['certified'] = RunInfo.objects.raw('''SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good
-            from certhelper_runinfo a
-            inner join certhelper_type b
-            on a.type_id = b.ID
-            where userid_id = %s and date = %s
-            order by type_id, -good''', [self.request.user.id, date_filter_value])
-        else:
-            context['certified'] = RunInfo.objects.raw('''SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good
-            from certhelper_runinfo a
-            inner join certhelper_type b
-            on a.type_id = b.ID
-            where userid_id = %s
-            order by type_id, -good''', [self.request.user.id])
-        # ====================================================================================================================
-
-        return context
+    return render(request, 'certhelper/summary.html', context)
 
 
 def clearsession(request):
@@ -301,7 +188,7 @@ def logout_view(request):
 
 def load_subcategories(request):
     category_id = request.GET.get('categoryid')
-    if(category_id):
+    if (category_id):
         subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
     else:
         subcategories = SubCategory.objects.none()
@@ -310,7 +197,7 @@ def load_subcategories(request):
 
 def load_subsubcategories(request):
     subcategory_id = request.GET.get('subcategoryid')
-    if(subcategory_id):
+    if (subcategory_id):
         subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
     else:
         subsubcategories = SubCategory.objects.none()
