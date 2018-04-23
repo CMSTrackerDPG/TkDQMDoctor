@@ -109,6 +109,10 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script>
+    if( $("#id_subcategory").val() == "" ){
+        $("#subcategory_row").hide()
+        $("#subsubcategory_row").hide()
+    }
     $("#id_category").change(function () {
         var category_id = $(this).val();  // get the selected category_id from the dropdown menu
 
