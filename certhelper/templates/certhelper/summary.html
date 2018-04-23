@@ -23,6 +23,22 @@ Depends on runtype:
 |              tracking = (Good OR Lowstat)           |
  - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
 
+{% if alert_infos %}
+    {% for info in alert_infos %}
+        <div class="alert alert-info">
+            <strong>Info!</strong> {{ info }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if errors %}
+    {% for error in alert_errors %}
+        <div class="alert alert-danger">
+            <strong>Error!</strong> {{ error }}
+        </div>
+    {% endfor %}
+{% endif %}
+
 <pre id=summary>
 =============Reference Runs===============
 {% for ref in refs %}{{ ref }}

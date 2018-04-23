@@ -50,10 +50,30 @@ def listruns(request):
 
     the_date = get_date_string(year, month, day)
 
+    category = request.GET.get('category', '')
+    subcategory = request.GET.get('subcategory', '')
+    subsubcategory = request.GET.get('subsubcategory', '')
+
+    filter_parameters = ""
+
+    if the_date:
+        filter_parameters += "?date=" + str(the_date)
+    if category:
+        if not filter_parameters:
+            filter_parameters += "?"
+        else:
+            filter_parameters += "&"
+        filter_parameters += "category=" + category
+        if subcategory:
+            filter_parameters += "&subcategory=" + subcategory
+            if subsubcategory:
+                filter_parameters += "&subsubcategory=" + subsubcategory
+
     return render(request, 'certhelper/list.html', {
         'table': table,
         'filter': run_info_filter,
         'the_date': the_date,
+        'filter_parameters': filter_parameters,
     })
 
 
@@ -127,6 +147,15 @@ class SummaryAsciiTable:
         return table.table
 
 
+def is_valid_id(id, Classname):
+    try:
+        if Classname.objects.filter(pk=id):
+            return True
+    except:
+        return False
+    return False
+
+
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
@@ -135,10 +164,41 @@ def summaryView(request):
     runs = RunInfo.objects.filter(userid=request.user)
 
     date_filter_value = request.GET.get('date', None)
+    category_id = request.GET.get('category', None)
+    subcategory_id = request.GET.get('subcategory', None)
+    subsubcategory_id = request.GET.get('subsubcategory', None)
+    alert_errors = []
+    alert_infos = []
 
-    if is_valid_date(date_filter_value):
-        runs = runs.filter(date=date_filter_value)
+    if date_filter_value:
+        if is_valid_date(date_filter_value):
+            runs = runs.filter(date=date_filter_value)
+        else:
+            alert_errors.append("Invalid Date: " + str(date_filter_value))
+            runs = RunInfo.objects.none()
 
+    if category_id:
+        if is_valid_id(category_id, Category):
+            runs = runs.filter(category=category_id)
+            if subcategory_id:
+                if is_valid_id(subcategory_id, SubCategory):
+                    runs = runs.filter(subcategory=subcategory_id)
+
+                    if subsubcategory_id:
+                        if is_valid_id(subsubcategory_id, SubSubCategory):
+                            runs = runs.filter(subsubcategory=subsubcategory_id)
+                        else:
+                            alert_errors.append("Invalid SubSubCategory ID: " + str(subsubcategory_id))
+                            runs = RunInfo.objects.none()
+                else:
+                    alert_errors.append("Invalid SubCategory ID: " + str(subcategory_id))
+                    runs = RunInfo.objects.none()
+        else:
+            alert_errors.append("Invalid Category ID: " + str(category_id))
+            runs = RunInfo.objects.none()
+
+    if not date_filter_value and not category_id:
+        alert_infos.append("No filters applied. Showing every run you have ever certified!")
     context = {}
 
     reference_run_ids = runs.values_list('reference_run').distinct()
@@ -163,6 +223,9 @@ def summaryView(request):
         context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
         context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
         context['sums'].append(runinfotypelist.get_sums_ascii_table())
+
+    context['alert_errors'] = alert_errors
+    context['alert_infos'] = alert_infos
 
     return render(request, 'certhelper/summary.html', context)
 
