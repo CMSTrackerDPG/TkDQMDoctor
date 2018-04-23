@@ -33,7 +33,7 @@ Depends on runtype:
     {% endfor %}
 {% endif %}
 
-{% if errors %}
+{% if alert_errors %}
     {% for error in alert_errors %}
         <div class="alert alert-danger">
             <strong>Error!</strong> {{ error }}
