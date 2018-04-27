@@ -148,3 +148,5 @@ LOGIN_REDIRECT_URL = ('/')
 
 # Needed for django-allauth
 SITE_ID = 1
+ACCOUNT_EMAIL_REQUIRED = 'false'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
