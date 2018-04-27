@@ -46,6 +46,11 @@ INSTALLED_APPS = [
     'certhelper.apps.CerthelperConfig',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'cern_oauth2',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -115,6 +120,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -135,3 +145,6 @@ STATIC_URL = '/static/'
 
 # Redirecting from the default account/profile after login
 LOGIN_REDIRECT_URL = ('/')
+
+# Needed for django-allauth
+SITE_ID = 1

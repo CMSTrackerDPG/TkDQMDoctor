@@ -43,9 +43,9 @@ urlpatterns = [
     url(r'^info/comment', TemplateView.as_view(template_name='certhelper/info/comment.html'), name='comment_info'),
 
     # authentification
-    url(r'^accounts/login/$', auth_views.LoginView.as_view(), name='login'), # in settings.py the redirect after logging in is defined
+    #url(r'^accounts/login/$', auth_views.LoginView.as_view(), name='login'), # in settings.py the redirect after logging in is defined
                                                                              # currently that is "/" which corresponds to views.listruns
-    url(r'^accounts/logout/$', views.logout_view, name='logout'),
+    #url(r'^accounts/logout/$', views.logout_view, name='logout'),
     url('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
     url('ajax/load-subsubcategories/', views.load_subsubcategories, name='ajax_load_subsubcategories'),
 ]
