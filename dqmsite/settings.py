@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'cern_oauth2',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
