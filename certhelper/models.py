@@ -113,6 +113,7 @@ class RunInfo(models.Model):
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]
+        ordering = ('-run_number', )
 
     def __str__(self):
         return str(self.run_number)
