@@ -22,7 +22,6 @@ class RunInfoFilter(django_filters.FilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(self.queryset)
         self.form.fields['subcategory'].queryset = SubCategory.objects.none()
         self.form.fields['subsubcategory'].queryset = SubSubCategory.objects.none()
 
