@@ -13,9 +13,8 @@ the access privileges.
 """
 
 from django.conf.urls import url
-from django.views.generic import TemplateView
-from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 
 from . import views
 
@@ -42,10 +41,6 @@ urlpatterns = [
     url(r'^help/$',       TemplateView.as_view(template_name='certhelper/info/help.html'),    name='help'),
     url(r'^info/comment', TemplateView.as_view(template_name='certhelper/info/comment.html'), name='comment_info'),
 
-    # authentification
-    #url(r'^accounts/login/$', auth_views.LoginView.as_view(), name='login'), # in settings.py the redirect after logging in is defined
-                                                                             # currently that is "/" which corresponds to views.listruns
-    #url(r'^accounts/logout/$', views.logout_view, name='logout'),
     url('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
     url('ajax/load-subsubcategories/', views.load_subsubcategories, name='ajax_load_subsubcategories'),
 ]

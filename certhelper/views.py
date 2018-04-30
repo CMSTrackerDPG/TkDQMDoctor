@@ -1,3 +1,4 @@
+from allauth.account.views import LoginView, SignupView
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -244,8 +245,8 @@ def clearsession(request):
 def logout_view(request):
     """ Logout current user
     """
-
-    logout(request)
+    if request.user.is_authenticated:
+        logout(request)
     return HttpResponseRedirect('/')
 
 
