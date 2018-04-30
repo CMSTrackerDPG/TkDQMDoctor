@@ -55,7 +55,7 @@
                 <a href="{% provider_login_url "cern" %}" type="button" class="btn btn-link"><span
                         class="glyphicon glyphicon-user"></span> Login</a>
             {% else %}
-                <a href="{% url 'account_logout' %}" type="button" class="btn btn-link"><span
+                <a href="{% url 'certhelper:logout' %}" type="button" class="btn btn-link"><span
                         class="glyphicon glyphicon-off"></span> Logout {{ request.user.username }}</a>
             {% endif %}
         </div>

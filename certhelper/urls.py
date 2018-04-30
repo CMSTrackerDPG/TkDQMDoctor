@@ -41,6 +41,9 @@ urlpatterns = [
     url(r'^help/$',       TemplateView.as_view(template_name='certhelper/info/help.html'),    name='help'),
     url(r'^info/comment', TemplateView.as_view(template_name='certhelper/info/comment.html'), name='comment_info'),
 
+    # logout
+    url(r'^logout/', views.logout_view, name='logout'),
+
     url('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
     url('ajax/load-subsubcategories/', views.load_subsubcategories, name='ajax_load_subsubcategories'),
 ]
