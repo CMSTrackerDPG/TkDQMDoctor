@@ -1,5 +1,6 @@
 Django==1.11
 django-allauth==0.35.0
+django-bootstrap==9.1.0
 django-filter==1.1.0
 django-tables2==1.21.2
 django-widget-tweaks==1.4.2
