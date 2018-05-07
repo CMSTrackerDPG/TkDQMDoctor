@@ -2,6 +2,7 @@ from allauth.account.views import LoginView, SignupView
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views import generic
 from django_tables2 import RequestConfig, SingleTableView
 from terminaltables import AsciiTable
@@ -247,7 +248,16 @@ def logout_view(request):
     """
     if request.user.is_authenticated:
         logout(request)
-    return HttpResponseRedirect('/')
+        callback_url = 'https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl=http%3A//'
+        callback_url += request.META['HTTP_HOST']
+        callback_url += reverse('certhelper:logout_status')
+        return HttpResponseRedirect(callback_url)
+
+def logout_status(request):
+    logout_successful = False
+    if not request.user.is_authenticated:
+        logout_successful = True
+    return render(request, 'certhelper/logout_status.html', {'logout_successful': logout_successful})
 
 
 def load_subcategories(request):

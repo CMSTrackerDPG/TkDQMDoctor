@@ -43,6 +43,7 @@ urlpatterns = [
 
     # logout
     url(r'^logout/', views.logout_view, name='logout'),
+    url(r'^logout-status/', views.logout_status, name='logout_status'),
 
     url('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
     url('ajax/load-subsubcategories/', views.load_subsubcategories, name='ajax_load_subsubcategories'),
