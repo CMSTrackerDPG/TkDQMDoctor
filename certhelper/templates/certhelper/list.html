@@ -1,136 +1,131 @@
-{% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
-<title>TkDQM Doc: List</title>
-
-<script>
-    function setFilterDateToToday() {
-        var today = new Date();
-        var day = today.getDate();
-        var month = today.getMonth() + 1;
-        var year = today.getFullYear();
-        document.getElementById("id_date_day").value = day;
-        document.getElementById("id_date_month").value = month;
-        document.getElementById("id_date_year").value = year;
-    }
-
-    function setFilterDateToAll() {
-        document.getElementById("id_date_day").value = 0;
-        document.getElementById("id_date_month").value = 0;
-        document.getElementById("id_date_year").value = 0;
-    }
-</script>
-
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
-
+{% extends 'certhelper/base.html' %}
+{% block title %}TkDQM Doc: List{% endblock %}
 {% load myfilters %}
 {% load widget_tweaks %}
 
-<h1 align="center">List of certified runs</h1>
-<div class="container" style="padding:0; margin:0; width:99%;">
-    <div class="row">
-        <div class="col col-sm-6">
-            {% if not user.is_authenticated %}
-                <!-- Dont show any buttons if the user is not logged in -->
-            {% else %}
-                <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
-                <a href="{% url 'certhelper:summary' %}{{filter_parameters}}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
-                <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>
-            {% endif %}
+{% block content %}
+    <h1 align="center">List of certified runs</h1>
+    <div class="container" style="padding:0; margin:0; width:99%;">
+        <div class="row">
+            <div class="col col-sm-6">
+                {% if not user.is_authenticated %}
+                    <!-- Dont show any buttons if the user is not logged in -->
+                {% else %}
+                    <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span
+                            class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
+                    <a href="{% url 'certhelper:summary' %}{{filter_parameters}}" type="button" class="btn btn-link"><span
+                            class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
+                    <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span
+                            class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>
+                {% endif %}
+            </div>
+            <div class="col col-sm-6 text-right">
+                {% if user.is_staff %}
+                    <a href="{% url 'admin:index' %} " type="button" class="btn btn-link"><span
+                            class="glyphicon glyphicon-cog"></span> Admin Settings</a>
+                {% endif %}
+
+                <a href="{% url 'certhelper:help' %}" type="button" class="btn btn-link"><span
+                        class="glyphicon glyphicon-question-sign"></span> Help</a>
+                {% if not user.is_authenticated %}
+                    {% load socialaccount %}
+                    <a href="{% provider_login_url "cern" action="reauthenticate" %}" type="button" class="btn btn-link"><span
+                            class="glyphicon glyphicon-user"></span> Login</a>
+                {% else %}
+                    <a href="{% url 'certhelper:logout' %}" type="button" class="btn btn-link"><span
+                            class="glyphicon glyphicon-off"></span> Logout {{ request.user.username }}</a>
+                {% endif %}
+            </div>
         </div>
-        <div class="col col-sm-6 text-right">
-            {% if user.is_staff %}
-                <a href="{% url 'admin:index' %} " type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-cog"></span> Admin Settings</a>
-            {% endif %}
 
-            <a href="{% url 'certhelper:help' %}" type="button" class="btn btn-link"><span
-                    class="glyphicon glyphicon-question-sign"></span> Help</a>
-            {% if not user.is_authenticated %}
-                {% load socialaccount %}
-                <a href="{% provider_login_url "cern" action="reauthenticate" %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-user"></span> Login</a>
-            {% else %}
-                <a href="{% url 'certhelper:logout' %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-off"></span> Logout {{ request.user.username }}</a>
-            {% endif %}
-        </div>
-
-    </div>
-
-    <div class="row">
-        <div class="col col-sm-12 text-center">
-            <form class="form-inline" method="get">
-                <div class="form-group">
-                    <strong>Category:</strong>
-                    {% render_field filter.form.category|add_class:"form-control" %}
-                    {% render_field filter.form.subcategory|add_class:"form-control" %}
-                    {% render_field filter.form.subsubcategory|add_class:"form-control" %}
+        <div class="row">
+            <div class="col col-sm-12 text-center">
+                <form class="form-inline" method="get">
+                    <div class="form-group">
+                        <strong>Category:</strong>
+                        {% render_field filter.form.category|add_class:"form-control" %}
+                        {% render_field filter.form.subcategory|add_class:"form-control" %}
+                        {% render_field filter.form.subsubcategory|add_class:"form-control" %}
+                        <div class="form-group">&nbsp;&nbsp;</div>
+                        <strong>Date:</strong>
+                        <button type="button" class="btn btn-info" onclick="setFilterDateToAll()">All</button>
+                        <button type="button" class="btn btn-info" onclick="setFilterDateToToday()">Today</button>
+                        {% render_field filter.form.date %}
+                    </div>
                     <div class="form-group">&nbsp;&nbsp;</div>
-                    <strong>Date:</strong>
-                    <button type="button" class="btn btn-info" onclick="setFilterDateToAll()">All</button>
-                    <button type="button" class="btn btn-info" onclick="setFilterDateToToday()">Today</button>
-                    {% render_field filter.form.date %}
-                </div>
-                <div class="form-group">&nbsp;&nbsp;</div>
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </form>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+            </div>
         </div>
-
     </div>
-</div>
 
-{% load render_table from django_tables2 %}
-{% render_table table %}
+    {% load render_table from django_tables2 %}
+    {% render_table table %}
+{% endblock %}
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script>
-    if( $("#id_subcategory").val() == "" ){
-        $("#id_subcategory").hide()
-        $("#id_subsubcategory").hide()
-    }
-    $("#id_category").change(function () {
-        var category_id = $(this).val();  // get the selected category_id from the dropdown menu
 
-        $.ajax({
-            url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
-            data: {
-                'categoryid': category_id  // add the category_id to the GET parameters
-            },
-            success: function (data) {  // date is the return of the load_subcategories view function
-                $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
-            }
-        });
-        $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
 
-        if(category_id != ""){
-            $("#id_subcategory").show()
-        } else {
-            $("#id_subcategory").hide()
+{% block script %}
+    <script>
+        function setFilterDateToToday() {
+            var today = new Date();
+            var day = today.getDate();
+            var month = today.getMonth() + 1;
+            var year = today.getFullYear();
+            document.getElementById("id_date_day").value = day;
+            document.getElementById("id_date_month").value = month;
+            document.getElementById("id_date_year").value = year;
         }
-    });
 
-    $("#id_subcategory").change(function () {
-        var subcategory_id = $(this).val();
+        function setFilterDateToAll() {
+            document.getElementById("id_date_day").value = 0;
+            document.getElementById("id_date_month").value = 0;
+            document.getElementById("id_date_year").value = 0;
+        }
 
-        $.ajax({
-            url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
-            data: {
-                'subcategoryid': subcategory_id
-            },
-            success: function (data) {
-                $("#id_subsubcategory").html(data);
-            }
-        });
-
-        if(subcategory_id != ""){
-            $("#id_subsubcategory").show()
-        } else {
+        if( $("#id_subcategory").val() == "" ){
+            $("#id_subcategory").hide()
             $("#id_subsubcategory").hide()
         }
-    });
-</script>
+        $("#id_category").change(function () {
+            var category_id = $(this).val();  // get the selected category_id from the dropdown menu
+
+            $.ajax({
+                url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
+                data: {
+                    'categoryid': category_id  // add the category_id to the GET parameters
+                },
+                success: function (data) {  // date is the return of the load_subcategories view function
+                    $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
+                }
+            });
+            $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+
+            if(category_id != ""){
+                $("#id_subcategory").show()
+            } else {
+                $("#id_subcategory").hide()
+            }
+        });
+
+        $("#id_subcategory").change(function () {
+            var subcategory_id = $(this).val();
+
+            $.ajax({
+                url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
+                data: {
+                    'subcategoryid': subcategory_id
+                },
+                success: function (data) {
+                    $("#id_subsubcategory").html(data);
+                }
+            });
+
+            if(subcategory_id != ""){
+                $("#id_subsubcategory").show()
+            } else {
+                $("#id_subsubcategory").hide()
+            }
+        });
+    </script>
+{% endblock %}
