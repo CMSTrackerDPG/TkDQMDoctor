@@ -2,7 +2,7 @@ import django_filters
 from django import forms
 from django.utils import timezone
 
-from certhelper.models import RunInfo, SubCategory, SubSubCategory
+from certhelper.models import RunInfo, SubCategory, SubSubCategory, Type
 
 
 class RunInfoFilter(django_filters.FilterSet):
@@ -16,9 +16,33 @@ class RunInfoFilter(django_filters.FilterSet):
         ),
     )
 
+    date_range = django_filters.DateFromToRangeFilter(
+        'date',
+        widget=django_filters.widgets.RangeWidget(attrs={
+            'placeholder': 'YYYY-MM-DD',
+            'class': 'form-control',
+            'size': 9,
+            'maxlength': 10,
+        })
+    )
+
+    runs = django_filters.RangeFilter(
+        'run_number',
+        widget=django_filters.widgets.RangeWidget(attrs={
+            'placeholder': 'run number',
+            'class': 'form-control',
+            'size': 7,
+            'maxlength': 10,
+        })
+    )
+    type = django_filters.ModelChoiceFilter(queryset=Type.objects.all(), widget=forms.Select(attrs={
+        'class': 'form-control',
+        'style': 'width: 500px;',
+    }))
+
     class Meta:
         model = RunInfo
-        fields = ['date', 'category', 'subcategory', 'subsubcategory']
+        fields = ['type', 'date', 'category', 'subcategory', 'subsubcategory']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
