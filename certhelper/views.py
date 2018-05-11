@@ -1,13 +1,15 @@
+from allauth.account.views import LoginView, SignupView
 from django.contrib.auth import logout
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views import generic
 from django_tables2 import RequestConfig, SingleTableView
 from terminaltables import AsciiTable
 
 from certhelper.filters import RunInfoFilter
-from certhelper.utilities import get_date_string, is_valid_date
+from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
+from certhelper.utilities.utilities import get_date_string, is_valid_date, get_filters_from_request_GET
 from .forms import *
 from .tables import *
 
@@ -44,16 +46,17 @@ def listruns(request):
 
     RequestConfig(request).configure(table)
 
-    year = request.GET.get('date_year', '')
-    month = request.GET.get('date_month', '')
-    day = request.GET.get('date_day', '')
+    applied_filters = get_filters_from_request_GET(request)
 
-    the_date = get_date_string(year, month, day)
+    filter_parameters = ""
+    for key, value in applied_filters.items():
+        filter_parameters += '&' if filter_parameters.startswith('?') else '?'
+        filter_parameters += key + "=" + value
 
     return render(request, 'certhelper/list.html', {
         'table': table,
         'filter': run_info_filter,
-        'the_date': the_date,
+        'filter_parameters': filter_parameters,
     })
 
 
@@ -127,157 +130,131 @@ class SummaryAsciiTable:
         return table.table
 
 
-class SummaryView(generic.ListView):
+def is_valid_id(id, Classname):
+    try:
+        if Classname.objects.filter(pk=id):
+            return True
+    except:
+        return False
+    return False
+
+
+def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
     where it is then displayed.
     """
-    template_name = 'certhelper/summary.html'
-    context_object_name = 'runs'
+    runs = RunInfo.objects.filter(userid=request.user)
 
-    def get_queryset(self):
-        date_filter_value = self.request.GET.get('date', None)
-        runinfo_queryset = RunInfo.objects.filter(userid=self.request.user)
+    date_filter_value = request.GET.get('date', None)
+    category_id = request.GET.get('category', None)
+    subcategory_id = request.GET.get('subcategory', None)
+    subsubcategory_id = request.GET.get('subsubcategory', None)
 
+
+    date_from = request.GET.get('date_range_0', None)
+    date_to = request.GET.get('date_range_1', None)
+    runs_from = request.GET.get('runs_0', None)
+    runs_to = request.GET.get('runs_1', None)
+    type_id = request.GET.get('type', None)
+
+    alert_errors = []
+    alert_infos = []
+
+    if date_filter_value:
         if is_valid_date(date_filter_value):
-            runinfo_queryset = runinfo_queryset.filter(date=date_filter_value)
-
-        return runinfo_queryset
-
-    def get_context_data(self, **kwargs):
-        context = super(SummaryView, self).get_context_data(**kwargs)
-
-        date_filter_value = self.request.GET.get('date', None)
-        date_is_valid = is_valid_date(date_filter_value)
-
-        """Retrieve all runs from the current user"""
-        CurrentUserRunInfos = RunInfo.objects.filter(userid=self.request.user)
-        if date_is_valid:
-            CurrentUserRunInfos = CurrentUserRunInfos.filter(date=date_filter_value)
-
-        """Extract the containing Reference Runs"""
-        ids = CurrentUserRunInfos.values_list('reference_run').distinct()
-        context['refs'] = ReferenceRun.objects.filter(id__in=ids)
-
-        """Sort the Runs by Type"""
-        context['sorted_by_type'] = CurrentUserRunInfos.order_by('type')
-
-        tmpsorted = CurrentUserRunInfos.order_by('type')
-        good_runs = tmpsorted.filter(pixel="Good", sistrip="Good", tracking="Good")
-        bad_runs = tmpsorted.filter(Q(pixel="Bad") | Q(sistrip="Bad") | Q(tracking="Bad"))
-
-        userRunInfoTypes = CurrentUserRunInfos \
-            .values('type') \
-            .order_by('type', 'run_number') \
-            .distinct()
-
-        columnDescription = ["Run", "Reference Run", "Number of LS", "Int. Luminosity", "Pixel", "Strip", "Tracking",
-                             "Comment"]
-
-        """ Get a list of unique type ids (for cosmics, prompt, etc.)"""
-        type_id_list = []
-        for entry in userRunInfoTypes:
-            if entry['type'] not in type_id_list:
-                type_id_list.append(entry['type'])
-
-        """ Create one AsciiTable per Type and fill it with the appropriate data"""
-        ascii_tables = []
-        for type_id in type_id_list:
-            userRunInfosPerType = CurrentUserRunInfos.filter(type_id=type_id).order_by("run_number")
-
-            """Extract the type from the first element, all types in that list are the same"""
-            the_type = userRunInfosPerType[0].type
-            """Create a AsciiTable with just the column descriptions as the first row"""
-            ascii_tables.append(SummaryAsciiTable(the_type, columnDescription))
-            for run in userRunInfosPerType:
-                """ add a new row to the lastly created AsciiTable"""
-                ascii_tables[-1].add_row([
-                    run.run_number,
-                    run.reference_run.reference_run,
-                    run.number_of_ls,
-                    run.int_luminosity,
-                    run.pixel,
-                    run.sistrip,
-                    run.tracking,
-                    run.comment
-                ])
-
-        """Provide the context for the summary template"""
-        context["ascii_tables"] = ascii_tables
-
-        # ====================================================================================================================
-
-        if (date_is_valid):
-            context['sums'] = RunInfo.objects.raw("""SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good, 
-            SUM(number_of_ls) as sum_number_of_ls,
-            SUM(int_luminosity) as sum_int_luminosity 
-            FROM certhelper_runinfo a 
-            inner join certhelper_type b 
-            on a.type_id = b.ID
-            where userid_id = %s and date = %s
-            group by b.ID, good
-            order by type_id, -good""", [self.request.user.id, date_filter_value])
+            runs = runs.filter(date=date_filter_value)
         else:
-            context['sums'] = RunInfo.objects.raw("""SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good, 
-            SUM(number_of_ls) as sum_number_of_ls,
-            SUM(int_luminosity) as sum_int_luminosity 
-            FROM certhelper_runinfo a 
-            inner join certhelper_type b 
-            on a.type_id = b.ID
-            where userid_id = %s
-            group by b.ID, good
-            order by type_id, -good""", [self.request.user.id])
+            alert_errors.append("Invalid Date: " + str(date_filter_value))
+            runs = RunInfo.objects.none()
 
-        # ====================================================================================================================
-
-        context['tkmap'] = CurrentUserRunInfos.order_by('type_id', 'trackermap')
-
-        # ====================================================================================================================
-
-        # When is a RUN marked as 'Good'?
-        # Depends on runtype:
-        # | - - - - - - - - - - - - - - - - - - - - - - - - - - |
-        # |-(Collisions) pixel    = (Good OR Lowstat)   AND     |
-        # |              sistrip  = (Good OR Lowstat)   AND     |
-        # |              tracking = (Good OR Lowstat)           |
-        # | - - - - - - - - - - - - - - - - - - - - - - - - - - |
-        # |-(Cosmics)    sistrip  = (Good OR Lowstat)   AND     |
-        # |              tracking = (Good OR Lowstat)           |
-        #  - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        if date_is_valid:
-            context['certified'] = RunInfo.objects.raw('''SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good
-            from certhelper_runinfo a
-            inner join certhelper_type b
-            on a.type_id = b.ID
-            where userid_id = %s and date = %s
-            order by type_id, -good''', [self.request.user.id, date_filter_value])
+    if date_from:
+        if is_valid_date(date_from):
+            runs = runs.filter(date__gte=date_from)
         else:
-            context['certified'] = RunInfo.objects.raw('''SELECT *,
-            case runtype
-                when 'Collisions' then  ((pixel='Good' or pixel='Lowstat') and (sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-                when 'Cosmics' then                                           ((sistrip='Good' or sistrip='Lowstat') and (tracking='Good' or tracking='Lowstat'))
-            end as good
-            from certhelper_runinfo a
-            inner join certhelper_type b
-            on a.type_id = b.ID
-            where userid_id = %s
-            order by type_id, -good''', [self.request.user.id])
-        # ====================================================================================================================
+            alert_errors.append("Invalid Date: " + str(date_from))
+            runs = RunInfo.objects.none()
 
-        return context
+    if date_to:
+        if is_valid_date(date_to):
+            runs = runs.filter(date__lte=date_to)
+        else:
+            alert_errors.append("Invalid Date: " + str(date_to))
+            runs = RunInfo.objects.none()
+
+    if runs_from:
+        try:
+            runs = runs.filter(run_number__gte=runs_from)
+        except:
+            alert_errors.append("Invalid Run Number: " + str(runs_from))
+            runs = RunInfo.objects.none()
+
+    if runs_to:
+        try:
+            runs = runs.filter(run_number__lte=runs_to)
+        except:
+            alert_errors.append("Invalid Run Number: " + str(runs_to))
+            runs = RunInfo.objects.none()
+
+    if category_id:
+        if is_valid_id(category_id, Category):
+            runs = runs.filter(category=category_id)
+            if subcategory_id:
+                if is_valid_id(subcategory_id, SubCategory):
+                    runs = runs.filter(subcategory=subcategory_id)
+
+                    if subsubcategory_id:
+                        if is_valid_id(subsubcategory_id, SubSubCategory):
+                            runs = runs.filter(subsubcategory=subsubcategory_id)
+                        else:
+                            alert_errors.append("Invalid SubSubCategory ID: " + str(subsubcategory_id))
+                            runs = RunInfo.objects.none()
+                else:
+                    alert_errors.append("Invalid SubCategory ID: " + str(subcategory_id))
+                    runs = RunInfo.objects.none()
+        else:
+            alert_errors.append("Invalid Category ID: " + str(category_id))
+            runs = RunInfo.objects.none()
+
+
+    if type_id:
+        if is_valid_id(type_id, Type):
+            runs = runs.filter(type=type_id)
+        else:
+            alert_errors.append("Invalid Type: " + str(type_id))
+            runs = RunInfo.objects.none()
+
+    if not date_filter_value and not category_id and not type_id and not date_from and not date_to and not runs_from and not runs_to:
+        alert_infos.append("No filters applied. Showing every run you have ever certified!")
+    context = {}
+
+    reference_run_ids = runs.values_list('reference_run').distinct()
+    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
+
+    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
+
+    runinfotypelists = []  # create one runinfotypelist per type
+
+    for run in runs:
+        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
+            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
+        runinfotypelists[-1].add_run(run)
+
+    context['runs'] = []
+    context['tk_maps'] = []
+    context['certified_runs'] = []
+    context['sums'] = []
+
+    for runinfotypelist in runinfotypelists:
+        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
+        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
+        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
+        context['sums'].append(runinfotypelist.get_sums_ascii_table())
+
+    context['alert_errors'] = alert_errors
+    context['alert_infos'] = alert_infos
+
+    return render(request, 'certhelper/summary.html', context)
 
 
 def clearsession(request):
@@ -294,14 +271,23 @@ def clearsession(request):
 def logout_view(request):
     """ Logout current user
     """
+    if request.user.is_authenticated:
+        logout(request)
+        callback_url = 'https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl=http%3A//'
+        callback_url += request.META['HTTP_HOST']
+        callback_url += reverse('certhelper:logout_status')
+        return HttpResponseRedirect(callback_url)
 
-    logout(request)
-    return HttpResponseRedirect('/')
+def logout_status(request):
+    logout_successful = False
+    if not request.user.is_authenticated:
+        logout_successful = True
+    return render(request, 'certhelper/logout_status.html', {'logout_successful': logout_successful})
 
 
 def load_subcategories(request):
     category_id = request.GET.get('categoryid')
-    if(category_id):
+    if (category_id):
         subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
     else:
         subcategories = SubCategory.objects.none()
@@ -310,7 +296,7 @@ def load_subcategories(request):
 
 def load_subsubcategories(request):
     subcategory_id = request.GET.get('subcategoryid')
-    if(subcategory_id):
+    if (subcategory_id):
         subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
     else:
         subsubcategories = SubCategory.objects.none()

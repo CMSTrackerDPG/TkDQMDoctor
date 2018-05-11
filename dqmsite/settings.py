@@ -19,12 +19,23 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&abrvr_0h(940(q_6(=+@m9uzhc)n&qvou*g-7fzw8%oh9y^4k'
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    # safe value used for development when DJANGO_SECRET_KEY might not be set
+    '&abrvr_0h(940(q_6(=+@m9uzhc)n&qvou*g-7fzw8%oh9y^4k'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['tkdqmdoctor.web.cern.ch', 'test-tkdqmdoctor.web.cern.ch', '128.141.84.249', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    'dev-tkdqmdoctor.web.cern.ch',
+    'tkdqmdoctor.web.cern.ch',
+    'test-tkdqmdoctor.web.cern.ch',
+    '128.141.84.249',
+    '127.0.0.1',
+    'localhost'
+]
 
 # Application definition
 
@@ -32,9 +43,15 @@ INSTALLED_APPS = [
     'django_tables2',
     'django_filters',
     'widget_tweaks',
+    'bootstrap3',
     'certhelper.apps.CerthelperConfig',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'cern_oauth2',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -77,9 +94,13 @@ WSGI_APPLICATION = 'dqmsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DJANGO_DATABASE_NAME'),
+        'USER': os.environ.get('DJANGO_DATABASE_USER'),
+        'PASSWORD': os.environ.get('DJANGO_DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DJANGO_DATABASE_HOST'),
+        'PORT': os.environ.get('DJANGO_DATABASE_PORT'),
+    },
 }
 
 # Password validation
@@ -99,6 +120,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -120,3 +146,8 @@ STATIC_URL = '/static/'
 
 # Redirecting from the default account/profile after login
 LOGIN_REDIRECT_URL = ('/')
+
+# Needed for django-allauth
+SITE_ID = 1
+ACCOUNT_EMAIL_REQUIRED = 'false'
+ACCOUNT_EMAIL_VERIFICATION = 'none'

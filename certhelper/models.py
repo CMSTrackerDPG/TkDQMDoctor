@@ -113,6 +113,19 @@ class RunInfo(models.Model):
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]
+        ordering = ('-run_number', )
 
     def __str__(self):
         return str(self.run_number)
+
+    def is_good(self):
+        assert self.type.runtype in ['Cosmics', 'Collisions']
+        good_criteria = ['Good', 'Lowstat']
+        candidates = [self.sistrip, self.tracking]
+        if self.type.runtype == 'Collisions':
+            candidates.append(self.pixel)
+
+        for candidate in candidates:
+            if candidate not in good_criteria:
+                return False
+        return True
