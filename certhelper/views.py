@@ -9,7 +9,7 @@ from terminaltables import AsciiTable
 
 from certhelper.filters import RunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.utilities import get_date_string, is_valid_date
+from certhelper.utilities.utilities import get_date_string, is_valid_date, get_filters_from_request_GET
 from .forms import *
 from .tables import *
 
@@ -46,35 +46,16 @@ def listruns(request):
 
     RequestConfig(request).configure(table)
 
-    year = request.GET.get('date_year', '')
-    month = request.GET.get('date_month', '')
-    day = request.GET.get('date_day', '')
-
-    the_date = get_date_string(year, month, day)
-
-    category = request.GET.get('category', '')
-    subcategory = request.GET.get('subcategory', '')
-    subsubcategory = request.GET.get('subsubcategory', '')
+    applied_filters = get_filters_from_request_GET(request)
 
     filter_parameters = ""
-
-    if the_date:
-        filter_parameters += "?date=" + str(the_date)
-    if category:
-        if not filter_parameters:
-            filter_parameters += "?"
-        else:
-            filter_parameters += "&"
-        filter_parameters += "category=" + category
-        if subcategory:
-            filter_parameters += "&subcategory=" + subcategory
-            if subsubcategory:
-                filter_parameters += "&subsubcategory=" + subsubcategory
+    for key, value in applied_filters.items():
+        filter_parameters += '&' if filter_parameters.startswith('?') else '?'
+        filter_parameters += key + "=" + value
 
     return render(request, 'certhelper/list.html', {
         'table': table,
         'filter': run_info_filter,
-        'the_date': the_date,
         'filter_parameters': filter_parameters,
     })
 
@@ -169,6 +150,14 @@ def summaryView(request):
     category_id = request.GET.get('category', None)
     subcategory_id = request.GET.get('subcategory', None)
     subsubcategory_id = request.GET.get('subsubcategory', None)
+
+
+    date_from = request.GET.get('date_range_0', None)
+    date_to = request.GET.get('date_range_1', None)
+    runs_from = request.GET.get('runs_0', None)
+    runs_to = request.GET.get('runs_1', None)
+    type_id = request.GET.get('type', None)
+
     alert_errors = []
     alert_infos = []
 
@@ -177,6 +166,34 @@ def summaryView(request):
             runs = runs.filter(date=date_filter_value)
         else:
             alert_errors.append("Invalid Date: " + str(date_filter_value))
+            runs = RunInfo.objects.none()
+
+    if date_from:
+        if is_valid_date(date_from):
+            runs = runs.filter(date__gte=date_from)
+        else:
+            alert_errors.append("Invalid Date: " + str(date_from))
+            runs = RunInfo.objects.none()
+
+    if date_to:
+        if is_valid_date(date_to):
+            runs = runs.filter(date__lte=date_to)
+        else:
+            alert_errors.append("Invalid Date: " + str(date_to))
+            runs = RunInfo.objects.none()
+
+    if runs_from:
+        try:
+            runs = runs.filter(run_number__gte=runs_from)
+        except:
+            alert_errors.append("Invalid Run Number: " + str(runs_from))
+            runs = RunInfo.objects.none()
+
+    if runs_to:
+        try:
+            runs = runs.filter(run_number__lte=runs_to)
+        except:
+            alert_errors.append("Invalid Run Number: " + str(runs_to))
             runs = RunInfo.objects.none()
 
     if category_id:
@@ -199,7 +216,15 @@ def summaryView(request):
             alert_errors.append("Invalid Category ID: " + str(category_id))
             runs = RunInfo.objects.none()
 
-    if not date_filter_value and not category_id:
+
+    if type_id:
+        if is_valid_id(type_id, Type):
+            runs = runs.filter(type=type_id)
+        else:
+            alert_errors.append("Invalid Type: " + str(type_id))
+            runs = RunInfo.objects.none()
+
+    if not date_filter_value and not category_id and not type_id and not date_from and not date_to and not runs_from and not runs_to:
         alert_infos.append("No filters applied. Showing every run you have ever certified!")
     context = {}
 
