@@ -121,10 +121,13 @@ def summaryView(request):
 
     alert_errors = []
     alert_infos = []
+    alert_filters = []
 
     if date_filter_value:
         if is_valid_date(date_filter_value):
             runs = runs.filter(date=date_filter_value)
+            alert_filters.append("Date: " + str(date_filter_value))
+
         else:
             alert_errors.append("Invalid Date: " + str(date_filter_value))
             runs = RunInfo.objects.none()
@@ -132,6 +135,7 @@ def summaryView(request):
     if date_from:
         if is_valid_date(date_from):
             runs = runs.filter(date__gte=date_from)
+            alert_filters.append("Date from: " + str(date_from))
         else:
             alert_errors.append("Invalid Date: " + str(date_from))
             runs = RunInfo.objects.none()
@@ -139,6 +143,7 @@ def summaryView(request):
     if date_to:
         if is_valid_date(date_to):
             runs = runs.filter(date__lte=date_to)
+            alert_filters.append("Date to: " + str(date_to))
         else:
             alert_errors.append("Invalid Date: " + str(date_to))
             runs = RunInfo.objects.none()
@@ -146,6 +151,7 @@ def summaryView(request):
     if runs_from:
         try:
             runs = runs.filter(run_number__gte=runs_from)
+            alert_filters.append("Runs from: " + str(runs_from))
         except:
             alert_errors.append("Invalid Run Number: " + str(runs_from))
             runs = RunInfo.objects.none()
@@ -153,6 +159,7 @@ def summaryView(request):
     if runs_to:
         try:
             runs = runs.filter(run_number__lte=runs_to)
+            alert_filters.append("Runs to: " + str(runs_to))
         except:
             alert_errors.append("Invalid Run Number: " + str(runs_to))
             runs = RunInfo.objects.none()
@@ -160,13 +167,16 @@ def summaryView(request):
     if category_id:
         if is_valid_id(category_id, Category):
             runs = runs.filter(category=category_id)
+            alert_filters.append("Category: " + str(category_id))
             if subcategory_id:
                 if is_valid_id(subcategory_id, SubCategory):
                     runs = runs.filter(subcategory=subcategory_id)
+                    alert_filters.append("Subcategory: " + str(subcategory_id))
 
                     if subsubcategory_id:
                         if is_valid_id(subsubcategory_id, SubSubCategory):
                             runs = runs.filter(subsubcategory=subsubcategory_id)
+                            alert_filters.append("SubSubcategory: " + str(subsubcategory_id))
                         else:
                             alert_errors.append("Invalid SubSubCategory ID: " + str(subsubcategory_id))
                             runs = RunInfo.objects.none()
@@ -180,6 +190,7 @@ def summaryView(request):
     if type_id:
         if is_valid_id(type_id, Type):
             runs = runs.filter(type=type_id)
+            alert_filters.append("Type: " + str(type_id))
         else:
             alert_errors.append("Invalid Type: " + str(type_id))
             runs = RunInfo.objects.none()
@@ -213,6 +224,8 @@ def summaryView(request):
 
     context['alert_errors'] = alert_errors
     context['alert_infos'] = alert_infos
+    context['alert_filters'] = alert_filters
+
 
     return render(request, 'certhelper/summary.html', context)
 
