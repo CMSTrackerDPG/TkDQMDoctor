@@ -1,15 +1,13 @@
-from allauth.account.views import LoginView, SignupView
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django_tables2 import RequestConfig, SingleTableView
-from terminaltables import AsciiTable
 
 from certhelper.filters import RunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.utilities import get_date_string, is_valid_date, get_filters_from_request_GET
+from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id
 from .forms import *
 from .tables import *
 
@@ -103,42 +101,6 @@ class CreateType(generic.CreateView):
     success_url = '/create'
 
 
-class SummaryAsciiTable:
-    """
-    Used to print the AsciiTables in the summary view
-    """
-
-    def __init__(self, thetype, tableColumnDescriptions):
-        self.mytype = thetype.__str__()
-        self.data = [tableColumnDescriptions]
-
-    def add_row(self, row):
-        self.data.append(row)
-
-    def print(self):
-        print(self.mytype)
-        table = AsciiTable(self.data)
-        table.inner_row_border = True
-        print(table.table)
-
-    def get_type(self):
-        return self.mytype
-
-    def get_table(self):
-        table = AsciiTable(self.data)
-        table.inner_row_border = True
-        return table.table
-
-
-def is_valid_id(id, Classname):
-    try:
-        if Classname.objects.filter(pk=id):
-            return True
-    except:
-        return False
-    return False
-
-
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
@@ -150,7 +112,6 @@ def summaryView(request):
     category_id = request.GET.get('category', None)
     subcategory_id = request.GET.get('subcategory', None)
     subsubcategory_id = request.GET.get('subsubcategory', None)
-
 
     date_from = request.GET.get('date_range_0', None)
     date_to = request.GET.get('date_range_1', None)
@@ -216,7 +177,6 @@ def summaryView(request):
             alert_errors.append("Invalid Category ID: " + str(category_id))
             runs = RunInfo.objects.none()
 
-
     if type_id:
         if is_valid_id(type_id, Type):
             runs = runs.filter(type=type_id)
@@ -277,6 +237,7 @@ def logout_view(request):
         callback_url += request.META['HTTP_HOST']
         callback_url += reverse('certhelper:logout_status')
         return HttpResponseRedirect(callback_url)
+
 
 def logout_status(request):
     logout_successful = False
