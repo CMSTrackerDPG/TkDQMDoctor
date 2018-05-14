@@ -85,6 +85,7 @@ class ReferenceRun(models.Model):
 
     class Meta:
         unique_together = ["reference_run", "reco", "runtype", "bfield", "beamtype", "beamenergy", "dataset"]
+        ordering = ('-reference_run',)
 
     def __str__(self):
         return str(self.reference_run) + " " + str(self.reco) + " " + str(self.runtype) + " " + str(
