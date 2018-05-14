@@ -1,11 +1,7 @@
-{% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
-<title>TkDQM Doc: Add Run</title>
+{% extends 'certhelper/base.html' %}
+{% block title %}Add Run{% endblock %}
 
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
-
+{% block content %}
 <h1 align="center">Add Run</h1>
 {{form.title}}
 {% load myfilters %}
@@ -106,7 +102,9 @@
     </div>
 </form>
 
+{% endblock content %}
 
+{% block script %}
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script>
     if( $("#id_subcategory").val() == "" ){
@@ -154,6 +152,4 @@
         }
     });
 </script>
-
-
-
+{% endblock script %}
