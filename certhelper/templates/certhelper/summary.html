@@ -28,10 +28,22 @@ Depends on runtype:
 {% if alert_infos %}
     {% for info in alert_infos %}
         <div class="alert alert-info">
-            <strong>Info!</strong> {{ info }}
+            <strong>Info:</strong> {{ info }}
         </div>
     {% endfor %}
 {% endif %}
+
+{% if alert_filters %}
+    <div class="alert alert-info">
+        <strong>Applied filters:</strong>
+        <ul>
+        {% for item in alert_filters %}
+             <li>{{ item }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 
 {% if alert_errors %}
     {% for error in alert_errors %}

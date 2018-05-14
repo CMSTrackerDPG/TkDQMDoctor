@@ -1,15 +1,13 @@
-from allauth.account.views import LoginView, SignupView
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django_tables2 import RequestConfig, SingleTableView
-from terminaltables import AsciiTable
 
 from certhelper.filters import RunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.utilities import get_date_string, is_valid_date, get_filters_from_request_GET
+from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id
 from .forms import *
 from .tables import *
 
@@ -103,42 +101,6 @@ class CreateType(generic.CreateView):
     success_url = '/create'
 
 
-class SummaryAsciiTable:
-    """
-    Used to print the AsciiTables in the summary view
-    """
-
-    def __init__(self, thetype, tableColumnDescriptions):
-        self.mytype = thetype.__str__()
-        self.data = [tableColumnDescriptions]
-
-    def add_row(self, row):
-        self.data.append(row)
-
-    def print(self):
-        print(self.mytype)
-        table = AsciiTable(self.data)
-        table.inner_row_border = True
-        print(table.table)
-
-    def get_type(self):
-        return self.mytype
-
-    def get_table(self):
-        table = AsciiTable(self.data)
-        table.inner_row_border = True
-        return table.table
-
-
-def is_valid_id(id, Classname):
-    try:
-        if Classname.objects.filter(pk=id):
-            return True
-    except:
-        return False
-    return False
-
-
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
@@ -151,7 +113,6 @@ def summaryView(request):
     subcategory_id = request.GET.get('subcategory', None)
     subsubcategory_id = request.GET.get('subsubcategory', None)
 
-
     date_from = request.GET.get('date_range_0', None)
     date_to = request.GET.get('date_range_1', None)
     runs_from = request.GET.get('runs_0', None)
@@ -160,10 +121,13 @@ def summaryView(request):
 
     alert_errors = []
     alert_infos = []
+    alert_filters = []
 
     if date_filter_value:
         if is_valid_date(date_filter_value):
             runs = runs.filter(date=date_filter_value)
+            alert_filters.append("Date: " + str(date_filter_value))
+
         else:
             alert_errors.append("Invalid Date: " + str(date_filter_value))
             runs = RunInfo.objects.none()
@@ -171,6 +135,7 @@ def summaryView(request):
     if date_from:
         if is_valid_date(date_from):
             runs = runs.filter(date__gte=date_from)
+            alert_filters.append("Date from: " + str(date_from))
         else:
             alert_errors.append("Invalid Date: " + str(date_from))
             runs = RunInfo.objects.none()
@@ -178,6 +143,7 @@ def summaryView(request):
     if date_to:
         if is_valid_date(date_to):
             runs = runs.filter(date__lte=date_to)
+            alert_filters.append("Date to: " + str(date_to))
         else:
             alert_errors.append("Invalid Date: " + str(date_to))
             runs = RunInfo.objects.none()
@@ -185,6 +151,7 @@ def summaryView(request):
     if runs_from:
         try:
             runs = runs.filter(run_number__gte=runs_from)
+            alert_filters.append("Runs from: " + str(runs_from))
         except:
             alert_errors.append("Invalid Run Number: " + str(runs_from))
             runs = RunInfo.objects.none()
@@ -192,6 +159,7 @@ def summaryView(request):
     if runs_to:
         try:
             runs = runs.filter(run_number__lte=runs_to)
+            alert_filters.append("Runs to: " + str(runs_to))
         except:
             alert_errors.append("Invalid Run Number: " + str(runs_to))
             runs = RunInfo.objects.none()
@@ -199,13 +167,16 @@ def summaryView(request):
     if category_id:
         if is_valid_id(category_id, Category):
             runs = runs.filter(category=category_id)
+            alert_filters.append("Category: " + str(category_id))
             if subcategory_id:
                 if is_valid_id(subcategory_id, SubCategory):
                     runs = runs.filter(subcategory=subcategory_id)
+                    alert_filters.append("Subcategory: " + str(subcategory_id))
 
                     if subsubcategory_id:
                         if is_valid_id(subsubcategory_id, SubSubCategory):
                             runs = runs.filter(subsubcategory=subsubcategory_id)
+                            alert_filters.append("SubSubcategory: " + str(subsubcategory_id))
                         else:
                             alert_errors.append("Invalid SubSubCategory ID: " + str(subsubcategory_id))
                             runs = RunInfo.objects.none()
@@ -216,10 +187,10 @@ def summaryView(request):
             alert_errors.append("Invalid Category ID: " + str(category_id))
             runs = RunInfo.objects.none()
 
-
     if type_id:
         if is_valid_id(type_id, Type):
             runs = runs.filter(type=type_id)
+            alert_filters.append("Type: " + str(type_id))
         else:
             alert_errors.append("Invalid Type: " + str(type_id))
             runs = RunInfo.objects.none()
@@ -253,6 +224,8 @@ def summaryView(request):
 
     context['alert_errors'] = alert_errors
     context['alert_infos'] = alert_infos
+    context['alert_filters'] = alert_filters
+
 
     return render(request, 'certhelper/summary.html', context)
 
@@ -277,6 +250,7 @@ def logout_view(request):
         callback_url += request.META['HTTP_HOST']
         callback_url += reverse('certhelper:logout_status')
         return HttpResponseRedirect(callback_url)
+
 
 def logout_status(request):
     logout_successful = False

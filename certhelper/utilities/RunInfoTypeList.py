@@ -61,9 +61,7 @@ class RunInfoTypeList:
         column_description = ["Type " + str(self.type_count), "Sum of LS", "Sum of int. luminosity"]
         data = []
         for good_bad_key, columns in self.sums_dict.items():
-            line = [good_bad_key]
-            for column in columns:
-                line.append(int(columns[column]))
+            line = [good_bad_key, int(columns['ls']), int(columns['int_lum'])]
             data.append(line)
         return self.get_ascii_table(column_description, data)
 

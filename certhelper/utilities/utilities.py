@@ -21,7 +21,7 @@ def get_date_string(year, month, day):
         if int(year) in range(1900, 3000) and int(month) in range(1, 12) and int(day) in range(1, 31):
             if len(month) == 1: month = "0" + month
             if len(day) == 1: day = "0" + day
-            datestring =  year + "-" + month + "-" + day
+            datestring = year + "-" + month + "-" + day
 
     if is_valid_date(datestring):
         return datestring
@@ -46,13 +46,21 @@ def get_filters_from_request_GET(request):
             if not candidate.startswith('date_range') or candidate.startswith('date_range') and is_valid_date(tmp):
                 applied_filters[candidate] = tmp
 
-
     year = request.GET.get('date_year', '')
     month = request.GET.get('date_month', '')
     day = request.GET.get('date_day', '')
 
     the_date = get_date_string(year, month, day)
-    if(the_date):
+    if (the_date):
         applied_filters['date'] = the_date
 
     return applied_filters
+
+
+def is_valid_id(id, Classname):
+    try:
+        if Classname.objects.filter(pk=id):
+            return True
+    except:
+        return False
+    return False
