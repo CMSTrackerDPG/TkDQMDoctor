@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}TkDQMDoctor{% endblock %}</title>
+    <title>{% block full_title %}TkDQMDoctor: {% block title %}{% endblock %}{% endblock %}</title>
     {% load static %}
     <link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
     {% load bootstrap3 %}
