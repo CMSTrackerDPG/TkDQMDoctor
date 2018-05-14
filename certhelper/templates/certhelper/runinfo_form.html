@@ -160,6 +160,12 @@
                     $("#id_tracking").val("Bad");
                 }
             });
+
+            $('#id_int_luminosity').on('focusout',function(){
+                rounded = parseFloat($("#id_int_luminosity").val()).toFixed("2")
+
+                $("#id_int_luminosity").val(rounded);
+            });
         });
     </script>
 {% endblock script %}
