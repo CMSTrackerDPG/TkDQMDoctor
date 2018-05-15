@@ -188,9 +188,11 @@
             });
 
             $('#id_int_luminosity').on('focusout',function(){
-                rounded = parseFloat($("#id_int_luminosity").val()).toFixed("1")
+                if($("#id_int_luminosity").val() != "") {
+                    rounded = parseFloat($("#id_int_luminosity").val()).toFixed("1")
 
-                $("#id_int_luminosity").val(rounded);
+                    $("#id_int_luminosity").val(rounded);
+                }
             });
 
             class RunType{
