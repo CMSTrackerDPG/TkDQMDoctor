@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block full_title %}TkDQMDoctor: {% block title %}{% endblock %}{% endblock %}</title>
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% block style %} {% endblock %}
+</head>
+
+<body>
+<div id="content">{% block content %}{% endblock %}</div>
+{% bootstrap_javascript jquery=1 %}
+{% block script %}{% endblock %}
+</body>
+</html>

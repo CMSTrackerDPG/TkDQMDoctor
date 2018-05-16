@@ -1,50 +1,72 @@
-{% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
-<title>TkDQM Doc: Add Run</title>
+{% extends 'certhelper/base.html' %}
+{% block title %}Add Run{% endblock %}
 
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+{% block style %}
+    <style>
+        /*
+         * for the dynamic list of ref runs in
+         *  dropdown menu based on selected type
+         */
+        select option[disabled] {
+            display: none;
+        }
+    </style>
+{% endblock style %}
 
-<h1 align="center">Add Run</h1>
-{{form.title}}
-{% load myfilters %}
+{% block content %}
+    <h1 align="center">Add Run</h1>
+    {{form.title}}
+    {% load myfilters %}
 
-{% if form.errors %}
-{% for field in form %}
-    {% for error in field.errors %}
-        <div class="alert alert-danger">
-            <strong>{{ error|escape }}</strong>
-        </div>
-    {% endfor %}
-{% endfor %}
-{% for error in form.non_field_errors %}
-    <div class="alert alert-danger">
-        <strong>{{ error|escape }}</strong>
-    </div>
-{% endfor %}
-{% endif %}
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
 
-<form method="POST" action=""> {% csrf_token %}
-    <table class="table table-condensed" style="max-width:650px;" align="center">
+    <form method="POST" action=""> {% csrf_token %}
+        <table class="table table-condensed" style="max-width:650px;" align="center">
             <tr>
                 <td>{{form.type.label}}</td>
                 <td>{{form.type|addclass:'form-control'}} </td>
                 <td><button type="button" class="btn btn-link" onclick="location.href='{% url 'certhelper:createtype' %}'"><span class="glyphicon glyphicon-plus-sign"></span> Add Type</button></td>
             </tr>
             <tr>
-                <td>{{form.reference_run.label}}</td>
-                <td>{{form.reference_run|addclass:'form-control'}}</td>
+                <td style="vertical-align: middle;">{{form.reference_run.label}}</td>
+                <td style="vertical-align: middle;">{{form.reference_run|addclass:'form-control'}}</td>
+                <td>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="radio-ref-run" id="radio-same-type" value="same-type" checked>
+                            Match Type
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="radio-ref-run" id="radio-all" value="all">
+                            Show All
+                        </label>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td>{{form.run_number.label}}</td>
                 <td>{{form.run_number|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:general_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:general_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
             </tr>
             <tr>
                 <td>{{form.trackermap.label}}</td>
                 <td>{{form.trackermap|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:trackermap_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:trackermap_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
             </tr>
             <tr>
                 <td>{{form.number_of_ls.label}}</td>
@@ -52,43 +74,212 @@
             </tr>
             <tr>
                 <td>{{form.int_luminosity.label}} </td>
-                <td>{{form.int_luminosity|addclass:'form-control'}}</td>               
+                <td>{{form.int_luminosity|addclass:'form-control'}}</td>
             </tr>
 
             <tr>
                 <td>{{form.pixel.label}}</td>
                 <td>{{form.pixel|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:pixel_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-                </tr>
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:pixel_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+            </tr>
 
             <tr>
                 <td>{{form.sistrip.label}}</td>
                 <td>{{form.sistrip|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:sistrip_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>                    
-            </tr>                
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:sistrip_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+            </tr>
 
             <tr>
                 <td>{{form.tracking.label}}</td>
                 <td>{{form.tracking|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>                    
-            </tr>    
-            
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+            </tr>
+
+            <tr>
+                <td>{{form.category.label}}</td>
+                <td>{{form.category|addclass:'form-control'}}</td>
+            </tr>
+
+            <tr id="subcategory_row">
+                <td>{{form.subcategory.label}}</td>
+                <td>{{form.subcategory|addclass:'form-control'}}</td>
+            </tr>
+
+            <tr id="subsubcategory_row">
+                <td>{{form.subsubcategory.label}}</td>
+                <td>{{form.subsubcategory|addclass:'form-control'}}</td>
+            </tr>
+
             <tr>
                 <td>{{form.comment.label}}</td>
                 <td>{{form.comment|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</button></td>                                                              
+                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</a></td>
             </tr>
-            
+
             <tr>
                 <td>{{form.date.label}}</td>
                 <td>{{form.date}}</td>
-            </tr>  
+            </tr>
 
-    </table>
-    <div align="center">
-        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Ok</button>
-        <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
-    </div>
-</form>
+        </table>
+        <div align="center">
+            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Ok</button>
+            <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
+        </div>
+    </form>
+
+{% endblock content %}
+
+{% block script %}
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            if( $("#id_subcategory").val() == "" ){
+                $("#subcategory_row").hide()
+                $("#subsubcategory_row").hide()
+            }
+
+            $("#id_category").change(function () {
+                var category_id = $(this).val();  // get the selected category_id from the dropdown menu
+
+                $.ajax({
+                    url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
+                    data: {
+                        'categoryid': category_id  // add the category_id to the GET parameters
+                    },
+                    success: function (data) {  // date is the return of the load_subcategories view function
+                        $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
+                    }
+                });
+                $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+
+                if(category_id != ""){
+                    $("#subcategory_row").show()
+                } else {
+                    $("#subcategory_row").hide()
+                }
+            });
+
+            $("#id_subcategory").change(function () {
+                var subcategory_id = $(this).val();
+
+                $.ajax({
+                    url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
+                    data: {
+                        'subcategoryid': subcategory_id
+                    },
+                    success: function (data) {
+                        $("#id_subsubcategory").html(data);
+                    }
+                });
+
+                if(subcategory_id != ""){
+                    $("#subsubcategory_row").show()
+                } else {
+                    $("#subsubcategory_row").hide()
+                }
+            });
+
+            $("#id_sistrip").change(function () {
+                if($(this).val() == "Bad"){
+                    $("#id_tracking").val("Bad");
+                }
+            });
+
+            $('#id_int_luminosity').on('focusout',function(){
+                rounded = parseFloat($("#id_int_luminosity").val()).toFixed("1")
+
+                $("#id_int_luminosity").val(rounded);
+            });
+
+            class RunType{
+                static get_type_text(){
+                    return $("#id_type option:selected").text().toLowerCase();
+                }
+
+                static get_word(index, text = this.get_type_text()){
+                    return text.toLowerCase().split(" ")[index];
+                }
+
+                static get_word_if_matches(allowed_choices, word_index){
+                    try {
+                        var word = this.get_word(word_index);
+                        var index = allowed_choices.indexOf(word);
+                        if (index != -1)
+                            return allowed_choices[index];
+
+                    } catch(err) {
+                        return null;
+                    }
+                    return null;
+                }
+
+                static get_reco(){
+                    var allowed_reco_choices = ["express", "prompt", "rereco"];
+                    return this.get_word_if_matches(allowed_reco_choices, 0)
+                }
+
+                static get_runtype(){
+                    var allowed_runtype_choices = ["cosmics", "collisions"];
+                    return this.get_word_if_matches(allowed_runtype_choices, 1)
+                }
+
+                static get_bfield(){
+                    var allowed_bfield_choices = ["0", "3.8"];
+                    return this.get_word_if_matches(allowed_bfield_choices, 2)
+                }
+
+                static text_matches_reco(text){
+                    return this.get_word(1, text) == this.get_reco();
+                }
 
 
+                static text_matches_runtype(text){
+                    return this.get_word(2, text) == this.get_runtype();
+                }
+
+
+                static text_matches_bfield(text){
+                    return this.get_word(3, text) == this.get_bfield();
+                }
+
+                static matches(text){
+                    var lower_text = text.toLowerCase();
+                    return this.text_matches_reco(lower_text)
+                        && this.text_matches_runtype(lower_text)
+                        && this.text_matches_bfield(lower_text)
+                }
+            }
+
+            $('input[type=radio][name=radio-ref-run]').on('change', function() {
+                update_reference_run_list();
+            });
+
+            $("#id_type").change(function () {
+                update_reference_run_list()
+            });
+
+            function update_reference_run_list(){
+                show_all_reference_runs();
+                var checked = $('input[type=radio][name=radio-ref-run]:checked').val();
+                if(checked == "same-type") {
+                    disable_not_matching_ref_runs();
+                }
+            }
+
+            function disable_not_matching_ref_runs(){
+                $('#id_reference_run > option').each(function() {
+                    if(!RunType.matches($( this ).text()))
+                        $( this ).prop('disabled', true);
+                });
+            }
+
+            function show_all_reference_runs(){
+                $('#id_reference_run > option').each(function() {
+                    $( this ).prop('disabled', false);
+                });
+            }
+        });
+    </script>
+{% endblock script %}
