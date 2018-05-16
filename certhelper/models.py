@@ -16,6 +16,9 @@ TypeForm           |  Type
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+from certhelper.manager import SoftDeletionManager
 
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Collisions', 'Collisions'))
@@ -25,7 +28,42 @@ BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'), 
 BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
 
 
-class Category(models.Model):
+class SoftDeletionModel(models.Model):
+    """
+    Marks object as deleted rather than irrevocably deleting that object
+    Also adds timestamps for creation time and update time
+
+    check https://medium.com/@adriennedomingus/soft-deletion-in-django-e4882581c340 for further information
+    """
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+    objects = SoftDeletionManager()
+    all_objects = SoftDeletionManager(alive_only=False)
+
+    class Meta:
+        abstract = True
+
+    def save(self):
+        if not self.created_at:
+            self.created_at = timezone.now()
+        self.updated_at = timezone.now()
+        super(SoftDeletionModel, self).save()
+
+    def delete(self):
+        self.deleted_at = timezone.now()
+        self.save()
+
+    def hard_delete(self):
+        super(SoftDeletionModel, self).delete()
+
+    def restore(self):
+        self.deleted_at = None
+        self.save()
+
+
+class Category(SoftDeletionModel):
     name = models.CharField(max_length=30, help_text="Title for the category of problems found")
 
     class Meta:
@@ -35,7 +73,7 @@ class Category(models.Model):
         return str(self.name)
 
 
-class SubCategory(models.Model):
+class SubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
     parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -46,7 +84,7 @@ class SubCategory(models.Model):
         return str(self.name)
 
 
-class SubSubCategory(models.Model):
+class SubSubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
     parent_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -57,7 +95,7 @@ class SubSubCategory(models.Model):
         return str(self.name)
 
 
-class Type(models.Model):
+class Type(SoftDeletionModel):
     reco = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
     bfield = models.CharField(max_length=30, choices=BFIELD_CHOICES)
@@ -74,7 +112,7 @@ class Type(models.Model):
 
 
 # ReferenceRun that should only be added by shift-leaders / staff
-class ReferenceRun(models.Model):
+class ReferenceRun(SoftDeletionModel):
     reference_run = models.IntegerField()
     reco = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
@@ -93,7 +131,7 @@ class ReferenceRun(models.Model):
 
 
 # Runs that shifters are certifying
-class RunInfo(models.Model):
+class RunInfo(SoftDeletionModel):
     GOOD_BAD_CHOICES = (('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
     TRACKERMAP_CHOICES = (('Exists', 'Exists'), ('Missing', 'Missing'))
     userid = models.ForeignKey(User, blank=True)
@@ -114,7 +152,7 @@ class RunInfo(models.Model):
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]
-        ordering = ('-run_number', )
+        ordering = ('-run_number',)
 
     def __str__(self):
         return str(self.run_number)

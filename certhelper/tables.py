@@ -4,11 +4,11 @@ from .models import RunInfo, ReferenceRun
 
 
 class RunInfoTable(tables.Table):
-    edit = tables.TemplateColumn(
+    edit_run = tables.TemplateColumn(
         '<div align="center"><a href="{% url \'certhelper:update\' record.id%}">'
         '<span class="glyphicon glyphicon-pencil"></a></div>',
         orderable=False)
-    delete = tables.TemplateColumn(
+    delete_run = tables.TemplateColumn(
         '<div align="center"><a href="{% url \'certhelper:delete\' record.id%}">'
         '<span class="glyphicon glyphicon-trash"></a></div>',
         orderable=False)
