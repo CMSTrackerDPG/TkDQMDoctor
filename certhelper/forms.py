@@ -76,7 +76,24 @@ class RunInfoForm(ModelForm):
 
     class Meta:
         model = RunInfo
-        fields = '__all__'
+
+        fields = [
+            'type',
+            'reference_run',
+            'run_number',
+            'trackermap',
+            'number_of_ls',
+            'int_luminosity',
+            'pixel',
+            'sistrip',
+            'tracking',
+            'comment',
+            'date',
+            'category',
+            'subcategory',
+            'subsubcategory',
+        ]
+
         widgets = {
             'int_luminosity': TextInput(attrs={'placeholder': "Unit: /pb "}),
             # 'date': DateInput()
@@ -95,7 +112,8 @@ class RunInfoForm(ModelForm):
                 self.fields['subcategory'].queryset = SubCategory.objects.filter(parent_category=category_id)
                 if 'subcategory' in self.data and self.data['subcategory']:
                     subcategory_id = self.data.get('subcategory')
-                    self.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(parent_category=subcategory_id)
+                    self.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(
+                        parent_category=subcategory_id)
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk:  # if a RunInfo model instance already exists, (edit button pressed)

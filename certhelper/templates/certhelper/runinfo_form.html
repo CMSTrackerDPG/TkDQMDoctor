@@ -1,11 +1,13 @@
 {% extends 'certhelper/base.html' %}
+{% load myfilters %}
+
 {% block title %}Add Run{% endblock %}
 
 {% block style %}
     <style>
         /*
          * for the dynamic list of ref runs in
-         *  dropdown menu based on selected type
+         *  drop-down menu based on selected type
          */
         select option[disabled] {
             display: none;
@@ -16,7 +18,6 @@
 {% block content %}
     <h1 align="center">Add Run</h1>
     {{form.title}}
-    {% load myfilters %}
 
     {% if form.errors %}
         {% for field in form %}
@@ -131,17 +132,18 @@
 {% endblock content %}
 
 {% block script %}
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
-
         $(document).ready(function () {
-            if( $("#id_subcategory").val() == "" ){
-                $("#subcategory_row").hide()
-                $("#subsubcategory_row").hide()
+            let category = $("#id_category");
+            let subcategory = $("#id_subcategory");
+
+            if( subcategory.val() === "" ){
+                $("#subcategory_row").hide();
+                $("#subsubcategory_row").hide();
             }
 
-            $("#id_category").change(function () {
-                var category_id = $(this).val();  // get the selected category_id from the dropdown menu
+            category.change(function () {
+                const category_id = $(this).val();  // get the selected category_id from the drop-down menu
 
                 $.ajax({
                     url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
@@ -149,20 +151,20 @@
                         'categoryid': category_id  // add the category_id to the GET parameters
                     },
                     success: function (data) {  // date is the return of the load_subcategories view function
-                        $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
+                        subcategory.html(data);  // replace drop-down options with with the data from load_subcategories view
                     }
                 });
-                $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+                subcategory.val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
 
-                if(category_id != ""){
+                if(category_id !== ""){
                     $("#subcategory_row").show()
                 } else {
                     $("#subcategory_row").hide()
                 }
             });
 
-            $("#id_subcategory").change(function () {
-                var subcategory_id = $(this).val();
+            subcategory.change(function () {
+                const subcategory_id = $(this).val();
 
                 $.ajax({
                     url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
@@ -174,7 +176,7 @@
                     }
                 });
 
-                if(subcategory_id != ""){
+                if(subcategory_id !== ""){
                     $("#subsubcategory_row").show()
                 } else {
                     $("#subsubcategory_row").hide()
@@ -182,15 +184,18 @@
             });
 
             $("#id_sistrip").change(function () {
-                if($(this).val() == "Bad"){
+                if($(this).val() === "Bad"){
                     $("#id_tracking").val("Bad");
                 }
             });
 
-            $('#id_int_luminosity').on('focusout',function(){
-                rounded = parseFloat($("#id_int_luminosity").val()).toFixed("1")
+            let int_luminosity = $('#id_int_luminosity');
 
-                $("#id_int_luminosity").val(rounded);
+            int_luminosity.on('focusout',function(){
+                if(int_luminosity.val() !== "") {
+                    const rounded = parseFloat(int_luminosity.val()).toFixed(1);
+                    int_luminosity.val(rounded);
+                }
             });
 
             class RunType{
@@ -204,9 +209,9 @@
 
                 static get_word_if_matches(allowed_choices, word_index){
                     try {
-                        var word = this.get_word(word_index);
-                        var index = allowed_choices.indexOf(word);
-                        if (index != -1)
+                        const word = this.get_word(word_index);
+                        const index = allowed_choices.indexOf(word);
+                        if (index !== -1)
                             return allowed_choices[index];
 
                     } catch(err) {
@@ -216,36 +221,36 @@
                 }
 
                 static get_reco(){
-                    var allowed_reco_choices = ["express", "prompt", "rereco"];
+                    const allowed_reco_choices = ["express", "prompt", "rereco"];
                     return this.get_word_if_matches(allowed_reco_choices, 0)
                 }
 
                 static get_runtype(){
-                    var allowed_runtype_choices = ["cosmics", "collisions"];
+                    const allowed_runtype_choices = ["cosmics", "collisions"];
                     return this.get_word_if_matches(allowed_runtype_choices, 1)
                 }
 
                 static get_bfield(){
-                    var allowed_bfield_choices = ["0", "3.8"];
+                    const allowed_bfield_choices = ["0", "3.8"];
                     return this.get_word_if_matches(allowed_bfield_choices, 2)
                 }
 
                 static text_matches_reco(text){
-                    return this.get_word(1, text) == this.get_reco();
+                    return this.get_word(1, text) === this.get_reco();
                 }
 
 
                 static text_matches_runtype(text){
-                    return this.get_word(2, text) == this.get_runtype();
+                    return this.get_word(2, text) === this.get_runtype();
                 }
 
 
                 static text_matches_bfield(text){
-                    return this.get_word(3, text) == this.get_bfield();
+                    return this.get_word(3, text) === this.get_bfield();
                 }
 
                 static matches(text){
-                    var lower_text = text.toLowerCase();
+                    const lower_text = text.toLowerCase();
                     return this.text_matches_reco(lower_text)
                         && this.text_matches_runtype(lower_text)
                         && this.text_matches_bfield(lower_text)
@@ -262,8 +267,8 @@
 
             function update_reference_run_list(){
                 show_all_reference_runs();
-                var checked = $('input[type=radio][name=radio-ref-run]:checked').val();
-                if(checked == "same-type") {
+                const checked = $('input[type=radio][name=radio-ref-run]:checked').val();
+                if(checked === "same-type") {
                     disable_not_matching_ref_runs();
                 }
             }
