@@ -50,7 +50,7 @@ class SoftDeletionModel(models.Model):
         super(SoftDeletionModel, self).delete()
 
 
-class Category(models.Model):
+class Category(SoftDeletionModel):
     name = models.CharField(max_length=30, help_text="Title for the category of problems found")
 
     class Meta:
@@ -60,7 +60,7 @@ class Category(models.Model):
         return str(self.name)
 
 
-class SubCategory(models.Model):
+class SubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
     parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -71,7 +71,7 @@ class SubCategory(models.Model):
         return str(self.name)
 
 
-class SubSubCategory(models.Model):
+class SubSubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
     parent_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -82,7 +82,7 @@ class SubSubCategory(models.Model):
         return str(self.name)
 
 
-class Type(models.Model):
+class Type(SoftDeletionModel):
     reco = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
     bfield = models.CharField(max_length=30, choices=BFIELD_CHOICES)
@@ -99,7 +99,7 @@ class Type(models.Model):
 
 
 # ReferenceRun that should only be added by shift-leaders / staff
-class ReferenceRun(models.Model):
+class ReferenceRun(SoftDeletionModel):
     reference_run = models.IntegerField()
     reco = models.CharField(max_length=30, choices=RECO_CHOICES)
     runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
