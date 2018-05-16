@@ -226,19 +226,7 @@ def summaryView(request):
     context['alert_infos'] = alert_infos
     context['alert_filters'] = alert_filters
 
-
     return render(request, 'certhelper/summary.html', context)
-
-
-def clearsession(request):
-    """Deletes all the entries in the RunInfo table and redicrets to '/'.
-    """
-
-    if request.method == 'POST':
-        RunInfo.objects.filter(userid=request.user).delete()
-        return HttpResponseRedirect('/')
-
-    return render(request, 'certhelper/clearsession.html')
 
 
 def logout_view(request):

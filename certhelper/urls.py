@@ -21,7 +21,6 @@ from . import views
 app_name = 'certhelper'
 urlpatterns = [
     url(r'^$', views.listruns, name='list'),
-    url(r'^clearsession/$', login_required(views.clearsession),            name='clearsession'),
     url(r'^summary/$',      login_required(views.summaryView),   name='summary'),
     url(r'^references/$',                  views.ListReferences.as_view(), name='references'),
     url(r'^create/$',       login_required(views.CreateRun.as_view()),     name='create'),
