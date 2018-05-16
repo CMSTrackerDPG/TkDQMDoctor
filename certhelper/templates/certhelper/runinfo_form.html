@@ -37,6 +37,11 @@
     <form method="POST" action=""> {% csrf_token %}
         <table class="table table-condensed" style="max-width:650px;" align="center">
             <tr>
+                <td>{{form.userid.label}}</td>
+                {% load widget_tweaks %}
+                <td>{{form.userid|add_class:'form-control'}} </td>
+            </tr>
+            <tr>
                 <td>{{form.type.label}}</td>
                 <td>{{form.type|addclass:'form-control'}} </td>
                 <td><button type="button" class="btn btn-link" onclick="location.href='{% url 'certhelper:createtype' %}'"><span class="glyphicon glyphicon-plus-sign"></span> Add Type</button></td>

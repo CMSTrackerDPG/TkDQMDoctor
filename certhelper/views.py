@@ -21,9 +21,14 @@ class CreateRun(generic.CreateView):
     template_name_suffix = '_form'
     success_url = '/'
 
-    def form_valid(self, form_class):
-        form_class.instance.userid = self.request.user
-        return super(CreateRun, self).form_valid(form_class)
+    #def form_valid(self, form_class):
+        #form_class.instance.userid = self.request.user
+        #return super(CreateRun, self).form_valid(form_class)
+
+    def get_initial(self):
+        initial = super(CreateRun, self).get_initial()
+        initial["userid"] = self.request.user
+        return initial
 
 
 def listruns(request):
@@ -76,9 +81,9 @@ class UpdateRun(generic.UpdateView):
     success_url = '/'
     template_name = 'certhelper/runinfo_form.html'
 
-    def form_valid(self, form_class):
-        form_class.instance.userid = self.request.user
-        return super(UpdateRun, self).form_valid(form_class)
+    #def form_valid(self, form_class):
+        # form_class.instance.userid = self.request.user # not neccessary to update
+    #    return super(UpdateRun, self).form_valid(form_class)
 
 
 class DeleteRun(generic.DeleteView):
@@ -226,7 +231,6 @@ def summaryView(request):
     context['alert_infos'] = alert_infos
     context['alert_filters'] = alert_filters
 
-
     return render(request, 'certhelper/summary.html', context)
 
 
@@ -275,3 +279,9 @@ def load_subsubcategories(request):
     else:
         subsubcategories = SubCategory.objects.none()
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
+
+
+def shiftleader_view(request):
+    table = ShiftleaderRunInfoTable(RunInfo.objects.all())
+    RequestConfig(request).configure(table)
+    return render(request, 'certhelper/shiftleader.html', {'table': table})
