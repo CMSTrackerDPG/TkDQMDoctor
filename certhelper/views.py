@@ -101,6 +101,7 @@ class CreateType(generic.CreateView):
     success_url = '/create'
 
 
+# TODO clean up this mess
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
