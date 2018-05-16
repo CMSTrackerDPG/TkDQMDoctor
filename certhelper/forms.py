@@ -105,8 +105,6 @@ class RunInfoForm(ModelForm):
         to the particular category should be shown, when selected"""
         self.fields['subcategory'].queryset = SubCategory.objects.none()
         self.fields['subsubcategory'].queryset = SubSubCategory.objects.none()
-        self.fields['userid'].widget.attrs['readonly'] = True
-        #self.fields['userid'].empty_label = None
 
         if 'category' in self.data and self.data['category']:  # if category is set in RunInfo Form
             try:
@@ -123,18 +121,6 @@ class RunInfoForm(ModelForm):
                 self.fields['subcategory'].queryset = self.instance.category.subcategory_set
                 if self.instance.subcategory:
                     self.fields['subsubcategory'].queryset = self.instance.subcategory.subsubcategory_set
-
-    def get_initial(self):
-        """
-        Returns the initial data to use for forms on this view.
-        """
-        initial = super(RunInfoForm, self).get_initial()
-
-        #initial['userid'] = self.request.user
-
-        #self.fields['userid'].queryset = User.objects.filter(id=1)
-
-        return initial
 
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
