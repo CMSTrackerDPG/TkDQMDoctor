@@ -19,6 +19,13 @@ class SoftDeletionQuerySet(QuerySet):
         """
         return super(SoftDeletionQuerySet, self).delete()
 
+
+    def restore(self):
+        """
+        only pretend to delete (mark as deleted)
+        """
+        return super(SoftDeletionQuerySet, self).update(deleted_at=None)
+
     def alive(self):
         """
         return only objects that are not deleted
