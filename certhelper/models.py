@@ -16,6 +16,9 @@ TypeForm           |  Type
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+from certhelper.manager import SoftDeletionManager
 
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Collisions', 'Collisions'))
@@ -23,6 +26,28 @@ BFIELD_CHOICES = (('0 T', '0 T'), ('3.8 T', '3.8 T'))
 BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'), ('HeavyIon-Proton', 'HeavyIon-Proton'),
                     ('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
 BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
+
+
+class SoftDeletionModel(models.Model):
+    """
+    marks object as deleted rather than irrevocably deleting that object
+
+    check https://medium.com/@adriennedomingus/soft-deletion-in-django-e4882581c340 for further information
+    """
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+    objects = SoftDeletionManager()
+    all_objects = SoftDeletionManager(alive_only=False)
+
+    class Meta:
+        abstract = True
+
+    def delete(self):
+        self.deleted_at = timezone.now()
+        self.save()
+
+    def hard_delete(self):
+        super(SoftDeletionModel, self).delete()
 
 
 class Category(models.Model):
@@ -93,7 +118,7 @@ class ReferenceRun(models.Model):
 
 
 # Runs that shifters are certifying
-class RunInfo(models.Model):
+class RunInfo(SoftDeletionModel):
     GOOD_BAD_CHOICES = (('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
     TRACKERMAP_CHOICES = (('Exists', 'Exists'), ('Missing', 'Missing'))
     userid = models.ForeignKey(User, blank=True)
@@ -114,7 +139,7 @@ class RunInfo(models.Model):
 
     class Meta:
         unique_together = ["run_number", "type", "trackermap"]
-        ordering = ('-run_number', )
+        ordering = ('-run_number',)
 
     def __str__(self):
         return str(self.run_number)
