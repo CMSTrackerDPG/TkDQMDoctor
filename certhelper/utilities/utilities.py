@@ -51,15 +51,15 @@ def get_filters_from_request_GET(request):
     day = request.GET.get('date_day', '')
 
     the_date = get_date_string(year, month, day)
-    if (the_date):
+    if the_date:
         applied_filters['date'] = the_date
 
     return applied_filters
 
 
-def is_valid_id(id, Classname):
+def is_valid_id(primary_key, Classname):
     try:
-        if Classname.objects.filter(pk=id):
+        if Classname.objects.filter(pk=primary_key):
             return True
     except:
         return False
