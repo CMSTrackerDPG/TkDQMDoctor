@@ -64,3 +64,11 @@ def is_valid_id(primary_key, Classname):
     except:
         return False
     return False
+
+
+def request_contains_filter_parameter(request):
+    for candidate in ["date", "userid"]:
+        for word in request.GET:
+            if candidate in word:
+                return True
+    return False

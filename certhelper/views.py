@@ -8,7 +8,8 @@ from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id
+from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id, \
+    request_contains_filter_parameter
 from .forms import *
 from .tables import *
 
@@ -328,24 +329,6 @@ def shiftleader_view(request):
     get_parameters += "&date__lte_month=" + str(end_of_week.month)
     get_parameters += "&date__lte_year=" + str(end_of_week.year)
     return HttpResponseRedirect("/shiftleader/%s" % get_parameters)
-
-
-def test1(request):
-    return HttpResponse("worked")
-
-
-def test2(request):
-    return HttpResponse("should be no parameters")
-
-
-def request_contains_filter_parameter(request):
-    for candidate in ["date", "userid"]:
-        for word in request.GET:
-            if candidate in word:
-                return True
-    return False
-
-    #return any(candidate in word for word in request.GET for candidate in ["date", "userid"])
 
 
 # TODO lazy load summary
