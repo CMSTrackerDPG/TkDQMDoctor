@@ -174,15 +174,12 @@
         $(document).ready(function () {
             request_get_params= window.location.search.substr(1);
 
-            //console.log("JA!!" + request_get_params)
             if(request_get_params.indexOf("runs") != -1 ||
                 request_get_params.indexOf("type") != -1 || request_get_params.indexOf("category") != -1)
                 $("#more").collapse('show');
 
 
             if(request_get_params.indexOf("date_range") != -1){
-                //$("#radio_day").prop("checked", false);
-                //$("#radio_range").prop("checked", true);
                 $('#date_day').css('display', 'none');
                 $('#date_range').css('display', 'inline');
             }
@@ -279,7 +276,7 @@
                 $("#filter-button-top").css('display', 'inline');
             });
 
-            //remove empty attributes form URL
+            //remove empty attributes from URL
             $("form").submit(function () {
                 $(this).find(":input").filter(function () {
                     return !this.value || this.value == "0";
