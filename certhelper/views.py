@@ -1,11 +1,12 @@
 from django.contrib.auth import logout
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
-from django_tables2 import RequestConfig, SingleTableView
+from django_filters.views import FilterView
+from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
-from certhelper.filters import RunInfoFilter
+from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
 from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id
 from .forms import *
@@ -21,9 +22,9 @@ class CreateRun(generic.CreateView):
     template_name_suffix = '_form'
     success_url = '/'
 
-    #def form_valid(self, form_class):
-        #form_class.instance.userid = self.request.user
-        #return super(CreateRun, self).form_valid(form_class)
+    # def form_valid(self, form_class):
+    # form_class.instance.userid = self.request.user
+    # return super(CreateRun, self).form_valid(form_class)
 
     def get_initial(self):
         initial = super(CreateRun, self).get_initial()
@@ -81,8 +82,8 @@ class UpdateRun(generic.UpdateView):
     success_url = '/'
     template_name = 'certhelper/runinfo_form.html'
 
-    #def form_valid(self, form_class):
-        # form_class.instance.userid = self.request.user # not neccessary to update
+    # def form_valid(self, form_class):
+    # form_class.instance.userid = self.request.user # not neccessary to update
     #    return super(UpdateRun, self).form_valid(form_class)
 
 
@@ -271,7 +272,90 @@ def load_subsubcategories(request):
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
 
 
+# def shiftleader_view(request):
+#    table = ShiftleaderRunInfoTable(RunInfo.objects.all())
+#    RequestConfig(request).configure(table)
+#    return render(request, 'certhelper/shiftleader.html', {'table': table})
+
+
+# TODO make this faster, unneccessary databaes queries slows down page load when no filters are applied
+def generate_summary(queryset):
+    runs = queryset
+    context = {}
+
+    reference_run_ids = runs.values_list('reference_run').distinct()
+    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
+
+    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
+
+    runinfotypelists = []  # create one runinfotypelist per type
+
+    for run in runs:
+        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
+            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
+        runinfotypelists[-1].add_run(run)
+
+    context['runs'] = []
+    context['tk_maps'] = []
+    context['certified_runs'] = []
+    context['sums'] = []
+
+    for runinfotypelist in runinfotypelists:
+        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
+        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
+        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
+        context['sums'].append(runinfotypelist.get_sums_ascii_table())
+
+    return context
+
+
 def shiftleader_view(request):
-    table = ShiftleaderRunInfoTable(RunInfo.objects.all())
-    RequestConfig(request).configure(table)
-    return render(request, 'certhelper/shiftleader.html', {'table': table})
+    """
+    if no fitler parameters are specified than every run from every user will be listed
+    to prevent this we make sure that at least one filter is applied.
+
+    if someone wants to list all runs form all users then he has to specify that explicitly
+    in the filter (setting everything to nothing)
+    """
+    if request_contains_filter_parameter(request):
+        return ShiftLeaderView.as_view()(request=request)
+    start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
+    end_of_week = start_of_week + timezone.timedelta(6)
+    get_parameters = "?date__gte_day=" + str(start_of_week.day)
+    get_parameters += "&date__gte_month=" + str(start_of_week.month)
+    get_parameters += "&date__gte_year=" + str(start_of_week.year)
+    get_parameters += "&date__lte_day=" + str(end_of_week.day)
+    get_parameters += "&date__lte_month=" + str(end_of_week.month)
+    get_parameters += "&date__lte_year=" + str(end_of_week.year)
+    return HttpResponseRedirect("/shiftleader/%s" % get_parameters)
+
+
+def test1(request):
+    return HttpResponse("worked")
+
+
+def test2(request):
+    return HttpResponse("should be no parameters")
+
+
+def request_contains_filter_parameter(request):
+    for candidate in ["date", "userid"]:
+        for word in request.GET:
+            if candidate in word:
+                return True
+    return False
+
+    #return any(candidate in word for word in request.GET for candidate in ["date", "userid"])
+
+
+# TODO lazy load summary
+class ShiftLeaderView(SingleTableMixin, FilterView):
+    table_class = ShiftleaderRunInfoTable
+    model = RunInfo
+    template_name = "certhelper/shiftleader.html"
+    filterset_class = ShiftLeaderRunInfoFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['summary'] = generate_summary(self.filterset.qs)
+        return context

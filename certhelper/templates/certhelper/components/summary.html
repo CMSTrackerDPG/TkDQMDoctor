@@ -1,0 +1,19 @@
+<pre id=summary>
+=============Reference Runs===============
+{% for ref in summary.refs %}{{ ref }}
+{% endfor %}
+
+=============Runs Checked================
+{% for run in summary.runs %}{{ run }}
+{% endfor %}
+=============Tracker Maps=================
+{% for tk_map in summary.tk_maps %}{{ tk_map }}
+{% endfor %}
+=============HDQM Trends==================
+=============Certified Runs===============
+{% for certified_run in summary.certified_runs %}{{ certified_run }}
+{% endfor %}
+=============Sum of Quantities============
+{% for sum in sums %}{{ sum }}
+{% endfor %}<div id=comment_div style="display: none;">
+</pre>

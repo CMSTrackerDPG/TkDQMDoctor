@@ -1,5 +1,5 @@
 import django_tables2 as tables
-from django_tables2.utils import A
+
 from .models import RunInfo, ReferenceRun
 
 
@@ -55,4 +55,5 @@ class ReferenceRunTable(tables.Table):
 
 
 class ShiftleaderRunInfoTable(RunInfoTable):
-    pass
+    class Meta:
+        attrs = {'class': 'table table-hover table-bordered'}

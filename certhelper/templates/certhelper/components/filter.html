@@ -1,0 +1,9 @@
+<div class="well" style="margin: 0 auto 10px; width: 800px;">
+    <form action="" method="get" class="form">
+        {% load bootstrap3 %}
+        {% load widget_tweaks %}
+        {% render_field filter.form.date %}
+        {% bootstrap_form filter.form %}
+        {% bootstrap_button 'filter' %}
+    </form>
+</div>

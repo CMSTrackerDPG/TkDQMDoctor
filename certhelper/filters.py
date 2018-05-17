@@ -1,7 +1,9 @@
 import django_filters
 from django import forms
+from django.contrib.auth.models import User
+from django.forms.extras.widgets import SelectDateWidget
 from django.utils import timezone
-
+from django.db import models
 from certhelper.models import RunInfo, SubCategory, SubSubCategory, Type
 
 
@@ -55,6 +57,32 @@ class RunInfoFilter(django_filters.FilterSet):
                 self.form.fields['subcategory'].queryset = SubCategory.objects.filter(parent_category=category_id)
                 if 'subcategory' in self.data and self.data['subcategory']:
                     subcategory_id = self.data.get('subcategory')
-                    self.form.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(parent_category=subcategory_id)
+                    self.form.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(
+                        parent_category=subcategory_id)
             except (ValueError, TypeError):
                 pass
+
+
+class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
+    # userid = django_filters.ModelMultipleChoiceFilter(queryset=User.objects.all())
+    userid = django_filters.filters.ModelMultipleChoiceFilter(
+        name='userid',
+        to_field_name='pk',
+        queryset=User.objects.all(),
+    )
+
+    class Meta:
+        model = RunInfo
+        fields = {
+            'date': ['gte', 'lte', ],
+            'run_number': ['gte', 'lte', ],
+            'category': ['exact']
+        }
+        filter_overrides = {
+            models.DateField: {
+                'filter_class': django_filters.DateTimeFilter,
+                'extra': lambda f: {
+                    'widget': SelectDateWidget
+                },
+            },
+        }
