@@ -27,7 +27,7 @@ class RunInfoTable(tables.Table):
                   'tracking',
                   'comment',
                   'date')
-        attrs = {'class': 'table table table-hover table-bordered'}
+        attrs = {'class': 'table table-hover table-bordered'}
 
 
 class READONLYRunInfoTable(tables.Table):
@@ -45,13 +45,13 @@ class READONLYRunInfoTable(tables.Table):
                   'tracking',
                   'comment',
                   'date')
-        attrs = {'class': 'table table table-hover table-bordered'}
+        attrs = {'class': 'table table-hover table-bordered'}
 
 
 class ReferenceRunTable(tables.Table):
     class Meta:
         model = ReferenceRun
-        attrs = {'class': 'table table table-hover table-bordered'}
+        attrs = {'class': 'table table-hover table-bordered'}
 
 
 class ShiftleaderRunInfoTable(RunInfoTable):
