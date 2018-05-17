@@ -3,8 +3,6 @@
 {% load widget_tweaks %}
 
 {% block content %}
-
-
     <h1 align="center">List of certified runs</h1>
     <div class="container" style="padding:0; margin:0; width:99%;">
         <div class="row">
@@ -80,17 +78,17 @@
                         <div class="col col-sm-2 vcenter text-right">
                             <strong>Category:</strong>
                         </div><div class="col col-sm-10 vcenter text-left">
-                            {% render_field filter.form.category|add_class:"form-control" %}
-                            {% render_field filter.form.subcategory|add_class:"form-control" %}
-                            {% render_field filter.form.subsubcategory|add_class:"form-control" %}
-                        </div>
+                        {% render_field filter.form.category|add_class:"form-control" %}
+                        {% render_field filter.form.subcategory|add_class:"form-control" %}
+                        {% render_field filter.form.subsubcategory|add_class:"form-control" %}
+                    </div>
                     </div>
                     <div class="row top-buffer">
                         <div class="col col-sm-2 vcenter text-right">
                             <strong>Run numbers:</strong>
                         </div><div class="col col-sm-10 vcenter text-left">
-                            {% render_field filter.form.runs %}
-                        </div>
+                        {% render_field filter.form.runs %}
+                    </div>
                     </div>
 
                     <div class="row top-buffer">
@@ -143,19 +141,6 @@
             margin-top: 20px;
         }
 
-        .date-checkbox {
-            background: white;
-            border-color: coral;
-        }
-
-        .date-checkbox:active {
-            background: red;
-        }
-
-        .date-checkbox:hover {
-            background: lightblue;
-        }
-
         .vcenter {
             display: inline-block;
             vertical-align: middle;
@@ -191,7 +176,7 @@
 
             //console.log("JA!!" + request_get_params)
             if(request_get_params.indexOf("runs") != -1 ||
-            request_get_params.indexOf("type") != -1 || request_get_params.indexOf("category") != -1)
+                request_get_params.indexOf("type") != -1 || request_get_params.indexOf("category") != -1)
                 $("#more").collapse('show');
 
 
