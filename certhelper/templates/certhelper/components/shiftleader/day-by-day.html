@@ -1,0 +1,43 @@
+{% load myfilters %}
+{% for weekday in weekdays.split %}
+    <div id="slr-{{ weekday }}" class="tab-pane fade">
+        !! TODO !!
+        <h3>{{ weekday|title }}</h3>
+        <h4>Day by day notes: day {{ forloop.counter }}, {{ filter.form.date__gte.value|dateoffset:forloop.counter0 }}</h4>
+        <p>
+        <ul>
+            <li>Fills <strong>[list of fills]</strong>
+                <ul>
+                    <li>
+                        <strong>[n]</strong> colliding bunches, peak lumi <strong>[n] x 10^33 cm^2/s</strong>
+                    </li>
+                </ul>
+            </li>
+            <li>Number of runs certified:
+                <ul>
+                    <li>Collisions: <strong>X</strong> in Stream-Express <strong>(int lumi)</strong>, <strong>Y</strong> in Prompt-Reco <strong>(int lumi)</strong></li>
+                    <li>Cosmics: <strong>X</strong> in Stream Express, <strong>Y</strong> in Prompt Reco</li>
+                </ul>
+            </li>
+            <li>
+                Total number of BAD runs = <strong>X</strong> (Int. Lumi) (see next slide for details)
+                <ul>
+                    <li>Number of changed flags from Express to Prompt= <strong>X</strong></li>
+                </ul>
+            </li>
+            <li>
+                Conditions update:
+            </li>
+            <li>
+                Issues reported in the Elog and feedback to Online:
+            </li>
+            <li>
+                On-calls:
+            </li>
+        </ul>
+
+        Daily Shifter Summaries: <strong>link1</strong>, <strong>link2</strong>
+        Prompt Feedback plots: <strong>link1</strong>
+        </p>
+    </div>
+{% endfor %}

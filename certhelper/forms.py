@@ -65,7 +65,7 @@ class DateInput(forms.DateInput):
 class ReferenceRunForm(ModelForm):
     class Meta:
         model = ReferenceRun
-        fields = '__all__'
+        fields = ['reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset', ]
 
 
 class RunInfoForm(ModelForm):

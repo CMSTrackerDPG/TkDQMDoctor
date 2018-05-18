@@ -5,7 +5,10 @@
     {% load bootstrap3 %}
 
     <div class="container-fluid">
-        <h1>Shiftleader Report</h1>
+        <h1 align="center">Shift Leader View</h1>
+
+        {% include "certhelper/components/menu.html" %}
+
         <div class="container">
             {% if filter %}
                 {% include "certhelper/components/filter.html" %}
@@ -15,7 +18,8 @@
         </div>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#runtable">Table</a></li>
-            <li><a data-toggle="tab" href="#summaryreport">Summary Report</a></li>
+            <li><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#shiftleader-report">Shift Leader Report</a></li>
         </ul>
         <div class="tab-content">
             <div id="runtable" class="tab-pane fade in active">
@@ -26,15 +30,37 @@
                     <div class="alert alert-danger" role="alert">No Table found.</div>
                 {% endif %}
             </div>
-            <div id="summaryreport" class="tab-pane fade">
-                <h3>Summary report</h3>
+            <div id="summary" class="tab-pane fade">
+                <h3>Summary</h3>
                 {% if summary %}
                     {% include "certhelper/components/summary.html" %}
                 {% else %}
                     <div class="alert alert-danger" role="alert">No Summary found.</div>
                 {% endif %}
             </div>
+
+            <div id="shiftleader-report" class="tab-pane fade">
+                <h3>Shift Leader Report</h3>
+                {% include "certhelper/components/shift-leader-report.html" %}
+
+                {% comment %}
+                {% if shiftleaderreport %}
+                    {% include "certhelper/components/shiftleader-report.html" %}
+                {% else %}
+                    <div class="alert alert-danger" role="alert">No Shiftleader Report found.</div>
+                {% endif %}
+                {% endcomment %}
+            </div>
         </div>
     </div>
     </div>
 {% endblock content %}
+
+
+{% block script %}
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+{% endblock script %}

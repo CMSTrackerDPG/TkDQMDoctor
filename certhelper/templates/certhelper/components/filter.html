@@ -1,9 +1,153 @@
-<div class="well" style="margin: 0 auto 10px; width: 800px;">
-    <form action="" method="get" class="form">
-        {% load bootstrap3 %}
-        {% load widget_tweaks %}
-        {% render_field filter.form.date %}
-        {% bootstrap_form filter.form %}
-        {% bootstrap_button 'filter' %}
-    </form>
+{% load bootstrap3 %}
+{% load widget_tweaks %}
+<style>
+    .filter-label{
+        font-weight: bold;
+    }
+    .top-buffer {
+        margin-top: 15px;
+    }
+
+</style>
+
+<div class="container">
+    <div class="well" style="margin: 0 auto 10px; width: 800px;">
+        <form action="" method="get" class="form">
+
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#menu-dates">Dates</a></li>
+                <li><a data-toggle="tab" href="#menu-run-numbers">Run Numbers</a></li>
+                <li><a data-toggle="tab" href="#menu-type">Type</a></li>
+                <li><a data-toggle="tab" href="#menu-categories">Categories</a></li>
+                <li><a data-toggle="tab" href="#menu-users">Shifters</a></li>
+            </ul>
+            <div class="tab-content">
+
+                <div id="menu-dates" class="tab-pane fade in active">
+
+                    <div class="form-inline">
+                        <div class="row top-buffer">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-5">
+                                <strong>from</strong>:
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>to</strong>:
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-5">
+                                {% render_field filter.form.date__gte|add_class:"form-control" %}
+                            </div>
+                            <div class="col-sm-6">
+                                {% render_field filter.form.date__lte|add_class:"form-control" %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="menu-run-numbers" class="tab-pane fade">
+                    <div class="form-inline">
+                        <div class="row top-buffer">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-5">
+                                <strong>from</strong>:
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>to</strong>:
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-5">
+                                {% render_field filter.form.run_number__gte|add_class:"form-control" %}
+                            </div>
+                            <div class="col-sm-6">
+                                {% render_field filter.form.run_number__lte|add_class:"form-control" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="menu-type" class="tab-pane fade">
+                    <div class="form-inline">
+                        <div class="row top-buffer">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-11">
+                                <strong>Run Type</strong>:
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                {% render_field filter.form.type|add_class:"form-control" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="menu-categories" class="tab-pane fade">
+
+                    <div class="row top-buffer">
+                        <div class="col col-sm-2 vcenter text-right">
+                            <strong>Category:</strong>
+                        </div>
+                        <div class="col col-sm-10 vcenter text-left">
+                            {% render_field filter.form.category|add_class:"form-control" %}
+                        </div>
+                    </div>
+
+                    <div class="row top-buffer">
+                        <div class="col col-sm-2 vcenter text-right">
+                            <strong>Subcategory:</strong>
+                        </div>
+                        <div class="col col-sm-10 vcenter text-left">
+                            {% render_field filter.form.subcategory|add_class:"form-control" %}
+                        </div>
+                    </div>
+
+                    <div class="row top-buffer">
+                        <div class="col col-sm-2 vcenter text-right">
+                            <strong>Subsubcategory:</strong>
+                        </div>
+                        <div class="col col-sm-10 vcenter text-left">
+                            {% render_field filter.form.subsubcategory|add_class:"form-control" %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="menu-users" class="tab-pane fade">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h4>Use only following Shifters:</h4>
+                        </div>
+                        <div class="col-sm-6 text-right" style="margin-top: 10px">
+                            <a href="#" data-toggle="tooltip" title="use CTRL + Click to select and deselect multiple users" style="color:black;
+    text-decoration: none;">{% bootstrap_icon "question-sign" %} Help</a>
+                        </div>
+                    </div>
+                    {% render_field filter.form.userid|add_class:"form-control" %}
+                </div>
+
+            </div>
+            <div class="row">
+                <hr style="width: 95%; color: lightgray; height: 1px; background-color:lightgray;" />
+            </div>
+            <div class="row">
+                <div class="col col-sm-6 text-left">
+                    <a href="{% url 'certhelper:shiftleader' %}" class="btn btn-danger" id="clear-filters">
+                        <span class="glyphicon glyphicon-remove"></span> Reset
+                    </a>
+                </div>
+                <div class="col col-sm-6 text-right">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-filter"></span> Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>

@@ -1,3 +1,6 @@
+
+{% url "certhelper:shiftleader" as shiftleader_url %}
+
 <div class="container" style="padding:0; margin:0; width:99%;">
     <div class="row">
         <div class="col col-sm-6">
@@ -6,9 +9,24 @@
             {% else %}
                 <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span
                         class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
+
+                {% if request.path !=  shiftleader_url %}
                 <a href="{% url 'certhelper:summary' %}{{ filter_parameters }}" type="button"
                    class="btn btn-link"><span
                         class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
+                {% endif %}
+
+                {% if user.is_staff %}
+                    {% if request.path ==  shiftleader_url %}
+                    <a href="{% url 'certhelper:list' %}{{ filter_parameters }}" type="button"
+                       class="btn btn-link"><span
+                            class="glyphicon glyphicon-th-list"></span> List of Certified Runs</a>
+                    {% else %}
+                    <a href="{% url 'certhelper:shiftleader' %}{{ filter_parameters }}" type="button"
+                       class="btn btn-link"><span
+                            class="glyphicon glyphicon-list"></span> Shift Leader</a>
+                    {% endif %}
+                {% endif %}
                 <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span
                         class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>
             {% endif %}

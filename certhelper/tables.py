@@ -51,6 +51,7 @@ class READONLYRunInfoTable(tables.Table):
 class ReferenceRunTable(tables.Table):
     class Meta:
         model = ReferenceRun
+        fields = ['id', 'reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset', ]
         attrs = {'class': 'table table-hover table-bordered'}
 
 

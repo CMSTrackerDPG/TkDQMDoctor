@@ -69,14 +69,25 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
         name='userid',
         to_field_name='pk',
         queryset=User.objects.all(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-control',
+            'size': '15',
+        })
     )
+
+    type = django_filters.ModelChoiceFilter(queryset=Type.objects.all(), widget=forms.Select(attrs={
+        'class': 'form-control',
+        'style': 'width: 600px;',
+    }))
 
     class Meta:
         model = RunInfo
         fields = {
             'date': ['gte', 'lte', ],
             'run_number': ['gte', 'lte', ],
-            'category': ['exact']
+            'category': ['exact'],
+            'subcategory': ['exact'],
+            'subsubcategory': ['exact'],
         }
         filter_overrides = {
             models.DateField: {
