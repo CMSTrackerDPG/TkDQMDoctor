@@ -1,6 +1,6 @@
 from django.contrib.auth import logout
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
 from django_tables2 import RequestConfig, SingleTableView
@@ -264,3 +264,16 @@ def load_subsubcategories(request):
     else:
         subsubcategories = SubCategory.objects.none()
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
+
+
+def hard_deleteview(request, run_number):
+    try:
+        run = RunInfo.all_objects.get(run_number=run_number)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the runnumber %s doesnt exist" % id)
+
+    if request.method == "POST":
+        run.hard_delete()
+        return HttpResponseRedirect('/')
+    
+    return render(request, 'certhelper/hard_delete.html', {'run': run})
