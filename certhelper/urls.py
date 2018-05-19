@@ -13,6 +13,7 @@ the access privileges.
 """
 
 from django.conf.urls import url
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
@@ -29,7 +30,7 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/update/$', login_required(views.UpdateRun.as_view()), name='update'),
     url(r'^(?P<pk>[0-9]+)/delete/$', login_required(views.DeleteRun.as_view()), name='delete'),
 
-    url(r'^(?P<pk>[0-9]+)/harddelete/$', login_required(views.DeleteRun.as_view()), name='delete'),
+    url(r'^(?P<pk>[0-9]+)/harddelete/$', staff_member_required(views.DeleteRun.as_view()), name='delete'),
 
     # checklists
     url(r'^checklists/general$',    TemplateView.as_view(template_name='certhelper/checklists/general.html'),    name='general_checklist'),
