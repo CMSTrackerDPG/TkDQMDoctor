@@ -8,6 +8,7 @@ from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
+from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
 from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id, \
     request_contains_filter_parameter
 from .forms import *
@@ -341,4 +342,6 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['summary'] = generate_summary(self.filterset.qs)
+        context['slr'] = ShiftLeaderReport()
+        context['slr'].update(self.filterset.qs)
         return context
