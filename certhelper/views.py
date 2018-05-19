@@ -274,5 +274,6 @@ def hard_deleteview(request, run_number):
 
     if request.method == "POST":
         run.hard_delete()
-        HttpResponseRedirect('/')
+        return HttpResponseRedirect('/')
+    
     return render(request, 'certhelper/hard_delete.html', {'run': run})

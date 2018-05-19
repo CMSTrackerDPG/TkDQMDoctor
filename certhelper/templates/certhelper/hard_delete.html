@@ -9,10 +9,15 @@
     <h1 align="center">Hard Delete Run</h1>
     </br>
     <h4 align="center">
-        Are you sure you want to irrevocably delete that run?
+        Are you sure you want to irrevocably delete that run, created by
+        {% if run.userid.first_name %}
+            {{ run.userid.first_name }} {{ run.userid.first_name }}
+        {% else %}
+            {{ run.userid.first_name }}
+        {% endif %} ?
     </h4>
 
-    <p>{{ run }}</p>
+    <p>{{ run.run_number }} {{ run.type }} {{ run.reference_run }}</p>
 
     <form action="" method="post" align="center">
         {% csrf_token %}
