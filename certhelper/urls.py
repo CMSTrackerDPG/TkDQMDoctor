@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/update/$', login_required(views.UpdateRun.as_view()), name='update'),
     url(r'^(?P<pk>[0-9]+)/delete/$', login_required(views.DeleteRun.as_view()), name='delete'),
 
-    url(r'^(?P<pk>[0-9]+)/harddelete/$', staff_member_required(views.DeleteRun.as_view()), name='delete'),
+    url(r'^(?P<run_number>[0-9]+)/harddelete/$', staff_member_required(views.hard_deleteview), name='harddelete'),
 
     # checklists
     url(r'^checklists/general$',    TemplateView.as_view(template_name='certhelper/checklists/general.html'),    name='general_checklist'),

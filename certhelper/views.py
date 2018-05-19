@@ -1,5 +1,5 @@
 from django.contrib.auth import logout
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
@@ -266,8 +266,12 @@ def load_subsubcategories(request):
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
 
 
-def hard_deleteview(request):
-    run = get_object_or_404(RunInfo, id=id)
+def hard_deleteview(request, run_number):
+    try:
+        run = RunInfo.all_objects.get(run_number=run_number)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the runnumber %s doesnt exist" % id)
+
     if request.method == "POST":
         run.hard_delete()
         HttpResponseRedirect('/')
