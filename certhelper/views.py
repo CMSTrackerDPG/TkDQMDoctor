@@ -1,6 +1,6 @@
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
 from django_tables2 import RequestConfig, SingleTableView
@@ -264,3 +264,11 @@ def load_subsubcategories(request):
     else:
         subsubcategories = SubCategory.objects.none()
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
+
+
+def hard_deleteview(request):
+    run = get_object_or_404(RunInfo, id=id)
+    if request.method == "POST":
+        run.hard_delete()
+        HttpResponseRedirect('/')
+    return render(request, 'certhelper/hard_delete.html', {'run': run})

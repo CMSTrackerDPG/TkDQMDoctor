@@ -1,0 +1,22 @@
+{% extends "certhelper/base.html" %}
+
+{% block title %}
+    Hard Delete Run
+{% endblock %}
+{% block content %}
+    {% load static %}
+
+    <h1 align="center">Hard Delete Run</h1>
+    </br>
+    <h4 align="center">
+        Are you sure you want to irrevocably delete that run?
+    </h4>
+
+    <p>{{ run }}</p>
+
+    <form action="" method="post" align="center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes</button>
+        <a href="{% url 'certhelper:list' %}" class="btn btn-default">No</a>
+    </form>
+{% endblock %}
