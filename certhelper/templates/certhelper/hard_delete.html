@@ -11,13 +11,19 @@
     <h4 align="center">
         Are you sure you want to irrevocably delete that run, created by
         {% if run.userid.first_name %}
-            {{ run.userid.first_name }} {{ run.userid.first_name }}
+            {{ run.userid.first_name }} {{ run.userid.last_name }} ({{ run.userid.username }})
         {% else %}
-            {{ run.userid.first_name }}
+            {{ run.userid.username }}
         {% endif %} ?
     </h4>
 
-    <p>{{ run.run_number }} {{ run.type }} {{ run.reference_run }}</p>
+    <p>
+    <ul>
+        <li>Run Number: {{ run.run_number }}</li>
+        <li>{{ run.type }}</li>
+        <li>{{ run.reference_run }}</li>
+    </ul>
+    </p>
 
     <form action="" method="post" align="center">
         {% csrf_token %}
