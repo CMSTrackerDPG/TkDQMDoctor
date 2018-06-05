@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/ptrstn/TkDQMDoctor.svg?branch=master)](https://travis-ci.com/ptrstn/TkDQMDoctor)
+[![Build Status](https://travis-ci.com/ptrstn/TkDQMDoctor.svg?branch=develop)](https://travis-ci.com/ptrstn/TkDQMDoctor)
+
 # How to develop locally
 
 ## Prerequisits
