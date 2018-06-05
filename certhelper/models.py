@@ -134,9 +134,9 @@ class ReferenceRun(SoftDeletionModel):
 class RunInfo(SoftDeletionModel):
     GOOD_BAD_CHOICES = (('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
     TRACKERMAP_CHOICES = (('Exists', 'Exists'), ('Missing', 'Missing'))
-    userid = models.ForeignKey(User, blank=True)
-    type = models.ForeignKey(Type)
-    reference_run = models.ForeignKey(ReferenceRun)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    type = models.ForeignKey(Type, on_delete=models.CASCADE)
+    reference_run = models.ForeignKey(ReferenceRun, on_delete=models.CASCADE)
     run_number = models.PositiveIntegerField()
     trackermap = models.CharField(max_length=7, choices=TRACKERMAP_CHOICES)
     number_of_ls = models.PositiveIntegerField()
