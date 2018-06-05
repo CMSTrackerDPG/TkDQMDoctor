@@ -1,0 +1,26 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+
+services: postgresql
+
+env:
+  - DJANGO_VERSION=1.11
+  - DJANGO_VERSION=2.0
+
+install:
+  - pip install -r requirements.txt
+  - pip install -I Django==$DJANGO_VERSION
+
+before_script:
+  - export DJANGO_DATABASE_NAME=travis_ci_test
+  - export DJANGO_DATABASE_USER=postgres
+  - export DJANGO_DATABASE_PASSWORD=""
+  - export DJANGO_DATABASE_HOST=localhost
+  - export DJANGO_DATABASE_PORT=""
+  - psql -c "create database ${DJANGO_DATABASE_NAME};" -U postgres
+
+script:
+  - python manage.py migrate
+  - python -Wall manage.py test
