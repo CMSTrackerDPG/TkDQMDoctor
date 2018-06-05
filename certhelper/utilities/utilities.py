@@ -18,7 +18,7 @@ def get_date_string(year, month, day):
     datestring = None
 
     if year and month and day:  # if attributes exist
-        if int(year) in range(1900, 3000) and int(month) in range(1, 12) and int(day) in range(1, 31):
+        if int(year) in range(1900, 3000) and int(month) in range(1, 13) and int(day) in range(1, 32):
             if len(month) == 1: month = "0" + month
             if len(day) == 1: day = "0" + day
             datestring = year + "-" + month + "-" + day
