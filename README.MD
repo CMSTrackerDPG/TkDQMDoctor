@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/ptrstn/TkDQMDoctor.svg?branch=master)](https://travis-ci.com/ptrstn/TkDQMDoctor)
 [![Build Status](https://travis-ci.com/ptrstn/TkDQMDoctor.svg?branch=develop)](https://travis-ci.com/ptrstn/TkDQMDoctor)
+[![codecov](https://codecov.io/gh/ptrstn/TkDQMDoctor/branch/master/graph/badge.svg)](https://codecov.io/gh/ptrstn/TkDQMDoctor)
 
 # How to develop locally
 
