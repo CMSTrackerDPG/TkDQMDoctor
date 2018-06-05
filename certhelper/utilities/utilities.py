@@ -1,5 +1,7 @@
 import datetime
 
+from django.utils import timezone
+
 
 def is_valid_date(date_text):
     try:
@@ -72,3 +74,15 @@ def request_contains_filter_parameter(request):
             if candidate in word:
                 return True
     return False
+
+
+def get_this_week_filter_parameter():
+    start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
+    end_of_week = start_of_week + timezone.timedelta(6)
+    get_parameters = "?date__gte_day=" + str(start_of_week.day)
+    get_parameters += "&date__gte_month=" + str(start_of_week.month)
+    get_parameters += "&date__gte_year=" + str(start_of_week.year)
+    get_parameters += "&date__lte_day=" + str(end_of_week.day)
+    get_parameters += "&date__lte_month=" + str(end_of_week.month)
+    get_parameters += "&date__lte_year=" + str(end_of_week.year)
+    return get_parameters

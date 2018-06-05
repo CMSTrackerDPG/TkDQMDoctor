@@ -12,7 +12,7 @@ from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
 from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
 from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id, \
-    request_contains_filter_parameter
+    request_contains_filter_parameter, get_this_week_filter_parameter
 from .forms import *
 from .tables import *
 
@@ -323,15 +323,7 @@ def shiftleader_view(request):
     """
     if request_contains_filter_parameter(request):
         return ShiftLeaderView.as_view()(request=request)
-    start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
-    end_of_week = start_of_week + timezone.timedelta(6)
-    get_parameters = "?date__gte_day=" + str(start_of_week.day)
-    get_parameters += "&date__gte_month=" + str(start_of_week.month)
-    get_parameters += "&date__gte_year=" + str(start_of_week.year)
-    get_parameters += "&date__lte_day=" + str(end_of_week.day)
-    get_parameters += "&date__lte_month=" + str(end_of_week.month)
-    get_parameters += "&date__lte_year=" + str(end_of_week.year)
-    return HttpResponseRedirect("/shiftleader/%s" % get_parameters)
+    return HttpResponseRedirect("/shiftleader/%s" % get_this_week_filter_parameter())
 
 
 # TODO lazy load summary
