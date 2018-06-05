@@ -19,3 +19,9 @@ class UtilitiesTest(TestCase):
         self.assertEqual(get_date_string("2099", "12", "31"), "2099-12-31")
         self.assertEqual(get_date_string("2999", "3", "7"), "2999-03-07")
         self.assertEqual(get_date_string("2018", "5", "31"), "2018-05-31")
+        #self.assertEqual(get_date_string("2018", "03", "29"), "")
+        self.assertEqual(get_date_string("2018", "03", "28"), "2018-03-28")
+        #self.assertEqual(get_date_string("a", "03", "28"), "")
+        #self.assertEqual(get_date_string("2018", "bcd", "29"), "")
+        #self.assertEqual(get_date_string("2018", "03", "!"), "")
+
