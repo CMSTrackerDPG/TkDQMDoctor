@@ -18,7 +18,15 @@ def addplaceholder(value, arg):
 
 @register.filter
 def dateoffset(value, offset):
+    """
+    Shift a date by given offset.
+    Example: dateoffset("2018-10-21", 2) => "2018-10-23"
+    """
     newdate = datetime.datetime.strptime(value, '%Y-%m-%d') + timezone.timedelta(offset)
-    # return str(value + timezone.timedelta(offset))
-    #newvalue = str(newdate.day) + "-" + str(newdate.month) + "-" + str(newdate.year)
+    return newdate.strftime('%Y-%m-%d')
+
+
+@register.filter
+def yyyymmdd_to_ddmmyyyy(value):
+    newdate = datetime.datetime.strptime(value, '%Y-%m-%d')
     return newdate.strftime('%d-%m-%Y')
