@@ -17,12 +17,12 @@
             {% endif %}
         </div>
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#runtable">Table</a></li>
+            <li><a data-toggle="tab" href="#runtable">Table</a></li>
             <li><a data-toggle="tab" href="#summary">Summary</a></li>
-            <li><a data-toggle="tab" href="#shiftleader-report">Shift Leader Report</a></li>
+            <li class="active"><a data-toggle="tab" href="#shiftleader-report">Shift Leader Report</a></li>
         </ul>
         <div class="tab-content">
-            <div id="runtable" class="tab-pane fade in active">
+            <div id="runtable" class="tab-pane fade">
                 <h3>List of Certified Runs</h3>
                 {% if table %}
                     {% render_table table 'django_tables2/bootstrap.html' %}
@@ -39,7 +39,7 @@
                 {% endif %}
             </div>
 
-            <div id="shiftleader-report" class="tab-pane fade">
+            <div id="shiftleader-report" class="tab-pane fade in active">
                 <h3>Shift Leader Report</h3>
                 {% include "certhelper/components/shift-leader-report.html" %}
 
