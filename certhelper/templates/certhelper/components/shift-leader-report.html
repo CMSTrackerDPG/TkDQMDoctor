@@ -1,5 +1,14 @@
 {% with 'monday tuesday wednesday thursday friday saturday sunday' as weekdays %}
 
+    {% for key, val in slreport.day.items %}
+        <p><strong>key</strong>
+            {{ key }}
+        </p>
+        <p><strong>val</strong>
+            {{ val.items }}
+            for
+        </p>
+    {% endfor %}
     <ul class="nav nav-tabs" xmlns="http://www.w3.org/1999/html">
         {% comment %} TODO: LHC Fills
         <li class="active"><a data-toggle="tab" href="#slr-lhc-fills">LHC Fills</a></li>
@@ -9,8 +18,8 @@
                 Day by day <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-                {% for weekday in weekdays.split %}
-                    <li><a data-toggle="tab" href="#slr-{{ weekday }}">{{ weekday|title }}</a></li>
+                {% for day in slreport.day %}
+                    <li><a data-toggle="tab" href="#slr-{{ day.date }}">{{ day.name }} ({{ day.date }})</a></li>
                 {% endfor %}
             </ul>
         </li>

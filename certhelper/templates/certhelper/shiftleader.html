@@ -41,15 +41,11 @@
 
             <div id="shiftleader-report" class="tab-pane fade in active">
                 <h3>Shift Leader Report</h3>
-                {% include "certhelper/components/shift-leader-report.html" %}
-
-                {% comment %}
-                {% if shiftleaderreport %}
-                    {% include "certhelper/components/shiftleader-report.html" %}
+                {% if slreport %}
+                    {% include "certhelper/components/shift-leader-report.html" %}
                 {% else %}
                     <div class="alert alert-danger" role="alert">No Shiftleader Report found.</div>
                 {% endif %}
-                {% endcomment %}
             </div>
         </div>
     </div>

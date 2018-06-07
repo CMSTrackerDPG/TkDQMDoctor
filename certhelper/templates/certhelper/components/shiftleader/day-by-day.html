@@ -1,26 +1,27 @@
 {% load myfilters %}
-{% for weekday in weekdays.split %}
-    <div id="slr-{{ weekday }}" class="tab-pane fade">
+
+{% for day in slreport.day %}
+    <div id="slr-{{ day.date }}" class="tab-pane fade">
         !! TODO !!
-        <h3>{{ weekday|title }}</h3>
-        <h4>Day by day notes: day {{ forloop.counter }}, {{ filter.form.date__gte.value|dateoffset:forloop.counter0 }}</h4>
+        <h3>{{ day.name|title }}</h3>
+        <h4>Day by day notes: {{ day.date }}</h4>
         <p>
         <ul>
             <li>Fills <strong>[list of fills]</strong>
                 <ul>
                     <li>
-                        <strong>[n]</strong> colliding bunches, peak lumi <strong>[n] x 10^33 cm^2/s</strong>
+                        <strong>[insert here]</strong> colliding bunches, peak lumi <strong>[insert here]</strong> x 10^33 cm^2/s
                     </li>
                 </ul>
             </li>
             <li>Number of runs certified:
                 <ul>
-                    <li>Collisions: <strong>X</strong> in Stream-Express <strong>(int lumi)</strong>, <strong>Y</strong> in Prompt-Reco <strong>(int lumi)</strong></li>
-                    <li>Cosmics: <strong>X</strong> in Stream Express, <strong>Y</strong> in Prompt Reco</li>
+                    <li>Collisions: <strong>{{ day.Collisions.Express.number_of_runs }}</strong> in Stream-Express <strong>int lumi={{ day.Collisions.Express.int_lum }}</strong>, <strong>{{ day.Collisions.Prompt.number_of_runs }}</strong> in Prompt-Reco <strong>int lumi = {{ day.Collisions.Prompt.int_lum }}</strong></li>
+                    <li>Cosmics: <strong>{{ day.Cosmics.Express.number_of_runs }}</strong> in Stream Express, <strong>{{ day.Cosmics.Prompt.number_of_runs }}</strong> in Prompt Reco</li>
                 </ul>
             </li>
             <li>
-                Total number of BAD runs = <strong>X</strong> (Int. Lumi) (see next slide for details)
+                Total number of BAD runs = <strong>{{ day.Bad.number_of_runs }}</strong> Int. Lumi ={{ day.Bad.int_lum }} (see next slide for details)
                 <ul>
                     <li>Number of changed flags from Express to Prompt= <strong>X</strong></li>
                 </ul>

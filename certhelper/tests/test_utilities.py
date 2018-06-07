@@ -25,5 +25,6 @@ class UtilitiesTest(TestCase):
         #self.assertEqual(get_date_string("2018", "bcd", "29"), "")
         #self.assertEqual(get_date_string("2018", "03", "!"), "")
 
-    def test_get_weekdayname(self, datestring):
-        return to_date(datestring).strftime("%A")
+    #TODO ?????
+    #def test_get_weekdayname(self, datestring):
+    #    return to_date(datestring).strftime("%A")

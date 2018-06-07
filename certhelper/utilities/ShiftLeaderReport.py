@@ -23,7 +23,6 @@ class ShiftLeaderReport:
         else:  # for whole week/ all runs
             summary = self.summary if not bad_only else self.bad_summary
             item = get_from_summary(summary, runtype, reco)
-
         assert len(item) <= 1
         return item[0] if len(item) == 1 else {}
 
@@ -46,13 +45,11 @@ class ShiftLeaderReport:
 
     def get_context(self):
         context = self.fill_context()
-        context[self.day_keyword] = {}
+        context[self.day_keyword] = []
 
         active_days = self.get_active_days_list()
         for idx, day in enumerate(active_days):
-            context[self.day_keyword][idx] = self.fill_context(day)
-            context[self.day_keyword][idx]["name"] = to_weekdayname(day)
-            context[self.day_keyword][idx]["date"] = day
+            context[self.day_keyword].append(self.fill_context(day))
 
         return context
 
@@ -73,8 +70,11 @@ class ShiftLeaderReport:
         return context
 
     def fill_context(self, day=None):
-        bad = self.bad_keyword
         context = self.build_context_structure()
+
+        # TODO test this!!
+        context[self.bad_keyword][self.num_runs_keyword] = 0
+        context[self.bad_keyword][self.intlum_keyword] = 0
 
         for runtype in self.types:
             for reco in self.recos:
@@ -82,9 +82,18 @@ class ShiftLeaderReport:
                     self.num_runs_keyword: self.number_of_runs(runtype, reco, day=day),
                     self.intlum_keyword: self.sum_int_lum(runtype, reco, day=day)
                 }
-                context[bad][runtype][reco] = {
-                    self.num_runs_keyword: self.number_of_runs(runtype, reco, bad_only=True, day=day),
-                    self.intlum_keyword: self.sum_int_lum(runtype, reco, bad_only=True, day=day)
-                }
 
+                num_runs = self.number_of_runs(runtype, reco, bad_only=True, day=day)
+                int_lum = self.sum_int_lum(runtype, reco, bad_only=True, day=day)
+                context[self.bad_keyword][runtype][reco] = {
+                    self.num_runs_keyword: num_runs,
+                    self.intlum_keyword: int_lum
+                }
+                #TODO TEST THIS
+                context[self.bad_keyword][self.num_runs_keyword] += num_runs
+                context[self.bad_keyword][self.intlum_keyword] += int_lum
+
+        if day:
+            context["name"] = to_weekdayname(day)
+            context["date"] = day
         return context
