@@ -18,7 +18,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from certhelper.manager import SoftDeletionManager
+from certhelper.manager import SoftDeletionManager, RunInfoManager
 
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Collisions', 'Collisions'))
@@ -132,6 +132,9 @@ class ReferenceRun(SoftDeletionModel):
 
 # Runs that shifters are certifying
 class RunInfo(SoftDeletionModel):
+    objects = RunInfoManager()
+    all_objects = RunInfoManager(alive_only=False)
+
     GOOD_BAD_CHOICES = (('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
     TRACKERMAP_CHOICES = (('Exists', 'Exists'), ('Missing', 'Missing'))
     userid = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
@@ -155,7 +158,8 @@ class RunInfo(SoftDeletionModel):
         ordering = ('-run_number',)
 
     def __str__(self):
-        return str(self.run_number)
+        return str(self.run_number) + " " + str(self.type.runtype) + " " + str(self.type.reco) + " " + \
+               str(self.int_luminosity) + " " + str(self.number_of_ls)
 
     def is_good(self):
         assert self.type.runtype in ['Cosmics', 'Collisions']
@@ -168,3 +172,6 @@ class RunInfo(SoftDeletionModel):
             if candidate not in good_criteria:
                 return False
         return True
+
+    def is_bad(self):
+        return not self.is_good()

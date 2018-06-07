@@ -1,5 +1,5 @@
 from django.db import models
-from certhelper.query import SoftDeletionQuerySet
+from certhelper.query import SoftDeletionQuerySet, RunInfoQuerySet
 
 
 class SoftDeletionManager(models.Manager):
@@ -20,3 +20,16 @@ class SoftDeletionManager(models.Manager):
     # TODO check if this is necessarry
     def hard_delete(self):
         return self.get_queryset().hard_delete()
+
+
+class RunInfoManager(SoftDeletionManager):
+    def get_queryset(self):
+        if self.alive_only:
+            return RunInfoQuerySet(self.model).filter(deleted_at=None)
+        return RunInfoQuerySet(self.model)
+
+    def good(self):
+        return RunInfoQuerySet(self.model).good()
+
+    def bad(self):
+        return RunInfoQuerySet(self.model).bad()
