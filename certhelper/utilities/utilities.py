@@ -86,3 +86,26 @@ def get_this_week_filter_parameter():
     get_parameters += "&date__lte_month=" + str(end_of_week.month)
     get_parameters += "&date__lte_year=" + str(end_of_week.year)
     return get_parameters
+
+
+def get_from_summary(summary, runtype=None, reco=None, date=None):
+    filtered = summary
+    if runtype:
+        filtered = [item for item in filtered if item['type__runtype'] == runtype]
+    if reco:
+        filtered = [item for item in filtered if item['type__reco'] == reco]
+    if date:
+        filtered = [item for item in filtered if item['date'] == to_date(date)]
+    return filtered
+
+
+def to_date(date, formatstring="%Y-%m-%d"):
+    if isinstance(date, datetime.date):
+        return date
+    if isinstance(date, datetime.datetime):
+        return date.date()
+    return datetime.datetime.strptime(date, formatstring).date()
+
+
+def to_weekdayname(date, formatstring="%Y-%m-%d"):
+    return to_date(date, formatstring).strftime("%A")

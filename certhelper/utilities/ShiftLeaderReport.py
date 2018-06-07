@@ -1,84 +1,90 @@
-"""
-Number of runs certified:
-Collisions: X in Stream-Express (int lumi), Y in Prompt-Reco (int lumi)
-Cosmics: X in Stream Express, Y in Prompt Reco
-Total number of BAD runs = X (Int. Lumi) (see next slide for details)
-Number of changed flags from Express to Prompt= X
-
-slr.collisions.streamexpress.count
-slr.collisions.streamexpress.intlumi
-
-slr.collisions.promptreco.count
-slr.collisions.promptreco.intlumi
-
-"""
+from certhelper.utilities.utilities import get_from_summary, to_weekdayname
 
 
 class ShiftLeaderReport:
-    """
-    contains information needed for
-    the weekly certification of the shiftleader
-    """
+    bad_keyword = "Bad"
+    day_keyword = "day"
+    num_runs_keyword = "number_of_runs"
+    intlum_keyword = "int_lum"
+    types = ["Collisions", "Cosmics"]
+    recos = ["Prompt", "Express"]
+    attributes = [num_runs_keyword, intlum_keyword]
 
-    def __init__(self) -> None:
-        weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-        self.days = []
-        for day in weekdays:
-            self.days.append(_ShiftLeaderReportDay(day))
+    def __init__(self, runs):
+        self.summary = runs.summary()
+        self.bad_summary = runs.bad().summary()
+        self.summary_per_day = runs.summary_per_day()
+        self.bad_summary_per_day = runs.bad().summary_per_day()
 
-    def update(self, runs):
-        # TODO increment count and int lumi for every run in runs
-        pass
+    def get_item(self, runtype, reco, bad_only=False, day=None):
+        if day:  # for single day
+            summary = self.summary_per_day if not bad_only else self.bad_summary_per_day
+            item = get_from_summary(summary, runtype, reco, day)
+        else:  # for whole week/ all runs
+            summary = self.summary if not bad_only else self.bad_summary
+            item = get_from_summary(summary, runtype, reco)
 
-    def __repr__(self) -> str:
-        return self.__str__()
+        assert len(item) <= 1
+        return item[0] if len(item) == 1 else {}
 
-    def __str__(self):
-        text = ""
-        for day in self.days:
-            text += "\n" + str(day.name) + ":" + day.__str__() + "\n"
-        return text
+    def number_of_runs(self, runtype, reco, bad_only=False, day=None):
+        return self.get_attribute("runs_certified", runtype, reco, bad_only, day)
 
+    def sum_int_lum(self, runtype, reco, bad_only=False, day=None):
+        return self.get_attribute("int_luminosity", runtype, reco, bad_only, day)
 
-class _ShiftLeaderReportDay:
-    def __init__(self, name) -> None:
-        self.name = name
-        self.cosmics = _ShiftLeaderReportRunType()
-        self.collisions = _ShiftLeaderReportRunType()
+    def get_attribute(self, attribute, runtype, reco, bad_only=False, day=None, default_value=0):
+        return self.get_item(runtype, reco, bad_only, day).get(attribute, default_value)
 
-    def update(self, run):
-        # TODO increment count and int lumi
-        pass
+    def get_active_days_list(self):
+        days_list = []
+        for item in self.summary_per_day:
+            day = item["date"].strftime('%Y-%m-%d')
+            if day not in days_list:
+                days_list.append(day)
+        return days_list
 
-    def __str__(self) -> str:
-        return "\n cosmics: " + self.cosmics.__str__() + "\n collisions " + self.collisions.__str__()
+    def get_context(self):
+        context = self.fill_context()
+        context[self.day_keyword] = {}
 
+        active_days = self.get_active_days_list()
+        for idx, day in enumerate(active_days):
+            context[self.day_keyword][idx] = self.fill_context(day)
+            context[self.day_keyword][idx]["name"] = to_weekdayname(day)
+            context[self.day_keyword][idx]["date"] = day
 
-class _ShiftLeaderReportRunType:
-    """Cosmics or Collisions"""
+        return context
 
-    def __init__(self) -> None:
-        self.streamexpress = _ShiftLeaderReportRecoType()
-        self.promptreco = _ShiftLeaderReportRecoType()
+    def build_context_structure(self):
+        bad = self.bad_keyword
+        context = {bad: {}}
 
-    def update(self, run):
-        # TODO increment count and int lumi
-        pass
+        for type in self.types:
+            context[type] = {}
+            context[bad][type] = {}
+            for reco in self.recos:
+                context[type][reco] = {}
+                context[bad][type][reco] = {}
+                for attr in self.attributes:
+                    context[type][reco][attr] = 0
+                    context[bad][type][reco][attr] = 0
 
-    def __str__(self) -> str:
-        return "\n\tstreamexpress: " + self.streamexpress.__str__() + "\n\t promptreco " + self.promptreco.__str__()
+        return context
 
+    def fill_context(self, day=None):
+        bad = self.bad_keyword
+        context = self.build_context_structure()
 
-class _ShiftLeaderReportRecoType:
-    """Express, Prompt, or reReco"""
+        for runtype in self.types:
+            for reco in self.recos:
+                context[runtype][reco] = {
+                    self.num_runs_keyword: self.number_of_runs(runtype, reco, day=day),
+                    self.intlum_keyword: self.sum_int_lum(runtype, reco, day=day)
+                }
+                context[bad][runtype][reco] = {
+                    self.num_runs_keyword: self.number_of_runs(runtype, reco, bad_only=True, day=day),
+                    self.intlum_keyword: self.sum_int_lum(runtype, reco, bad_only=True, day=day)
+                }
 
-    def __str__(self):
-        return "\n\t\tcount: " + self.count.__str__() + "\n\t\tint lumni: " + self.intlumi.__str__()
-
-    def update(self, run):
-        # TODO increment count and int lumi
-        pass
-
-    def __init__(self) -> None:
-        self.count = 0
-        self.intlumi = 0
+        return context

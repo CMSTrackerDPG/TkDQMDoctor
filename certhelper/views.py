@@ -336,8 +336,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['summary'] = generate_summary(self.filterset.qs)
-        context['slr'] = ShiftLeaderReport()
-        context['slr'].update(self.filterset.qs)
+        context['slreport'] = ShiftLeaderReport(self.filterset.qs).get_context()
         return context
 
 
