@@ -1,10 +1,17 @@
 import django_tables2 as tables
-from django_tables2.utils import A
+
 from .models import RunInfo, ReferenceRun
 
+
 class RunInfoTable(tables.Table):
-    edit_run = tables.TemplateColumn('<div align="center"><a href="{% url \'certhelper:update\' record.id%}"><span class="glyphicon glyphicon-pencil"></a></div>', orderable=False)
-    delete_run = tables.TemplateColumn('<div align="center"><a href="{% url \'certhelper:delete\' record.id%}"><span class="glyphicon glyphicon-trash"></a></div>', orderable=False)
+    edit_run = tables.TemplateColumn(
+        '<div align="center"><a href="{% url \'certhelper:update\' record.id%}">'
+        '<span class="glyphicon glyphicon-pencil"></a></div>',
+        orderable=False)
+    delete_run = tables.TemplateColumn(
+        '<div align="center"><a href="{% url \'certhelper:delete\' record.id%}">'
+        '<span class="glyphicon glyphicon-trash"></a></div>',
+        orderable=False)
 
     class Meta:
         model = RunInfo
@@ -20,11 +27,10 @@ class RunInfoTable(tables.Table):
                   'tracking',
                   'comment',
                   'date')
-        attrs = {'class': 'table table table-hover table-bordered'}
+        attrs = {'class': 'table table-hover table-bordered'}
 
 
 class READONLYRunInfoTable(tables.Table):
-
     class Meta:
         model = RunInfo
         fields = ('userid',
@@ -39,11 +45,16 @@ class READONLYRunInfoTable(tables.Table):
                   'tracking',
                   'comment',
                   'date')
-        attrs = {'class': 'table table table-hover table-bordered'}
-
+        attrs = {'class': 'table table-hover table-bordered'}
 
 
 class ReferenceRunTable(tables.Table):
     class Meta:
         model = ReferenceRun
-        attrs = {'class': 'table table table-hover table-bordered'}
+        fields = ['id', 'reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset', ]
+        attrs = {'class': 'table table-hover table-bordered'}
+
+
+class ShiftleaderRunInfoTable(RunInfoTable):
+    class Meta:
+        attrs = {'class': 'table table-hover table-bordered'}

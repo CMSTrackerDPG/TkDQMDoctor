@@ -1,11 +1,32 @@
+import datetime
+
 from django import template
+from django.utils import timezone
 
 register = template.Library()
+
 
 @register.filter(name='addclass')
 def addclass(value, arg):
     return value.as_widget(attrs={'class': arg})
 
+
 @register.filter(name='addplaceholder')
 def addplaceholder(value, arg):
     return value.as_widget(attrs={'placeholder': arg})
+
+
+@register.filter
+def dateoffset(value, offset):
+    """
+    Shift a date by given offset.
+    Example: dateoffset("2018-10-21", 2) => "2018-10-23"
+    """
+    newdate = datetime.datetime.strptime(value, '%Y-%m-%d') + timezone.timedelta(offset)
+    return newdate.strftime('%Y-%m-%d')
+
+
+@register.filter
+def yyyymmdd_to_ddmmyyyy(value):
+    newdate = datetime.datetime.strptime(value, '%Y-%m-%d')
+    return newdate.strftime('%d-%m-%Y')

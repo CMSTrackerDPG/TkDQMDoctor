@@ -1,13 +1,18 @@
 from django.contrib.auth import logout
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.shortcuts import render
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
-from django_tables2 import RequestConfig, SingleTableView
+from django_filters.views import FilterView
+from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
-from certhelper.filters import RunInfoFilter
+from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id
+from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
+from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id, \
+    request_contains_filter_parameter, get_this_week_filter_parameter
 from .forms import *
 from .tables import *
 
@@ -21,9 +26,14 @@ class CreateRun(generic.CreateView):
     template_name_suffix = '_form'
     success_url = '/'
 
-    def form_valid(self, form_class):
-        form_class.instance.userid = self.request.user
-        return super(CreateRun, self).form_valid(form_class)
+    # def form_valid(self, form_class):
+    # form_class.instance.userid = self.request.user
+    # return super(CreateRun, self).form_valid(form_class)
+
+    def get_initial(self):
+        initial = super(CreateRun, self).get_initial()
+        initial["userid"] = self.request.user
+        return initial
 
 
 def listruns(request):
@@ -76,9 +86,9 @@ class UpdateRun(generic.UpdateView):
     success_url = '/'
     template_name = 'certhelper/runinfo_form.html'
 
-    def form_valid(self, form_class):
-        form_class.instance.userid = self.request.user
-        return super(UpdateRun, self).form_valid(form_class)
+    # def form_valid(self, form_class):
+    # form_class.instance.userid = self.request.user # not neccessary to update
+    #    return super(UpdateRun, self).form_valid(form_class)
 
 
 class DeleteRun(generic.DeleteView):
@@ -266,6 +276,70 @@ def load_subsubcategories(request):
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
 
 
+# def shiftleader_view(request):
+#    table = ShiftleaderRunInfoTable(RunInfo.objects.all())
+#    RequestConfig(request).configure(table)
+#    return render(request, 'certhelper/shiftleader.html', {'table': table})
+
+
+# TODO make this faster, unneccessary databaes queries slows down page load when no filters are applied
+def generate_summary(queryset):
+    runs = queryset
+    context = {}
+
+    reference_run_ids = runs.values_list('reference_run').distinct()
+    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
+
+    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
+
+    runinfotypelists = []  # create one runinfotypelist per type
+
+    for run in runs:
+        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
+            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
+        runinfotypelists[-1].add_run(run)
+
+    context['runs'] = []
+    context['tk_maps'] = []
+    context['certified_runs'] = []
+    context['sums'] = []
+
+    for runinfotypelist in runinfotypelists:
+        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
+        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
+        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
+        context['sums'].append(runinfotypelist.get_sums_ascii_table())
+
+    return context
+
+
+def shiftleader_view(request):
+    """
+    if no fitler parameters are specified than every run from every user will be listed
+    to prevent this we make sure that at least one filter is applied.
+
+    if someone wants to list all runs form all users then he has to specify that explicitly
+    in the filter (setting everything to nothing)
+    """
+    if request_contains_filter_parameter(request):
+        return ShiftLeaderView.as_view()(request=request)
+    return HttpResponseRedirect("/shiftleader/%s" % get_this_week_filter_parameter())
+
+
+# TODO lazy load summary
+class ShiftLeaderView(SingleTableMixin, FilterView):
+    table_class = ShiftleaderRunInfoTable
+    model = RunInfo
+    template_name = "certhelper/shiftleader.html"
+    filterset_class = ShiftLeaderRunInfoFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['summary'] = generate_summary(self.filterset.qs)
+        context['slreport'] = ShiftLeaderReport(self.filterset.qs).get_context()
+        return context
+
+
 def hard_deleteview(request, run_number):
     try:
         run = RunInfo.all_objects.get(run_number=run_number)
@@ -275,5 +349,5 @@ def hard_deleteview(request, run_number):
     if request.method == "POST":
         run.hard_delete()
         return HttpResponseRedirect('/')
-    
+
     return render(request, 'certhelper/hard_delete.html', {'run': run})

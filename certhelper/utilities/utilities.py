@@ -1,5 +1,7 @@
 import datetime
 
+from django.utils import timezone
+
 
 def is_valid_date(date_text):
     try:
@@ -51,16 +53,59 @@ def get_filters_from_request_GET(request):
     day = request.GET.get('date_day', '')
 
     the_date = get_date_string(year, month, day)
-    if (the_date):
+    if the_date:
         applied_filters['date'] = the_date
 
     return applied_filters
 
 
-def is_valid_id(id, Classname):
+def is_valid_id(primary_key, Classname):
     try:
-        if Classname.objects.filter(pk=id):
+        if Classname.objects.filter(pk=primary_key):
             return True
     except:
         return False
     return False
+
+
+def request_contains_filter_parameter(request):
+    for candidate in ["date", "userid"]:
+        for word in request.GET:
+            if candidate in word:
+                return True
+    return False
+
+
+def get_this_week_filter_parameter():
+    start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
+    end_of_week = start_of_week + timezone.timedelta(6)
+    get_parameters = "?date__gte_day=" + str(start_of_week.day)
+    get_parameters += "&date__gte_month=" + str(start_of_week.month)
+    get_parameters += "&date__gte_year=" + str(start_of_week.year)
+    get_parameters += "&date__lte_day=" + str(end_of_week.day)
+    get_parameters += "&date__lte_month=" + str(end_of_week.month)
+    get_parameters += "&date__lte_year=" + str(end_of_week.year)
+    return get_parameters
+
+
+def get_from_summary(summary, runtype=None, reco=None, date=None):
+    filtered = summary
+    if runtype:
+        filtered = [item for item in filtered if item['type__runtype'] == runtype]
+    if reco:
+        filtered = [item for item in filtered if item['type__reco'] == reco]
+    if date:
+        filtered = [item for item in filtered if item['date'] == to_date(date)]
+    return filtered
+
+
+def to_date(date, formatstring="%Y-%m-%d"):
+    if isinstance(date, datetime.date):
+        return date
+    if isinstance(date, datetime.datetime):
+        return date.date()
+    return datetime.datetime.strptime(date, formatstring).date()
+
+
+def to_weekdayname(date, formatstring="%Y-%m-%d"):
+    return to_date(date, formatstring).strftime("%A")

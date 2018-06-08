@@ -1,0 +1,42 @@
+{% load myfilters %}
+
+{% for day in slreport.day %}
+    <div id="slr-{{ day.date }}" class="tab-pane fade">
+        <h3>Day by day notes: {{ day.name|title }}, {{ day.date }}</h3>
+        <p>
+        <ul>
+            <li>Fills <strong>[list of fills]</strong>
+                <ul>
+                    <li>
+                        <strong>[insert here]</strong> colliding bunches, peak lumi <strong>[insert here]</strong> x 10<sup>33</sup> cm<sup>2</sup>/s
+                    </li>
+                </ul>
+            </li>
+            <li>Number of runs certified:
+                <ul>
+                    <li>Collisions: <strong>{{ day.Collisions.Express.number_of_runs }}</strong> in Stream-Express (<strong>{{ day.Collisions.Express.int_lum }} pb<sup>-1</sup></strong>), <strong>{{ day.Collisions.Prompt.number_of_runs }}</strong> in Prompt-Reco (<strong>{{ day.Collisions.Prompt.int_lum }} pb<sup>-1</sup></strong>)</li>
+                    <li>Cosmics: <strong>{{ day.Cosmics.Express.number_of_runs }}</strong> in Stream Express, <strong>{{ day.Cosmics.Prompt.number_of_runs }}</strong> in Prompt Reco</li>
+                </ul>
+            </li>
+            <li>
+                Total number of BAD runs = <strong>{{ day.Bad.number_of_runs }}</strong> (<strong>{{ day.Bad.int_lum }} pb<sup>-1</sup></strong>) (see next slide for details)
+                <ul>
+                    <li>Number of changed flags from Express to Prompt=<strong>[insert here]</strong></li>
+                </ul>
+            </li>
+            <li>
+                Conditions update:
+            </li>
+            <li>
+                Issues reported in the Elog and feedback to Online:
+            </li>
+            <li>
+                On-calls:
+            </li>
+        </ul>
+
+        Daily Shifter Summaries: <strong>link1</strong>, <strong>link2</strong>
+        Prompt Feedback plots: <strong>link1</strong>
+        </p>
+    </div>
+{% endfor %}

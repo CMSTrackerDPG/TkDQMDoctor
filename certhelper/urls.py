@@ -22,6 +22,7 @@ from . import views
 app_name = 'certhelper'
 urlpatterns = [
     url(r'^$', views.listruns, name='list'),
+    url(r'^shiftleader/$', staff_member_required(views.shiftleader_view), name='shiftleader'),
     url(r'^summary/$',      login_required(views.summaryView),   name='summary'),
     url(r'^references/$',                  views.ListReferences.as_view(), name='references'),
     url(r'^create/$',       login_required(views.CreateRun.as_view()),     name='create'),

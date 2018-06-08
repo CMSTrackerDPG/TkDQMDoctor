@@ -15,10 +15,11 @@ install:
   - pip install codecov
   - pip install pytest-django
   - pip install pytest-cov
+  - pip install mixer
 
 before_script:
 script:
-  - pytest
+  - pytest --cov=.
 
 after_success:
   - codecov
