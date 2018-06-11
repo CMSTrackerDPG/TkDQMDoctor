@@ -13,12 +13,13 @@ TypeForm           |  Type
 
 
 """
-
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
 from certhelper.manager import SoftDeletionManager
+from certhelper.utilities.utilities import get_full_name
 
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Collisions', 'Collisions'))
@@ -151,11 +152,12 @@ class RunInfo(SoftDeletionModel):
     subsubcategory = models.ForeignKey(SubSubCategory, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
-        unique_together = ["run_number", "type", "trackermap"]
         ordering = ('-run_number',)
 
     def __str__(self):
-        return str(self.run_number)
+        return str(self.run_number) + ", " + str(self.type.runtype) + " " + str(self.type.reco) + \
+               " (ref: " + str(self.reference_run.reference_run) + ", " + \
+               str(self.reference_run.runtype) + " " + str(self.reference_run.reco) + ")"
 
     def is_good(self):
         assert self.type.runtype in ['Cosmics', 'Collisions']
@@ -168,3 +170,30 @@ class RunInfo(SoftDeletionModel):
             if candidate not in good_criteria:
                 return False
         return True
+
+    def validate_unique(self, exclude=None):
+        qs = RunInfo.objects.filter(
+            run_number=self.run_number,
+            type=self.type,
+            reference_run=self.reference_run
+        )
+
+        if qs.exists():
+            if len(qs) == 1:
+                print("length is one")
+            else:
+                print("length is {}".format(len(qs)))
+            run = qs[0]
+            raise ValidationError(
+                'This run ({}, {} {}, (ref: {})) was already certified by {} on {}'.format(
+                    run.run_number,
+                    run.type.runtype,
+                    run.type.reco,
+                    run.reference_run.reference_run,
+                    get_full_name(run.userid),
+                    run.date)
+            )
+
+    def save(self):
+        self.validate_unique()
+        super(RunInfo, self).save()

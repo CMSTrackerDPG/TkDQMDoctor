@@ -1,5 +1,7 @@
 import datetime
 
+from django.contrib.auth.models import User
+
 
 def is_valid_date(date_text):
     try:
@@ -64,3 +66,18 @@ def is_valid_id(id, Classname):
     except:
         return False
     return False
+
+
+def get_full_name(user):
+    name = ""
+    if user.first_name:
+        name += str(user.first_name) + " "
+    if user.last_name:
+        name += str(user.last_name) + " "
+
+    if name:
+        name += "(" + str(user.username) + ")"
+    else:
+        name += str(user.username)
+
+    return name
