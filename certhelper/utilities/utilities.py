@@ -109,3 +109,18 @@ def to_date(date, formatstring="%Y-%m-%d"):
 
 def to_weekdayname(date, formatstring="%Y-%m-%d"):
     return to_date(date, formatstring).strftime("%A")
+
+
+def get_full_name(user):
+    name = ""
+    if user.first_name:
+        name += str(user.first_name) + " "
+    if user.last_name:
+        name += str(user.last_name) + " "
+
+    if name:
+        name += "(" + str(user.username) + ")"
+    else:
+        name += str(user.username)
+
+    return name
