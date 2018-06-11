@@ -46,13 +46,13 @@ class SoftDeletionModel(models.Model):
     class Meta:
         abstract = True
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if not self.created_at:
             self.created_at = timezone.now()
         self.updated_at = timezone.now()
-        super(SoftDeletionModel, self).save()
+        super(SoftDeletionModel, self).save(*args, **kwargs)
 
-    def delete(self):
+    def delete(self, *args, **kwargs):
         self.deleted_at = timezone.now()
         self.save()
 
