@@ -178,11 +178,11 @@ class RunInfo(SoftDeletionModel):
             reference_run=self.reference_run
         )
 
-        if qs.exists():
-            if len(qs) == 1:
-                print("length is one")
-            else:
-                print("length is {}".format(len(qs)))
+        # If noone else certified the run and I am not editing the Run
+        if qs.exists() and qs[0].pk != self.pk:
+            if len(qs) != 1:
+                # TODO Logging Warning, duplicate certification
+                pass
             run = qs[0]
             raise ValidationError(
                 'This run ({}, {} {}, (ref: {})) was already certified by {} on {}'.format(
