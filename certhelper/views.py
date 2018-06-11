@@ -26,14 +26,9 @@ class CreateRun(generic.CreateView):
     template_name_suffix = '_form'
     success_url = '/'
 
-    # def form_valid(self, form_class):
-    # form_class.instance.userid = self.request.user
-    # return super(CreateRun, self).form_valid(form_class)
-
-    def get_initial(self):
-        initial = super(CreateRun, self).get_initial()
-        initial["userid"] = self.request.user
-        return initial
+    def form_valid(self, form_class):
+        form_class.instance.userid = self.request.user
+        return super(CreateRun, self).form_valid(form_class)
 
 
 def listruns(request):
