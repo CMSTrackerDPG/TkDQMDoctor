@@ -51,11 +51,10 @@ Option2 on the other hand is prefered if you want to add styling (bootstrap clas
 to a lot of you attributes of the Model.
 """
 
-from django.core.exceptions import ValidationError
 from django import forms
-from django.forms import ModelForm, TextInput, Textarea
+from django.forms import ModelForm, TextInput
+
 from .models import *
-from django.utils import timezone
 
 
 class DateInput(forms.DateInput):

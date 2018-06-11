@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, Q, Count, Sum, FloatField, DecimalField
+from django.db.models import QuerySet, Q, Count, Sum, FloatField
 from django.db.models.functions import ExtractWeekDay
 from django.utils import timezone
 
