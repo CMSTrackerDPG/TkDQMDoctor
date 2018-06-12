@@ -1,7 +1,10 @@
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import generic
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
@@ -15,6 +18,7 @@ from .forms import *
 from .tables import *
 
 
+@method_decorator(login_required, name="dispatch")
 class CreateRun(generic.CreateView):
     """Form which allows for creation of a new entry in RunInfo
     """
@@ -61,6 +65,7 @@ def listruns(request):
     })
 
 
+@method_decorator(login_required, name="dispatch")
 class ListReferences(SingleTableView):
     """Display ReferenceRuns in a tableview
     !!! USES DJANGO-TABLES2 !!! 
@@ -70,6 +75,7 @@ class ListReferences(SingleTableView):
     table_class = ReferenceRunTable
 
 
+@method_decorator(login_required, name="dispatch")
 class UpdateRun(generic.UpdateView):
     """Updates a specific Run from the RunInfo table
     """
@@ -84,6 +90,7 @@ class UpdateRun(generic.UpdateView):
     #    return super(UpdateRun, self).form_valid(form_class)
 
 
+@method_decorator(login_required, name="dispatch")
 class DeleteRun(generic.DeleteView):
     """Deletes a specific Run from the RunInfo table    
     """
@@ -94,6 +101,7 @@ class DeleteRun(generic.DeleteView):
     template_name_suffix = '_delete_form'
 
 
+@method_decorator(login_required, name="dispatch")
 class CreateType(generic.CreateView):
     """Form to create a new Type (RunType)
     """
@@ -105,6 +113,8 @@ class CreateType(generic.CreateView):
 
 
 # TODO clean up this mess
+
+@login_required
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
@@ -233,6 +243,7 @@ def summaryView(request):
     return render(request, 'certhelper/summary.html', context)
 
 
+@login_required
 def logout_view(request):
     """ Logout current user
     """
@@ -242,6 +253,7 @@ def logout_view(request):
         callback_url += request.META['HTTP_HOST']
         callback_url += reverse('certhelper:logout_status')
         return HttpResponseRedirect(callback_url)
+    return HttpResponseRedirect('/')
 
 
 def logout_status(request):
@@ -306,9 +318,10 @@ def generate_summary(queryset):
     return context
 
 
+@staff_member_required
 def shiftleader_view(request):
     """
-    if no fitler parameters are specified than every run from every user will be listed
+    if no filter parameters are specified than every run from every user will be listed
     to prevent this we make sure that at least one filter is applied.
 
     if someone wants to list all runs form all users then he has to specify that explicitly
@@ -320,6 +333,7 @@ def shiftleader_view(request):
 
 
 # TODO lazy load summary
+@method_decorator(staff_member_required, name="dispatch")
 class ShiftLeaderView(SingleTableMixin, FilterView):
     table_class = ShiftleaderRunInfoTable
     model = RunInfo
@@ -333,6 +347,8 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
         return context
 
 
+# TODO superuser required
+@staff_member_required
 def hard_deleteview(request, run_number):
     try:
         run = RunInfo.all_objects.get(run_number=run_number)
