@@ -100,10 +100,10 @@ def get_from_summary(summary, runtype=None, reco=None, date=None):
 
 
 def to_date(date, formatstring="%Y-%m-%d"):
-    if isinstance(date, datetime.date):
-        return date
     if isinstance(date, datetime.datetime):
         return date.date()
+    if isinstance(date, datetime.date):
+        return date
     return datetime.datetime.strptime(date, formatstring).date()
 
 
