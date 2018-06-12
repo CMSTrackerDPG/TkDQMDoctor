@@ -201,7 +201,7 @@ class TestRunInfoManager:
         assert len(get_from_summary(summary, date="2018-05-14")) == 4
         assert len(get_from_summary(summary, runtype="Collisions", date="2018-05-14")) == 2
         assert len(get_from_summary(summary, reco="Express", date="2018-05-14")) == 2
-        assert len(get_from_summary(summary, "Collisions",  "Express", "2018-05-14")) == 1
+        assert len(get_from_summary(summary, "Collisions", "Express", "2018-05-14")) == 1
         assert len(get_from_summary(summary, date="2018-05-15")) == 1
         assert len(get_from_summary(summary, date="2018-05-16")) == 0
         assert len(get_from_summary(summary, date="2018-05-17")) == 1
@@ -212,3 +212,38 @@ class TestRunInfoManager:
         assert get_from_summary(summary, date="2018-05-18")[0]["int_luminosity"] == 154667.12
         assert get_from_summary(summary, date="2018-05-18")[0]["number_of_ls"] == 144
         assert get_from_summary(summary, date="2018-05-14")[2]["int_luminosity"] == 0.12
+
+    def test_get_queryset(self):
+        mixer.blend('certhelper.RunInfo', run_number=123456)
+        mixer.blend('certhelper.RunInfo', run_number=234567)
+
+        assert len(RunInfo.objects.all()) == 2
+        assert len(RunInfo.all_objects.all()) == 2
+        RunInfo.objects.hard_delete()
+        assert RunInfo.objects.exists() is False
+        assert RunInfo.all_objects.exists() is False
+
+    def test_alive_only(self):
+        mixer.blend('certhelper.RunInfo', run_number=123456)
+        mixer.blend('certhelper.RunInfo', run_number=234567)
+        mixer.blend('certhelper.RunInfo', run_number=345678)
+        mixer.blend('certhelper.RunInfo', run_number=456789)
+        mixer.blend('certhelper.RunInfo', run_number=567890)
+
+        assert len(RunInfo.objects.all()) == 5
+
+        RunInfo.objects.filter(run_number__gt=300000).delete()
+
+        assert len(RunInfo.objects.all()) == 2
+        assert len(RunInfo.objects.all().alive()) == 2
+        assert len(RunInfo.objects.all().dead()) == 0
+        assert len(RunInfo.all_objects.all()) == 5
+        assert len(RunInfo.all_objects.all().alive()) == 2
+        assert len(RunInfo.all_objects.all().dead()) == 3
+
+        RunInfo.all_objects.filter(run_number__gt=300000).dead().restore()
+        assert len(RunInfo.objects.all()) == 5
+        assert len(RunInfo.all_objects.all()) == 5
+        assert len(RunInfo.all_objects.all().alive()) == 5
+        assert len(RunInfo.all_objects.all().dead()) == 0
+
