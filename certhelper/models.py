@@ -74,6 +74,7 @@ class Category(SoftDeletionModel):
         return str(self.name)
 
 
+# TODO make parent_category not nullable
 class SubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
     parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
@@ -85,6 +86,7 @@ class SubCategory(SoftDeletionModel):
         return str(self.name)
 
 
+# TODO make parent_category not nullable
 class SubSubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
     parent_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
@@ -178,6 +180,9 @@ class RunInfo(SoftDeletionModel):
         return not self.is_good()
 
     def validate_unique(self, exclude=None):
+        if not self.type_id:
+            raise ValidationError("Type is empty")
+
         qs = RunInfo.objects.filter(
             run_number=self.run_number,
             type=self.type,
