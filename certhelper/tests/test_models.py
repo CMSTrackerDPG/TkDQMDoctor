@@ -109,8 +109,8 @@ class TestRuninfo:
 
     def test_validate_unique(self):
         with pytest.raises(ValidationError):
-            t: Type = mixer.blend('certhelper.Type')
-            ref: ReferenceRun = mixer.blend('certhelper.ReferenceRun')
+            t = mixer.blend('certhelper.Type')
+            ref = mixer.blend('certhelper.ReferenceRun')
 
             r1 = mixer.blend('certhelper.RunInfo',
                              run_number=123456,
