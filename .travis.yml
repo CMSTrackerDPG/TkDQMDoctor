@@ -7,7 +7,7 @@ services: postgresql
 
 env:
   - DJANGO_VERSION=1.11
-  - DJANGO_VERSION=2.0
+# - DJANGO_VERSION=2.0
 
 install:
   - pip install -r requirements.txt
@@ -19,7 +19,8 @@ install:
 
 before_script:
 script:
-  - pytest --cov=.
+  - PYTHONWARNINGS=all pytest --cov=.
+  - python -Wall manage.py test
 
 after_success:
   - codecov
