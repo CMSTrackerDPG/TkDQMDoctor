@@ -1,7 +1,7 @@
 import django_filters
 from django import forms
 from django.contrib.auth.models import User
-from django.forms.extras.widgets import SelectDateWidget
+from django.forms.widgets import SelectDateWidget
 from django.utils import timezone
 from django.db import models
 from certhelper.models import RunInfo, SubCategory, SubSubCategory, Type
