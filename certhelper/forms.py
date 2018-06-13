@@ -121,6 +121,7 @@ class RunInfoForm(ModelForm):
                 if self.instance.subcategory:
                     self.fields['subsubcategory'].queryset = self.instance.subcategory.subsubcategory_set
 
+    # TODO write dedicated clean_tracking, clean_... instead one single clean
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
 
