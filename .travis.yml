@@ -3,11 +3,11 @@ python:
   - "3.5"
   - "3.6"
 
-services: postgresql
+#services: postgresql
 
 env:
   - DJANGO_VERSION=1.11
-# - DJANGO_VERSION=2.0
+  - DJANGO_VERSION=2.0
 
 install:
   - pip install -r requirements.txt

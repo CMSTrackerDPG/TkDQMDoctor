@@ -16,6 +16,7 @@ def assert_view_requires_no_login(view):
     resp = get_view_response(view, req)
     assert resp.status_code == 200
 
+
 def assert_view_requires_login(view):
     req = RequestFactory().get("/")
     req.user = AnonymousUser()
@@ -43,7 +44,6 @@ def get_view_response(view, req):
     if isinstance(view, types.FunctionType):
         return view(req)
     return view.as_view()(req)
-
 
 
 def test_authentication():
@@ -77,9 +77,9 @@ class TestUpdateRun():
         assert resp.status_code == 200
 
     def test_post(self):
+        assert not RunInfo.objects.all().exists()
         run = mixer.blend("certhelper.RunInfo", run_number=654321)
-        # TODO test model_to_dict
-
+        assert RunInfo.objects.all().exists()
         data = {
             'type': run.type.pk,
             'reference_run': run.reference_run.pk,
@@ -90,13 +90,21 @@ class TestUpdateRun():
             'pixel': run.pixel,
             'sistrip': run.sistrip,
             'tracking': run.tracking,
-            'date': run.date,
+            'comment': "",
+            'date': run.date
         }
-        req = RequestFactory().post("/bla/", data=data)
-        req.user = mixer.blend(User)
-        resp = UpdateRun.as_view()(req, pk=run.pk)
-        #assert resp.status_code == 302, "should redirect to success view"
-        #assert resp.url == "/"
+
+        form = RunInfoForm(data=data)
+
+        assert {} == form.errors
+        assert True is form.is_valid()
+
+        req = RequestFactory().post(reverse("certhelper:update", kwargs={'pk': run.pk}), data=form.data)
+        req.user = run.userid
+        view = UpdateRun.as_view()
+        resp = view(req, pk=run.pk)
+        assert 302 == resp.status_code, "should redirect to success view"
+        assert resp.url == "/"
         assert run.run_number != 123445
         run.refresh_from_db()
         assert run.run_number == 123445
