@@ -40,7 +40,7 @@ def listruns(request):
     # We make sure that the logged in user can only see his own runs
     # In case the user is not logged in we show all objects
     # but remove the edit and remove buttons from the tableview.
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         run_info_list = RunInfo.objects.filter(userid=request.user)
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
         table = RunInfoTable(run_info_filter.qs)
