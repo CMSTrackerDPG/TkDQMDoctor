@@ -5,6 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 from mixer.backend.django import mixer
 
+import certhelper
 from certhelper.views import *
 
 pytestmark = pytest.mark.django_db
@@ -59,7 +60,55 @@ def test_authentication():
     assert_view_requires_staff(shiftleader_view)
 
 
-class TestUpdateRun():
+class TestCreateRun:
+    def test_invalid(self):
+        data = {
+            'type': mixer.blend("certhelper.Type").pk,
+            'reference_run': mixer.blend("certhelper.ReferenceRun").pk,
+            'run_number': 123445
+        }
+
+        form = RunInfoForm(data=data)
+
+        assert {} != form.errors
+        assert False is form.is_valid()
+
+        req = RequestFactory().post(reverse("certhelper:create"), data=form.data)
+        req.user = mixer.blend(User)
+        resp = CreateRun.as_view()(req)
+        assert 200 == resp.status_code, "should not redirect to success view"
+
+        assert not RunInfo.objects.exists()
+
+    def test_valid(self):
+        data = {
+            'type': mixer.blend("certhelper.Type").pk,
+            'reference_run': mixer.blend("certhelper.ReferenceRun").pk,
+            'run_number': 123445,
+            'trackermap': "Exists",
+            'number_of_ls': 12,
+            'int_luminosity': 42,
+            'pixel': "Good",
+            'sistrip': "Good",
+            'tracking': "Good",
+            'comment': "",
+            'date': "2018-01-01"
+        }
+
+        form = RunInfoForm(data=data)
+
+        assert {} == form.errors
+        assert form.is_valid()
+
+        req = RequestFactory().post(reverse("certhelper:create"), data=form.data)
+        req.user = mixer.blend(User)
+        resp = CreateRun.as_view()(req)
+        assert 302 == resp.status_code, "should not redirect to success view"
+        assert "/" == resp.url
+        assert RunInfo.objects.exists()
+
+
+class TestUpdateRun:
     # TODO: test if you can only edit your own runs
     def test_anonymous(self):
         run = mixer.blend("certhelper.RunInfo")
@@ -85,11 +134,11 @@ class TestUpdateRun():
             'reference_run': run.reference_run.pk,
             'run_number': 123445,
             'trackermap': run.trackermap,
-            'number_of_ls': run.number_of_ls,
-            'int_luminosity': run.int_luminosity,
-            'pixel': run.pixel,
-            'sistrip': run.sistrip,
-            'tracking': run.tracking,
+            'number_of_ls': 12,
+            'int_luminosity': 42,
+            'pixel': "Good",
+            'sistrip': "Good",
+            'tracking': "Good",
             'comment': "",
             'date': run.date
         }
@@ -115,3 +164,159 @@ class TestUpdateRun():
     # logout_view
     # load_subcategories
     # load_subsubcategories
+
+
+class TestListRuns:
+    def test_listruns(self):
+        req = RequestFactory().get("/")
+        req.user = mixer.blend(User)
+        resp = get_view_response(listruns, req)
+        assert resp.status_code == 200
+
+    def test_filter_parameters(self):
+        # TODO test invalid parameter values
+        req = RequestFactory().get("/")
+        req.user = mixer.blend(User)
+        req.GET = req.GET.copy()
+        req.GET['category'] = "1"
+        req.GET['subcategory'] = "2"
+        req.GET['subsubcategory'] = "3"
+        req.GET['date_range_0'] = "2018-06-13"
+        req.GET['date_range_1'] = "2018-06-13"
+        req.GET['runs_0'] = "42"
+        req.GET['runs_1'] = "1728"
+        req.GET['type'] = "3"
+        resp = get_view_response(listruns, req)
+        assert resp.status_code == 200
+
+
+class TestSummaryView:
+    def test_no_filters(self):
+        req = RequestFactory().get("/")
+        req.user = mixer.blend(User)
+        resp = get_view_response(listruns, req)
+        assert resp.status_code == 200
+
+    def test_with_filters(self):
+        req = RequestFactory().get("/")
+        req.user = mixer.blend(User)
+        req.GET = req.GET.copy()
+
+        mixer.blend("certhelper.Category")
+        mixer.blend("certhelper.SubCategory")
+        mixer.blend("certhelper.SubSubCategory")
+
+        req.GET["date"] = "2018-06-01"
+        req.GET['category'] = "1"
+        req.GET['subcategory'] = "1"
+        req.GET['subsubcategory'] = "1"
+        req.GET['date_range_0'] = "2018-06-13"
+        req.GET['date_range_1'] = "2018-06-13"
+        req.GET['runs_0'] = "42"
+        req.GET['runs_1'] = "1728"
+        req.GET['type'] = "3"
+        resp = get_view_response(summaryView, req)
+        assert resp.status_code == 200
+
+    def test_with_invalid_filters(self):
+        req = RequestFactory().get("/")
+        req.user = mixer.blend(User)
+        req.GET = req.GET.copy()
+
+        req.GET["date"] = "20sfd18-06-01"
+        req.GET['category'] = "1"
+        req.GET['subcategory'] = "2"
+        req.GET['subsubcategory'] = "3"
+        req.GET['date_range_0'] = "201-asasgsa6-13"
+        req.GET['date_range_1'] = "BLUME"
+        req.GET['runs_0'] = "sadfasdf"
+        req.GET['runs_1'] = "ýxkushd"
+        req.GET['type'] = " asad /4332re"
+        resp = get_view_response(summaryView, req)
+        assert resp.status_code == 200
+
+
+class TestLoadCategories:
+    def test_load_invalid_subcategories(self):
+        req = RequestFactory().get("/")
+        resp = load_subcategories(req)
+        assert resp.status_code == 200
+
+    def test_load_valid_subcategories(self):
+        req = RequestFactory().get("/")
+        req.GET = req.GET.copy()
+        req.GET["categoryid"] = mixer.blend("certhelper.Category").id
+        resp = load_subcategories(req)
+        assert resp.status_code == 200
+
+    def test_load_invalid_subsubcategories(self):
+        req = RequestFactory().get("/")
+        resp = load_subsubcategories(req)
+        assert resp.status_code == 200
+
+    def test_load_valid_subsubcategories(self):
+        req = RequestFactory().get("/")
+        req.GET = req.GET.copy()
+        req.GET["subcategoryid"] = mixer.blend("certhelper.SubCategory").id
+        resp = load_subsubcategories(req)
+        assert resp.status_code == 200
+
+
+class TestHardDeleteView:
+    def test_authentication(self):
+        run = mixer.blend("certhelper.RunInfo")
+        req = RequestFactory().get("/")
+        req.user = AnonymousUser()
+        resp = hard_deleteview(req, run.run_number)
+        assert resp.status_code == 302
+        assert "login" in resp.url
+
+        assert RunInfo.objects.exists()
+
+        req.user = mixer.blend(User, is_staff=False)
+        resp = hard_deleteview(req, run.run_number)
+        assert resp.status_code == 302
+        assert "login" in resp.url
+
+        assert RunInfo.objects.exists()
+
+        req.user = mixer.blend(User, is_staff=True)
+        resp = hard_deleteview(req, run.run_number)
+        assert resp.status_code == 200
+
+        assert RunInfo.objects.exists()
+
+    def test_hard_delete_post(self):
+
+        run = mixer.blend("certhelper.RunInfo")
+        req = RequestFactory().post("/")
+        req.user = AnonymousUser()
+        resp = hard_deleteview(req, run.run_number)
+        assert resp.status_code == 302
+        assert "login" in resp.url
+
+        assert RunInfo.objects.exists()
+
+        req.user = mixer.blend(User, is_staff=False)
+        resp = hard_deleteview(req, run.run_number)
+        assert resp.status_code == 302
+        assert "login" in resp.url
+
+        assert RunInfo.objects.exists()
+
+        req.user = mixer.blend(User, is_staff=True)
+        resp = hard_deleteview(req, run.run_number)
+        assert resp.status_code == 302
+        assert "login" not in resp.url
+
+        assert not RunInfo.objects.exists(), "Successfully deleted"
+
+    def test_doesnotexist(self):
+        req = RequestFactory().get("/")
+        req.user = mixer.blend(User, is_staff=True)
+        with pytest.raises(Http404):
+            hard_deleteview(req, 42)
+
+
+
+
