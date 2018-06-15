@@ -1,7 +1,8 @@
+import re
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -265,7 +266,7 @@ def logout_status(request):
 
 def load_subcategories(request):
     category_id = request.GET.get('categoryid')
-    if (category_id):
+    if category_id:
         subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
     else:
         subcategories = SubCategory.objects.none()
@@ -274,7 +275,7 @@ def load_subcategories(request):
 
 def load_subsubcategories(request):
     subcategory_id = request.GET.get('subcategoryid')
-    if (subcategory_id):
+    if subcategory_id:
         subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
     else:
         subsubcategories = SubCategory.objects.none()
@@ -360,3 +361,11 @@ def hard_deleteview(request, run_number):
         return HttpResponseRedirect('/')
 
     return render(request, 'certhelper/hard_delete.html', {'run': run})
+
+
+def validate_central_certification_list(request):
+    text = request.GET.get('text', None)
+    run_numbers = re.sub('[^0-9]', ' ', text).split()  # only run_numbers
+    run_numbers = set(run_numbers)  # remove duplicates
+    data = RunInfo.objects.all().compare_list_if_certified(run_numbers)
+    return JsonResponse(data)

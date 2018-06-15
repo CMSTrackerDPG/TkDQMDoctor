@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.models import QuerySet, Q, Count, Sum, FloatField
 from django.db.models.functions import ExtractWeekDay
 from django.utils import timezone
@@ -75,3 +76,40 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
                 number_of_ls=Sum('number_of_ls'),
                 day=(ExtractWeekDay('date'))
             )
+
+    def compare_list_if_certified(self, list_of_run_numbers):
+        """
+        :param list_of_run_numbers: list of run_numbers e.g. [317696, 123456, 317696, 317696]
+        :type list_of_run_numbers: list
+        :return: dictionary of run_numbers
+        :rtype: dictionary {"good": [], "bad": [], "missing": [], "conflicting": []}
+        """
+
+        d = {"good": [], "bad": [], "missing": [], "conflicting": []}
+        for run_number in list_of_run_numbers:
+            try:
+                run = self.get(run_number=run_number)
+                if run.is_good():
+                    d["good"].append(run_number)
+                else:
+                    d["bad"].append(run_number)
+            except (ObjectDoesNotExist, ValueError):
+                d["missing"].append(run_number)
+            except MultipleObjectsReturned:
+                runs = self.filter(run_number=run_number)
+                is_good = runs[0].is_good()
+                conflict = False
+                for run in runs:
+                    if run.is_good() != is_good:
+                        conflict = True
+                if conflict:
+                    d["conflicting"].append(run_number)
+                elif is_good:
+                    d["good"].append(run_number)
+                else:
+                    d["bad"].append(run_number)
+        return d
+
+
+
+

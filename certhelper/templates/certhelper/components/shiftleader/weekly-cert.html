@@ -1,5 +1,10 @@
 
 <div id="slr-weekly-cert" class="tab-pane fade in active">
+    <div class="form-group">
+        <label for="cc-input">List of central certification runs:</label>
+        <input type="text" class="form-control" name="central-cert-in" size="30" id="id-cc-input" autofocus="">
+    </div>
+
     <h3>Weekly Certification</h3>
     <p>
         <ul>
@@ -25,7 +30,7 @@
 </li>
     <li>Central certification:
         <ul>
-            <li>list of runs <b>[insert here]</b></li>
+            <li>list of runs <span id="id-cc-span"><b>[insert here]</b></span><span id="id-cc-legend"></span></li>
             <li>deadline has been met?</li>
         </ul>
     </li>

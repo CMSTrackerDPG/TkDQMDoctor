@@ -2,9 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from mixer.backend.django import mixer
 
-from certhelper.models import ReferenceRun
 from certhelper.models import RunInfo
-from certhelper.models import Type
 
 pytestmark = pytest.mark.django_db
 

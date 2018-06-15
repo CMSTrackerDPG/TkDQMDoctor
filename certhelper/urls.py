@@ -51,6 +51,7 @@ urlpatterns = [
     url(r'^logout/', views.logout_view, name='logout'),
     url(r'^logout-status/', views.logout_status, name='logout_status'),
 
-    url('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
-    url('ajax/load-subsubcategories/', views.load_subsubcategories, name='ajax_load_subsubcategories'),
+    url(r'^ajax/load-subcategories/$', views.load_subcategories, name='ajax_load_subcategories'),
+    url(r'^ajax/load-subsubcategories/$', views.load_subsubcategories, name='ajax_load_subsubcategories'),
+    url(r'^ajax/validate-cc-list/$', views.validate_central_certification_list, name='ajax_validate_cc_list'),
 ]

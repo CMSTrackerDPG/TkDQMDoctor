@@ -1,5 +1,9 @@
 {% extends 'certhelper/base.html' %}
 
+{% block style %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "certhelper/components/shiftleader.css" %}" type="text/css">
+{% endblock style %}
 {% block content %}
     {% load render_table from django_tables2 %}
     {% load bootstrap3 %}
@@ -54,9 +58,6 @@
 
 
 {% block script %}
-    <script>
-        $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-    </script>
+    {% load static %}
+    <script src="{% static "certhelper/components/shiftleader.js" %}"></script>
 {% endblock script %}

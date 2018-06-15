@@ -1,0 +1,15 @@
+.good-runs {
+    color: green;
+}
+
+.bad-runs {
+    color: red;
+}
+
+.missing-runs {
+    color: orange;
+}
+
+.conflicting-runs {
+    color: purple;
+}
