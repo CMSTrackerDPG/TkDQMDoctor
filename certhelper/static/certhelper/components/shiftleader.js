@@ -16,22 +16,22 @@ $(document).ready(function () {
             success: function (data) {
                 if (data) {
                     let newtext = "";
-                    $.each( data.good, function( key, value ) {
+                    $.each( data.good.sort(function(a, b){return a-b}), function( key, value ) {
                         if(newtext !== "")
                             newtext += ", ";
                         newtext += '<span class="good-runs">' +value + '</span>'
                     });
-                    $.each( data.bad, function( key, value ) {
+                    $.each( data.bad.sort(function(a, b){return a-b}), function( key, value ) {
                         if(newtext !== "")
                             newtext += ", ";
                         newtext += '<span class="bad-runs">' + value + '</span>'
                     });
-                    $.each( data.missing, function( key, value ) {
+                    $.each( data.missing.sort(function(a, b){return a-b}), function( key, value ) {
                         if(newtext !== "")
                             newtext += ", ";
                         newtext += '<span class="missing-runs">' +value + '</span>'
                     });
-                    $.each( data.conflicting, function( key, value ) {
+                    $.each( data.conflicting.sort(function(a, b){return a-b}), function( key, value ) {
                         if(newtext !== "")
                             newtext += ", ";
                         newtext += '<span class="conflicting-runs">' +value + '</span>'
