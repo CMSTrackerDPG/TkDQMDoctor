@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'dqmsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': os.environ.get('DJANGO_DATABASE_ENGINE'),
         'NAME': os.environ.get('DJANGO_DATABASE_NAME'),
         'USER': os.environ.get('DJANGO_DATABASE_USER'),
         'PASSWORD': os.environ.get('DJANGO_DATABASE_PASSWORD'),

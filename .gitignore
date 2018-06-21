@@ -183,3 +183,8 @@ venv.bak/
 
 .idea/
 db.json
+db-*.json
+
+local.env
+develop.env
+production.env
