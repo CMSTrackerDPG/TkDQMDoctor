@@ -111,6 +111,10 @@ def log_social_account_removed(request, socialaccount, **kwargs):
 
 
 @receiver(allauth.socialaccount.signals.social_account_added)
+def update_newly_added_user_privilege_by_e_groups(request, sociallogin, **kwargs):
+    update_user_privilege_by_e_groups(request, sociallogin.user, **kwargs)
+
+
 @receiver(allauth.account.signals.user_logged_in)
 def update_user_privilege_by_e_groups(request, user, **kwargs):
     try:

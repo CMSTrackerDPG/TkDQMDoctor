@@ -92,6 +92,7 @@ class UserProfile(models.Model):
             egroups = self.extra_data.get("groups")
             logger.debug("extra_data = {}".format(self.extra_data))
             logger.debug("egroups = {}".format(self.extra_data.get("groups")))
+            assert egroups is not None
 
             for user_privilege, necessary_group_list in self.criteria_groups_dict.items():
                 logger.debug("user_privilege = {}, necessary_group_list = {}".format(user_privilege, necessary_group_list))
@@ -118,8 +119,11 @@ class UserProfile(models.Model):
                     else:
                         logger.debug("Privilege not updated because it is already higher user_privilege={}, "
                                      "self.user_privilege={}".format(user_privilege, self.user_privilege))
+        except AssertionError:
+            logger.error("No e-groups found")
         except Exception as e:
             logger.error("Failed to upgrade user privilege")
+            logger.exception(e)
 
     @property
     def is_guest(self):
