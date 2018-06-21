@@ -1,5 +1,15 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
+
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline, )
 
 
 class ReferenceRunAdmin(admin.ModelAdmin):
@@ -27,6 +37,8 @@ class SubSubCategoryAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(ReferenceRun, ReferenceRunAdmin)
 admin.site.register(RunInfo, RunInfoAdmin)
 admin.site.register(Type, TypeAdmin)

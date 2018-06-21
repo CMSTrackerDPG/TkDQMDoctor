@@ -13,13 +13,20 @@ TypeForm           |  Type
 
 
 """
+import logging
+
+from allauth.socialaccount.fields import JSONField
+from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 
 from certhelper.manager import SoftDeletionManager, RunInfoManager
+from certhelper.utilities.logger import get_configured_logger
 from certhelper.utilities.utilities import get_full_name
+
+
+logger = get_configured_logger(loggername=__name__, filename="models.log")
 
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Collisions', 'Collisions'))
@@ -27,6 +34,120 @@ BFIELD_CHOICES = (('0 T', '0 T'), ('3.8 T', '3.8 T'))
 BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'), ('HeavyIon-Proton', 'HeavyIon-Proton'),
                     ('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
 BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
+
+
+class UserProfile(models.Model):
+    """
+    - adds extra information to the django User model
+    - extends the default django User model using signals
+    - grants user more access rights based on CERN e-groups the user is member of
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    GUEST = 0
+    SHIFTER = 10
+    SHIFTLEADER = 20
+    EXPERT = 30
+    ADMIN = 50
+
+    USER_PRIVILEGE_CHOICES = (
+        (GUEST, 'Guest'),
+        (SHIFTER, 'Shifter'),
+        (SHIFTLEADER, "Shift Leader"),
+        (EXPERT, "Expert"),
+        (ADMIN, "Administrator"),
+    )
+
+    """
+    Dictionary containing which e-group a user hat be member of in order to 
+    to gain a specific user privilege (e.g. Shift Leader or Admin)
+    """
+    criteria_groups_dict = {
+        SHIFTER: [
+            "tkdqmdoctor-shifters",
+        ],
+        SHIFTLEADER: [
+            "cms-tracker-offline-shiftleader",
+            "cms-tracker-offline-shiftleaders",
+            "tkdqmdoctor-shiftleaders",
+        ],
+        EXPERT: [
+            "tkdqmdoctor-experts",
+        ],
+        ADMIN: [
+            "tkdqmdoctor-admins",
+        ]
+    }
+
+    extra_data = JSONField(verbose_name='extra data', default=dict)
+
+    user_privilege = models.IntegerField(choices=USER_PRIVILEGE_CHOICES, default=GUEST)
+
+    def upgrade_user_privilege(self):
+        """
+        Does upgrade a user privilege if the user is inside a higher privilege e-group
+        Does NOT downgrade a status, i.e. once a shift leader always a shift leader
+        """
+        try:
+            egroups = self.extra_data.get("groups")
+            logger.debug("extra_data = {}".format(self.extra_data))
+            logger.debug("egroups = {}".format(self.extra_data.get("groups")))
+
+            for user_privilege, necessary_group_list in self.criteria_groups_dict.items():
+                logger.debug("user_privilege = {}, necessary_group_list = {}".format(user_privilege, necessary_group_list))
+                if any(egroup in necessary_group_list for egroup in egroups):
+                    logger.debug("Criteria matched for user_privilege {}, self.user_privilege={}".format(user_privilege, self.user_privilege))
+                    logger.debug("Checked group list for privilege {} is {}".format(user_privilege, necessary_group_list))
+                    if self.user_privilege < user_privilege:
+                        self.user_privilege = user_privilege
+                        logger.info("User {} has been granted {} status".format(
+                            self.user, self.get_user_privilege_display()))
+                        if self.user_privilege == self.ADMIN:
+                            self.user.is_superuser = True
+                            logger.info("User {} is now superuser".format(self.user))
+                        if self.user_privilege >= self.SHIFTLEADER:
+                            self.user.is_staff = True
+                            group_name = "Shift leaders"
+                            try:
+                                g = Group.objects.get(name="Shift leaders")
+                                self.user.groups.add(g)
+                                logger.info("User {} has been added to Group {}".format(self.user, group_name))
+                            except Group.DoesNotExist:
+                                logger.error("Group {} does not exist".format(group_name))
+                            logger.info("User {} is now staff".format(self.user))
+                    else:
+                        logger.debug("Privilege not updated because it is already higher user_privilege={}, "
+                                     "self.user_privilege={}".format(user_privilege, self.user_privilege))
+        except Exception as e:
+            logger.error("Failed to upgrade user privilege")
+
+    @property
+    def is_guest(self):
+        return self.user_privilege == self.GUEST
+
+    @property
+    def is_shifter(self):
+        return self.user_privilege == self.SHIFTER
+
+    @property
+    def is_shiftleader(self):
+        return self.user_privilege == self.SHIFTLEADER
+
+    @property
+    def is_expert(self):
+        return self.user_privilege == self.EXPERT
+
+    @property
+    def is_admin(self):
+        return self.user_privilege == self.ADMIN
+
+    @property
+    def has_shifter_rights(self):
+        return self.user_privilege in (self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN)
+
+    @property
+    def has_shift_leader_rights(self):
+        return self.user_privilege in (self.SHIFTLEADER, self.EXPERT, self.ADMIN)
 
 
 class SoftDeletionModel(models.Model):

@@ -1,10 +1,131 @@
 import pytest
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from mixer.backend.django import mixer
 
 from certhelper.models import RunInfo
 
 pytestmark = pytest.mark.django_db
+
+
+class TestUserProfile:
+    def test_init(self):
+        user = mixer.blend(User)
+        assert user.userprofile is not None
+        assert user.userprofile.user_privilege == 0  # Guest per default
+        assert user.userprofile.get_user_privilege_display() == "Guest"  # Guest per default
+
+    def test_upgrade_user_privilege_if_changed(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+        assert userprofile.user_privilege == 0
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
+        assert userprofile.user_privilege == 0
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 10
+        userprofile.extra_data.get("groups").append("cms-tracker-offline-shiftleader")
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 20
+        userprofile.extra_data.get("groups").append("tkdqmdoctor-experts")
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 30
+        userprofile.extra_data.get("groups").append("tkdqmdoctor-admins")
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 50
+
+    def test_upgrade_to_shiftleader(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+        assert userprofile.user_privilege == 0
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 20
+
+    def test_downgrade_not_possible(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-admins"]}
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 50
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
+        assert userprofile.user_privilege == 50
+
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 20
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
+        assert userprofile.user_privilege == 20
+
+    def test_properties(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+        assert userprofile.user_privilege == 0
+        assert userprofile.is_guest
+        assert not userprofile.is_shifter
+        assert not userprofile.is_shiftleader
+        assert not userprofile.is_expert
+        assert not userprofile.is_admin
+        assert not userprofile.has_shifter_rights
+        assert not userprofile.has_shift_leader_rights
+        assert user.is_staff is False
+        assert user.is_superuser is False
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 10
+        assert not userprofile.is_guest
+        assert userprofile.is_shifter
+        assert not userprofile.is_shiftleader
+        assert not userprofile.is_expert
+        assert not userprofile.is_admin
+        assert userprofile.has_shifter_rights
+        assert not userprofile.has_shift_leader_rights
+        assert user.is_staff is False
+        assert user.is_superuser is False
+
+        userprofile.extra_data.get("groups").append("cms-tracker-offline-shiftleader")
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 20
+        assert not userprofile.is_guest
+        assert not userprofile.is_shifter
+        assert userprofile.is_shiftleader
+        assert not userprofile.is_expert
+        assert not userprofile.is_admin
+        assert userprofile.has_shifter_rights
+        assert userprofile.has_shift_leader_rights
+        assert user.is_staff is True
+        assert user.is_superuser is False
+
+        userprofile.extra_data.get("groups").append("tkdqmdoctor-experts")
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 30
+        assert not userprofile.is_guest
+        assert not userprofile.is_shifter
+        assert not userprofile.is_shiftleader
+        assert userprofile.is_expert
+        assert not userprofile.is_admin
+        assert userprofile.has_shifter_rights
+        assert userprofile.has_shift_leader_rights
+        assert user.is_staff is True
+        assert user.is_superuser is False
+
+        userprofile.extra_data.get("groups").append("tkdqmdoctor-admins")
+        userprofile.upgrade_user_privilege()
+        assert userprofile.user_privilege == 50
+        assert not userprofile.is_guest
+        assert not userprofile.is_shifter
+        assert not userprofile.is_shiftleader
+        assert not userprofile.is_expert
+        assert userprofile.is_admin
+        assert userprofile.has_shifter_rights
+        assert userprofile.has_shift_leader_rights
+        assert user.is_staff is True
+        assert user.is_superuser is True
 
 
 class TestRuninfo:
