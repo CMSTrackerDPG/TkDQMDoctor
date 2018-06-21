@@ -19,7 +19,7 @@ class CernProvider(OAuth2Provider):
         return data
 
     def extract_uid(self, data):
-        return str(data['id'])
+        return str(data.get('id'))
 
     def extract_common_fields(self, data):
         return dict(
@@ -29,5 +29,6 @@ class CernProvider(OAuth2Provider):
             last_name=data.get('last_name'),
             name=data.get('name')
         )
+
 
 provider_classes = [CernProvider]

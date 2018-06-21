@@ -14,14 +14,17 @@ class CernOAuth2Adapter(OAuth2Adapter):
     access_token_url = 'https://oauth.web.cern.ch/OAuth/Token'
     authorize_url = 'https://oauth.web.cern.ch/OAuth/Authorize'
     profile_url = 'https://oauthresource.web.cern.ch/api/User'
+    groups_url = 'https://oauthresource.web.cern.ch/api/Groups'
 
     supports_state = False
     redirect_uri_protocol = 'https'
 
     def complete_login(self, request, app, token, **kwargs):
         headers = {'Authorization': 'Bearer {0}'.format(token.token)}
-        resp = requests.get(self.profile_url, headers=headers)
-        extra_data = resp.json()
+        user_response = requests.get(self.profile_url, headers=headers)
+        groups_response = requests.get(self.groups_url, headers=headers)
+        extra_data = user_response.json()
+        extra_data.update(groups_response.json())
         return self.get_provider().sociallogin_from_response(request,
                                                              extra_data)
 
