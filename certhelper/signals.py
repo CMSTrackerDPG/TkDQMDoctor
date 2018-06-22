@@ -31,8 +31,12 @@ def save_user_profile(sender, instance, **kwargs):
     try:
         instance.userprofile.save()
         logger.debug("UserProfile has been saved for {}".format(instance))
+    except UserProfile.DoesNotExist:
+        logger.error("No UserProfile exists for User {}!".format(instance))
+        UserProfile.objects.create(user=instance)
+        logger.info("UserProfile was therefore created subsequently for {}".format(instance))
     except Exception as e:
-        logger.error("Failed to log")
+        logger.error("Failed to save UserProfile")
         logger.exception(e)
 
 
@@ -127,7 +131,7 @@ def update_user_privilege_by_e_groups(request, user, **kwargs):
         userprofile = socialaccount.user.userprofile
     except AttributeError:
         try:
-            logger.info("User {} has no UserProfile!".format(socialaccount.user))
+            logger.info("No UserProfile exists for User {}!".format(socialaccount.user))
             UserProfile.objects.create(user=socialaccount.user)
             logger.info("UserProfile was therefore created subsequently for {}".format(socialaccount.user))
             userprofile = socialaccount.user.userprofile

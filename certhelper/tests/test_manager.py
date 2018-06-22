@@ -246,4 +246,3 @@ class TestRunInfoManager:
         assert len(RunInfo.all_objects.all()) == 5
         assert len(RunInfo.all_objects.all().alive()) == 5
         assert len(RunInfo.all_objects.all().dead()) == 0
-

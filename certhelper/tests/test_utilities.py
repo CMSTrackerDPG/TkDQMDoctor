@@ -1,16 +1,12 @@
-import datetime
-
 import pytest
 from django.contrib.auth.models import User
 from django.test import RequestFactory
 from mixer.backend.django import mixer
 
 from certhelper.models import RunInfo
+from certhelper.utilities.utilities import *
 
 pytestmark = pytest.mark.django_db
-
-from certhelper.utilities.utilities import is_valid_date, get_date_string, to_date, to_weekdayname, get_full_name, \
-    is_valid_id, get_this_week_filter_parameter, request_contains_filter_parameter
 
 
 class TestUtilities:

@@ -316,7 +316,3 @@ class TestHardDeleteView:
         req.user = mixer.blend(User, is_staff=True)
         with pytest.raises(Http404):
             hard_deleteview(req, 42)
-
-
-
-

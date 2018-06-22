@@ -38,6 +38,9 @@ BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13
 
 class UserProfile(models.Model):
     """
+    Do NOT instantiate this manually!
+    It will be automatically created/updated when a User instance is created/updated
+
     - adds extra information to the django User model
     - extends the default django User model using signals
     - grants user more access rights based on CERN e-groups the user is member of
