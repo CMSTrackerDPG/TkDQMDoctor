@@ -10,12 +10,8 @@ env:
   - DJANGO_VERSION=2.0
 
 install:
-  - pip install -r requirements.txt
   - pip install -I Django==$DJANGO_VERSION
-  - pip install codecov
-  - pip install pytest-django
-  - pip install pytest-cov
-  - pip install mixer
+  - pip install -r testing-requirements.txt
 
 before_script:
 script:
