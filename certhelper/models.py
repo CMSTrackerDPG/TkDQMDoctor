@@ -16,7 +16,7 @@ TypeForm           |  Type
 import logging
 
 from allauth.socialaccount.fields import JSONField
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -60,6 +60,8 @@ class UserProfile(models.Model):
         (EXPERT, "Expert"),
         (ADMIN, "Administrator"),
     )
+
+    SHIFT_LEADER_GROUP_NAME = "Shift leaders"
 
     """
     Dictionary containing which e-group a user hat be member of in order to 
@@ -111,13 +113,24 @@ class UserProfile(models.Model):
                             logger.info("User {} is now superuser".format(self.user))
                         if self.user_privilege >= self.SHIFTLEADER:
                             self.user.is_staff = True
-                            group_name = "Shift leaders"
                             try:
-                                g = Group.objects.get(name="Shift leaders")
+                                g = Group.objects.get(name=self.SHIFT_LEADER_GROUP_NAME)
                                 self.user.groups.add(g)
-                                logger.info("User {} has been added to Group {}".format(self.user, group_name))
+                                logger.info("User {} has been added to Group {}".format(self.user, self.SHIFT_LEADER_GROUP_NAME))
                             except Group.DoesNotExist:
-                                logger.error("Group {} does not exist".format(group_name))
+                                logger.error("Group {} does not exist".format(self.SHIFT_LEADER_GROUP_NAME))
+                                user_permissions = Permission.objects.filter(content_type__model="user")
+                                certhelper_permissions = Permission.objects.filter(content_type__app_label="certhelper")
+                                g = Group.objects.create(name=self.SHIFT_LEADER_GROUP_NAME)
+                                for permission in user_permissions:
+                                    g.permissions.add(permission)
+                                for permission in certhelper_permissions:
+                                    g.permissions.add(permission)
+                                g.save()
+                                logger.error("Group {} has been created".format(self.SHIFT_LEADER_GROUP_NAME))
+                                self.user.groups.add(g)
+                                logger.info("User {} has been added to Group {}".format(self.user, self.SHIFT_LEADER_GROUP_NAME))
+
                             logger.info("User {} is now staff".format(self.user))
                     else:
                         logger.debug("Privilege not updated because it is already higher user_privilege={}, "
