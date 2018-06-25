@@ -89,7 +89,7 @@ def firefox():
 
 @pytest.fixture
 def authenticated_browser(firefox, client, live_server, superuser):
-    """Return a firefox browser instance with logged-in superuser"""
+    """returns a firefox browser instance with logged-in superuser"""
     client.login(username=SUPERUSER_USERNAME, password=PASSWORD)
     cookie = client.cookies['sessionid']
 

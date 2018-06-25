@@ -7,3 +7,4 @@ omit =
     *wsgi.py,
     manage.py,
     venv/*
+    cern_oauth2/*

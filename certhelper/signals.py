@@ -42,81 +42,65 @@ def save_user_profile(sender, instance, **kwargs):
 
 @receiver(django.contrib.auth.signals.user_logged_in)
 def log_user_logged_in(sender, user, request, **kwargs):
-    try:
-        logger.info("User {} has logged in".format(user))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    logger.info("User {} has logged in".format(user))
 
 
 @receiver(django.contrib.auth.signals.user_logged_out)
 def log_user_logged_out(sender, user, request, **kwargs):
-    try:
-        logger.info("User {} has logged out".format(user))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    logger.info("User {} has logged out".format(user))
 
 
 @receiver(django.contrib.auth.signals.user_login_failed)
 def log_user_has_login_failed(sender, credentials, request, **kwargs):
     try:
         logger.warning("User {} has failed to logged in".format(credentials.get("username")))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    except AttributeError:
+        logger.error("Username attribute does not exist!")
 
 
 @receiver(allauth.account.signals.user_logged_in)
 def log_allauth_user_logged_in(request, user, **kwargs):
-    try:
-        logger.debug("User {} has logged in via allauth".format(user))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    logger.debug("User {} has logged in via allauth".format(user))
 
 
 @receiver(allauth.socialaccount.signals.pre_social_login)
 def log_pre_social_login(request, sociallogin, **kwargs):
     try:
         logger.debug("Pre social login for User {}".format(sociallogin.user))
-    except User.DoesNotExist:
+    except (User.DoesNotExist, AttributeError):
         logger.debug("Pre social login for non-existing User")
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
 
 
 @receiver(allauth.socialaccount.signals.social_account_added)
 def log_social_account_added(request, sociallogin, **kwargs):
     try:
         logger.info("Social Account {} has been added for User {}".format(sociallogin.account, sociallogin.user))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    except (SocialAccount.DoesNotExist, User.DoesNotExist, AttributeError):
+        logger.debug("Pre social login for non-existing User")
 
 
 @receiver(allauth.socialaccount.signals.social_account_updated)
 def log_social_account_updated(request, sociallogin, **kwargs):
     try:
         logger.debug("Social Account {} has been updated for User {}".format(sociallogin.account, sociallogin.user))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    except (SocialAccount.DoesNotExist, User.DoesNotExist, AttributeError):
+        logger.error("Something unexpected happened")
 
 
 @receiver(allauth.socialaccount.signals.social_account_removed)
 def log_social_account_removed(request, socialaccount, **kwargs):
     try:
         logger.info("Social Account {} has been removed from User {}".format(socialaccount, socialaccount.user))
-    except Exception as e:
-        logger.error("Failed to log")
-        logger.exception(e)
+    except (User.DoesNotExist, AttributeError):
+        logger.error("Something unexpected happened")
 
 
 @receiver(allauth.socialaccount.signals.social_account_added)
 def update_newly_added_user_privilege_by_e_groups(request, sociallogin, **kwargs):
-    update_user_privilege_by_e_groups(request, sociallogin.user, **kwargs)
+    try:
+        update_user_privilege_by_e_groups(request, sociallogin.user, **kwargs)
+    except (User.DoesNotExist, AttributeError):
+        logger.error("Something unexpected happened")
 
 
 @receiver(allauth.account.signals.user_logged_in)
