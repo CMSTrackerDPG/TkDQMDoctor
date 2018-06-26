@@ -8,6 +8,8 @@
         {% if logout_successful %}
             <h1>Logout successfull</h1>
             <p class="lead">Please end your session by closing all browser windows to successfully delete all cookies.</p>
+
+            <p class="lead"><a href="{% url 'certhelper:list' %}">Go back home</a></p>
         {% else %}
             <h1>Logout <strong>not</strong> successful.</h1>
             <p class="lead">Oops. Something went wrong.</p>
