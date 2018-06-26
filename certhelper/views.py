@@ -1,7 +1,8 @@
 import re
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -76,6 +77,10 @@ class ListReferences(SingleTableView):
     table_class = ReferenceRunTable
 
 
+def same_user_or_shiftleader_check(user):
+    pass
+
+
 @method_decorator(login_required, name="dispatch")
 class UpdateRun(generic.UpdateView):
     """Updates a specific Run from the RunInfo table
@@ -89,6 +94,14 @@ class UpdateRun(generic.UpdateView):
     # def form_valid(self, form_class):
     # form_class.instance.userid = self.request.user # not neccessary to update
     #    return super(UpdateRun, self).form_valid(form_class)
+
+    def same_user_or_shiftleader_check(self, user):
+        return self.get_object().userid == user or user.userprofile.has_shift_leader_rights
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.get_object().userid == request.user or request.user.userprofile.has_shift_leader_rights:
+            return super(UpdateRun, self).dispatch(request, *args, **kwargs)
+        return redirect_to_login(request.get_full_path(), login_url=reverse('admin:login'))
 
 
 @method_decorator(login_required, name="dispatch")
@@ -282,12 +295,6 @@ def load_subsubcategories(request):
     return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
 
 
-# def shiftleader_view(request):
-#    table = ShiftleaderRunInfoTable(RunInfo.objects.all())
-#    RequestConfig(request).configure(table)
-#    return render(request, 'certhelper/shiftleader.html', {'table': table})
-
-
 # TODO make this faster, unneccessary databaes queries slows down page load when no filters are applied
 def generate_summary(queryset):
     runs = queryset
@@ -354,7 +361,9 @@ def hard_deleteview(request, run_number):
     try:
         run = RunInfo.all_objects.get(run_number=run_number)
     except RunInfo.DoesNotExist:
-        raise Http404("The run with the runnumber %s doesnt exist" % id)
+        raise Http404("The run with the runnumber {} doesnt exist".format(run_number))
+    except RunInfo.MultipleObjectsReturned:
+        raise Http404("Multiple certifications with the runnumber {} exist".format(run_number))
 
     if request.method == "POST":
         run.hard_delete()

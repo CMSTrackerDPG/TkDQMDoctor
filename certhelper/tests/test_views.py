@@ -123,7 +123,17 @@ class TestUpdateRun:
         req = RequestFactory().get("/")
         req.user = mixer.blend(User)
         resp = UpdateRun.as_view()(req, pk=run.pk)
-        assert resp.status_code == 200
+        assert resp.status_code == 302, "different user should not have enough rights"
+        req.user = run.userid
+        resp = UpdateRun.as_view()(req, pk=run.pk)
+        assert resp.status_code == 200, "same user should be permitted to edit"
+        req.user = mixer.blend(User)
+        resp = UpdateRun.as_view()(req, pk=run.pk)
+        assert resp.status_code == 302, "should not have enough rights"
+        req.user.is_superuser = True
+        assert req.user.userprofile.has_shift_leader_rights
+        resp = UpdateRun.as_view()(req, pk=run.pk)
+        assert resp.status_code == 200, "superuser should have enough rights"
 
     def test_post(self):
         assert not RunInfo.objects.all().exists()

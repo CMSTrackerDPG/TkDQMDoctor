@@ -163,11 +163,13 @@ class UserProfile(models.Model):
 
     @property
     def has_shifter_rights(self):
-        return self.user_privilege in (self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN)
+        return self.user_privilege in (self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN) \
+               or self.user.is_staff or self.user.is_superuser
 
     @property
     def has_shift_leader_rights(self):
-        return self.user_privilege in (self.SHIFTLEADER, self.EXPERT, self.ADMIN)
+        return self.user_privilege in (self.SHIFTLEADER, self.EXPERT, self.ADMIN) \
+               or self.user.is_staff or self.user.is_superuser
 
 
 class SoftDeletionModel(models.Model):
