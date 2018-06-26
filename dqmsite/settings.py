@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', True)
 
 ALLOWED_HOSTS = [
     'dev-tkdqmdoctor.web.cern.ch',
@@ -145,7 +145,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Redirecting from the default account/profile after login
-LOGIN_REDIRECT_URL = ('/')
+LOGIN_REDIRECT_URL = '/'
 
 # Needed for django-allauth
 SITE_ID = 1
