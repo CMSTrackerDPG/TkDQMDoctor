@@ -82,6 +82,7 @@ class TestCreateCertifications:
         firefox.find_element_by_id("id_dataset").clear()
         firefox.find_element_by_id("id_dataset").send_keys("/some/dataset")
         firefox.find_element_by_name("_save").click()
+        assert "Add reference run" in firefox.page_source
         firefox.find_element_by_link_text("Add reference run").click()
         firefox.find_element_by_id("id_reference_run").clear()
         firefox.find_element_by_id("id_reference_run").send_keys("2")
