@@ -67,7 +67,7 @@ class DeletedRunInfoTable(tables.Table):
         '<div align="center"><a href="{% url \'certhelper:restore_run\' record.id%}">'
         '<span class="glyphicon glyphicon-repeat"></a></div>',
         orderable=False)
-    harddelete_run = tables.TemplateColumn(
+    delete_forever = tables.TemplateColumn(
         '<div align="center"><a href="{% url \'certhelper:hard_delete_run\' record.id%}">'
         '<span class="glyphicon glyphicon-trash " style="color:red"></a></div>',
         orderable=False)

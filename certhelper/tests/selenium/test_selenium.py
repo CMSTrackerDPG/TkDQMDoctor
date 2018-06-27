@@ -240,7 +240,7 @@ class TestCreateCertifications:
 
         # Go to Shift leader report
         firefox.find_element_by_link_text("Shift Leader").click()
-        firefox.find_element_by_link_text("Table").click()
+        firefox.find_element_by_link_text("Certified Runs").click()
         firefox.find_element_by_xpath("//div[@id='runtable']/div/table/tbody/tr/td[13]/div/a/span").click()
         firefox.find_element_by_id("id_run_number").clear()
         firefox.find_element_by_id("id_run_number").send_keys("1")
@@ -249,7 +249,7 @@ class TestCreateCertifications:
         firefox.find_element_by_id("id_run_number").send_keys("3")
         firefox.find_element_by_xpath("//button[@type='submit']").click()
         firefox.find_element_by_link_text("Shift Leader").click()
-        firefox.find_element_by_link_text("Table").click()
+        firefox.find_element_by_link_text("Certified Runs").click()
         firefox.find_element_by_xpath("//div[@id='runtable']/div/table/tbody/tr/td[13]/div/a/span").click()
         firefox.find_element_by_id("id_run_number").clear()
         firefox.find_element_by_id("id_run_number").send_keys("4")
