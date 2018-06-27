@@ -53,6 +53,11 @@ def get_filters_from_request_GET(request):
     day = request.GET.get('date_day', '')
 
     the_date = get_date_string(year, month, day)
+
+    # TODO solve conflict between two dates set
+    if request.GET.get('date', ''):
+        the_date = request.GET.get('date', '')
+
     if the_date:
         applied_filters['date'] = the_date
 

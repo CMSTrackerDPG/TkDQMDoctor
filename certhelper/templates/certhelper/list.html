@@ -2,7 +2,7 @@
 {% block title %}List{% endblock %}
 
 {% block content %}
-    <h1 align="center">List of certified runs</h1>
+    <h1 align="center"><a href="{% url 'certhelper:list' %}" style="color: #333;text-decoration: none;">List of certified runs</a></h1>
     {% include "certhelper/components/menu.html" %}
 
     {% if filter %}
