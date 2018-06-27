@@ -47,38 +47,55 @@ def client_with_superuser_logged_in(client, django_user_model):
 class TestIndexPage:
     def test_anonymous(self, client):
         response = client.get(reverse("certhelper:list"))
+        assert response.status_code == 302
+        assert "/?date=" in response.url
+        redirect_url = response.url
+        response = client.get(redirect_url)
+        assert response.status_code == 200
+
         assert "List of certified runs" in response.content.decode()
         assert "Login" in response.content.decode()
         assert "Add Run" not in response.content.decode()
         assert "Admin Settings" not in response.content.decode()
-        assert response.status_code == 200
 
     def test_logged_in(self, client_with_user_logged_in):
         client = client_with_user_logged_in
         response = client.get(reverse("certhelper:list"))
+        assert response.status_code == 302
+        assert "/?date=" in response.url
+        redirect_url = response.url
+        response = client.get(redirect_url)
+        assert response.status_code == 200
         assert "List of certified runs" in response.content.decode()
         assert "Login" not in response.content.decode()
         assert "Add Run" in response.content.decode()
         assert "Admin Settings" not in response.content.decode()
-        assert response.status_code == 200
 
     def test_staffuser(self, client_with_staff_logged_in):
         client = client_with_staff_logged_in
         response = client.get(reverse("certhelper:list"))
+        assert response.status_code == 302
+        assert "/?date=" in response.url
+        redirect_url = response.url
+        response = client.get(redirect_url)
+        assert response.status_code == 200
         assert "List of certified runs" in response.content.decode()
         assert "Login" not in response.content.decode()
         assert "Add Run" in response.content.decode()
         assert "Admin Settings" in response.content.decode()
-        assert response.status_code == 200
 
     def test_superuser(self, client_with_superuser_logged_in):
         client = client_with_superuser_logged_in
         response = client.get(reverse("certhelper:list"))
+        assert response.status_code == 302
+        assert "/?date=" in response.url
+        redirect_url = response.url
+        response = client.get(redirect_url)
+        assert response.status_code == 200
         assert "List of certified runs" in response.content.decode()
         assert "Login" not in response.content.decode()
         assert "Add Run" in response.content.decode()
         assert "Admin Settings" in response.content.decode()
-        assert response.status_code == 200
 
 
 class TestCreatePage:

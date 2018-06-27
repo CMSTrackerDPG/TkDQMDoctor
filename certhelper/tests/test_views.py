@@ -15,7 +15,7 @@ def assert_view_requires_no_login(view):
     req = RequestFactory().get("/")
     req.user = AnonymousUser()
     resp = get_view_response(view, req)
-    assert resp.status_code == 200
+    assert resp.status_code == 200 or "login" not in resp.url
 
 
 def assert_view_requires_login(view):
@@ -181,7 +181,8 @@ class TestListRuns:
         req = RequestFactory().get("/")
         req.user = mixer.blend(User)
         resp = get_view_response(listruns, req)
-        assert resp.status_code == 200
+        assert resp.status_code == 302, "should redirect with today parameter"
+        assert "/?date" in resp.url
 
     def test_filter_parameters(self):
         # TODO test invalid parameter values
@@ -205,7 +206,8 @@ class TestSummaryView:
         req = RequestFactory().get("/")
         req.user = mixer.blend(User)
         resp = get_view_response(listruns, req)
-        assert resp.status_code == 200
+        assert resp.status_code == 302
+        assert "/?date=" in resp.url
 
     def test_with_filters(self):
         req = RequestFactory().get("/")

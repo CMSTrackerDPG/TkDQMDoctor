@@ -69,7 +69,7 @@ def is_valid_id(primary_key, Classname):
 
 
 def request_contains_filter_parameter(request):
-    for candidate in ["date", "userid"]:
+    for candidate in ["options", "category", "runs", "type", "date", "userid"]:
         for word in request.GET:
             if candidate in word:
                 return True
@@ -86,6 +86,10 @@ def get_this_week_filter_parameter():
     get_parameters += "&date__lte_month=" + str(end_of_week.month)
     get_parameters += "&date__lte_year=" + str(end_of_week.year)
     return get_parameters
+
+
+def get_today_filter_parameter():
+    return "?date={}".format(timezone.now().strftime('%Y-%m-%d'))
 
 
 def get_from_summary(summary, runtype=None, reco=None, date=None):

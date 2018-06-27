@@ -15,7 +15,7 @@ from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
 from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
 from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id, \
-    request_contains_filter_parameter, get_this_week_filter_parameter
+    request_contains_filter_parameter, get_this_week_filter_parameter, get_today_filter_parameter
 from .forms import *
 from .tables import *
 
@@ -38,6 +38,9 @@ class CreateRun(generic.CreateView):
 def listruns(request):
     """passes all RunInfo objects to list.html
     """
+
+    if not request_contains_filter_parameter(request):
+        return HttpResponseRedirect("/%s" % get_today_filter_parameter())
 
     # We make sure that the logged in user can only see his own runs
     # In case the user is not logged in we show all objects
@@ -352,7 +355,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['summary'] = generate_summary(self.filterset.qs)
         context['slreport'] = ShiftLeaderReport(self.filterset.qs).get_context()
-        context['deleted_runs'] = DeletedRunInfoTable(RunInfo.all_objects.dead().order_by('run_number'))
+        context['deleted_runs'] = DeletedRunInfoTable(RunInfo.all_objects.dead().order_by('-run_number'))
         return context
 
 
