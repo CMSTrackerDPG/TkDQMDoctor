@@ -111,7 +111,7 @@ class DeleteRun(generic.DeleteView):
 
     model = RunInfo
     form_class = RunInfoForm
-    success_url = '/'
+    success_url = '/shiftleader/'
     template_name_suffix = '_delete_form'
 
 
@@ -352,6 +352,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['summary'] = generate_summary(self.filterset.qs)
         context['slreport'] = ShiftLeaderReport(self.filterset.qs).get_context()
+        context['deleted_runs'] = DeletedRunInfoTable(RunInfo.all_objects.dead().order_by('run_number'))
         return context
 
 
@@ -370,6 +371,34 @@ def hard_deleteview(request, run_number):
         return HttpResponseRedirect('/')
 
     return render(request, 'certhelper/hard_delete.html', {'run': run})
+
+
+@staff_member_required
+def hard_delete_run_view(request, pk):
+    try:
+        run = RunInfo.all_objects.get(pk=pk)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the id {} doesnt exist".format(pk))
+
+    if request.method == "POST":
+        run.hard_delete()
+        return HttpResponseRedirect('/shiftleader/')
+
+    return render(request, 'certhelper/hard_delete.html', {'run': run})
+
+
+@staff_member_required
+def restore_run_view(request, pk):
+    try:
+        run = RunInfo.all_objects.get(pk=pk)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the id {} doesnt exist".format(pk))
+
+    if request.method == "POST":
+        run.restore()
+        return HttpResponseRedirect('/shiftleader/')
+
+    return render(request, 'certhelper/restore.html', {'run': run})
 
 
 def validate_central_certification_list(request):

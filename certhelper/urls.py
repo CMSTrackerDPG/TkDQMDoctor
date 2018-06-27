@@ -30,6 +30,8 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/delete/$', views.DeleteRun.as_view(), name='delete'),
 
     url(r'^(?P<run_number>[0-9]+)/harddelete/$', views.hard_deleteview, name='harddelete'),
+    url(r'^(?P<pk>[0-9]+)/hard_delete_run/$', views.hard_delete_run_view, name='hard_delete_run'),
+    url(r'^(?P<pk>[0-9]+)/restore_run/$', views.restore_run_view, name='restore_run'),
 
     # checklists
     url(r'^checklists/general$', TemplateView.as_view(template_name='certhelper/checklists/general.html'),

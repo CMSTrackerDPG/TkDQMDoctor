@@ -22,6 +22,7 @@
         </div>
         <ul class="nav nav-tabs">
             <li><a data-toggle="tab" href="#runtable">Table</a></li>
+            <li><a data-toggle="tab" href="#deleted-runs">Deleted Certifications</a></li>
             <li><a data-toggle="tab" href="#summary">Summary</a></li>
             <li class="active"><a data-toggle="tab" href="#shiftleader-report">Shift Leader Report</a></li>
         </ul>
@@ -34,6 +35,17 @@
                     <div class="alert alert-danger" role="alert">No Table found.</div>
                 {% endif %}
             </div>
+
+            <div id="deleted-runs" class="tab-pane fade">
+                <h3>List of deleted certified runs</h3>
+                {% if deleted_runs %}
+                    {% render_table deleted_runs 'django_tables2/bootstrap.html' %}
+                {% else %}
+                    <div class="alert alert-danger" role="alert">No Table found.</div>
+                {% endif %}
+            </div>
+
+
             <div id="summary" class="tab-pane fade">
                 <h3>Summary</h3>
                 {% if summary %}
@@ -51,6 +63,8 @@
                     <div class="alert alert-danger" role="alert">No Shiftleader Report found.</div>
                 {% endif %}
             </div>
+
+
         </div>
     </div>
     </div>
