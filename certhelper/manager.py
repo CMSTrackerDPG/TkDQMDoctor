@@ -17,6 +17,9 @@ class SoftDeletionManager(models.Manager):
             return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
         return SoftDeletionQuerySet(self.model)
 
+    def dead(self):
+        return self.get_queryset().dead()
+
     # TODO check if this is necessarry
     def hard_delete(self):
         return self.get_queryset().hard_delete()
