@@ -184,6 +184,7 @@ venv.bak/
 .idea/
 db.json
 db-*.json
+db.sqlite*
 
 local.env
 develop.env
