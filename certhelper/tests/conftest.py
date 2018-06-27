@@ -82,7 +82,7 @@ def firefox():
     options = webdriver.FirefoxOptions()
     options.add_argument('--headless')
     firefox_webdriver = webdriver.Firefox(firefox_options=options)
-    firefox_webdriver.implicitly_wait(10)
+    firefox_webdriver.implicitly_wait(60)
     yield firefox_webdriver
     firefox_webdriver.quit()
 
