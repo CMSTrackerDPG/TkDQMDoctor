@@ -23,7 +23,7 @@ install:
 
 before_script:
 script:
-  - PYTHONWARNINGS=all pytest --cov=.
+  - PYTHONWARNINGS=all pytest --cov=. --ignore certhelper/tests/selenium/
 
 after_success:
   - codecov

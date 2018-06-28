@@ -3,7 +3,8 @@ import logging
 import pytest
 from selenium import webdriver
 
-logging.disable(logging.NOTSET)
+# Disables Logging when testing
+logging.disable(logging.CRITICAL)
 
 
 SUPERUSER_USERNAME = "superuser"
