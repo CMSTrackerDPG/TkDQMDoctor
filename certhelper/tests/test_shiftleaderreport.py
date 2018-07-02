@@ -118,3 +118,15 @@ class TestShiftLeaderReport:
         assert context["day"][1]["Collisions"]["Express"]["int_lum"] == 423.24
         assert context["day"][1]["Collisions"]["Express"]["number_of_runs"] == 1
         assert context["Collisions"]["Express"]["number_of_runs"] == 8
+
+    def test_changed_flags(self, some_certified_runs):
+        runs = RunInfo.objects.all()
+
+        for run in runs:
+            run.date = "2018-02-28"
+            run.save()
+
+        report = ShiftLeaderReport(runs)
+
+        assert "4, 5, 14" == report.get_context()["day"][0]["runs_with_changed_flags"]
+        assert 3 == report.get_context()["day"][0]["number_of_changed_flags"]

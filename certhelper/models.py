@@ -64,7 +64,7 @@ class UserProfile(models.Model):
     SHIFT_LEADER_GROUP_NAME = "Shift leaders"
 
     """
-    Dictionary containing which e-group a user hat be member of in order to 
+    Dictionary containing which e-group a user has to be member of, in order to 
     to gain a specific user privilege (e.g. Shift Leader or Admin)
     """
     criteria_groups_dict = {
@@ -242,8 +242,8 @@ class SubSubCategory(SoftDeletionModel):
 
 
 class Type(SoftDeletionModel):
-    reco = models.CharField(max_length=30, choices=RECO_CHOICES)
-    runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)
+    reco = models.CharField(max_length=30, choices=RECO_CHOICES)  # Express, Prompt, reReco
+    runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)  # Cosmics, Collisions
     bfield = models.CharField(max_length=30, choices=BFIELD_CHOICES)
     beamtype = models.CharField(max_length=30, choices=BEAMTYPE_CHOICES)
     beamenergy = models.CharField(max_length=10, choices=BEAMENERGY_CHOICES)
@@ -321,6 +321,39 @@ class RunInfo(SoftDeletionModel):
 
     def is_bad(self):
         return not self.is_good()
+
+    def flag_has_changed(self):
+        """
+        Checks whether or not the flag from Express to Prompt has changed.
+
+        If a run with run_number x has been certified in Express and this run
+        has the type Prompt, then this function returns True if the flag has
+        changed (i.e. is_good -> is_bad, or is_bad -> is_good) otherwise False.
+
+        For Example:
+        This run has the run_number 42 and was certified with the type Express.
+        Another certication for the run_number 42 exists for the type Prompt
+
+        If the other certification is marked good and this run is marked bad
+        then the flag has changed and there this function returns True.
+        """
+        if self.type.reco == "Prompt":
+            try:
+                express_run = RunInfo.objects.get(type__reco="Express", run_number=self.run_number)
+                return self.is_good() != express_run.is_good()
+            except RunInfo.DoesNotExist:
+                logger.warning("Certification for run_number {} exists for Prompt but not Express!".format(self.run_number))
+                return False
+            except RunInfo.MultipleObjectsReturned:
+                logger.error("More than 2 Express certifications exist for run {}".format(self.run_number))
+                logger.info("Checking if all express runs have the same good/bad status")
+                express_runs = RunInfo.objects.filter(type__reco="Express", run_number=self.run_number)
+                for run in express_runs:
+                    if express_runs[0].is_good() != run.is_good():
+                        logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
+                        return False
+                return self.is_good() != express_runs[0].is_good()
+        return False
 
     def validate_unique(self, exclude=None):
         if not self.type_id:

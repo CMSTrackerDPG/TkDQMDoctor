@@ -1,3 +1,4 @@
+from certhelper.models import RunInfo
 from certhelper.utilities.utilities import get_from_summary, to_weekdayname
 
 
@@ -44,6 +45,28 @@ class ShiftLeaderReport:
         return days_list
 
     def get_context(self):
+        """
+        Returns a dictionary that can be used in a Template
+
+        For example:
+        context['slreport'] = ShiftLeaderReport(RunInfo.objects.filter(date="2018-12-31)).get_context()
+
+        and then in the template:
+
+        <h1>Weekly Certification</h1>
+        {{ slreport.Collisions.Prompt.number_of_runs }}
+        {{ slreport.Bad.Collisions.Express.int_lum }}
+        {{ slreport.Cosmics.Prompt.number_of_runs }}
+        ...
+
+        <h1>Day by Day notes</h1>
+        {% for day in slreport.day %}
+            {{ day.date }} {{ day.name|title }}
+            {{ day.Collisions.Express.int_lum }}
+            {{ day.Bad.number_of_runs }}
+        {% endfor %}
+
+        """
         context = self.fill_context()
         context[self.day_keyword] = []
 
@@ -54,6 +77,10 @@ class ShiftLeaderReport:
         return context
 
     def build_context_structure(self):
+        """
+        Builds a dictionary without any values set yet.
+        The Values wil be filled by the fill_context method
+        """
         bad = self.bad_keyword
         context = {bad: {}}
 
@@ -70,6 +97,11 @@ class ShiftLeaderReport:
         return context
 
     def fill_context(self, day=None):
+        """
+        returns a dictionary with filled out values
+
+        All/Bad, Collisions/Coscmics, Express/Prompt, number of runs, int luminosity
+        """
         context = self.build_context_structure()
 
         # TODO test this!!
@@ -96,4 +128,8 @@ class ShiftLeaderReport:
         if day:
             context["name"] = to_weekdayname(day)
             context["date"] = day
+            runs_with_changed_flag = RunInfo.objects.filter(date=day).changed_flags()
+            context["number_of_changed_flags"] = len(runs_with_changed_flag)
+            context["runs_with_changed_flags"] = ", ".join(str(run) for run in runs_with_changed_flag)
         return context
+

@@ -110,6 +110,48 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
                     d["bad"].append(run_number)
         return d
 
+    def changed_flags(self):
+        """
+        compares all run_numbers in current QuerySet against whole database
+        and returns a list of run_numbers where the flags changed
 
+        Example: Run was certified good in express and bad promptreco
+        """
+        return list({run.run_number for run in self if run.flag_has_changed()})
 
+    def today(self):
+        pass
 
+    def this_week(self):
+        """
+        filters QuerySet to only show runs of the current week
+        week starts on monday at 00:00:00 and ends on sunday at 23:59:59
+        """
+        pass
+
+    def last_week(self):
+        """
+        filters QuerySet to only show runs of the current week
+        week starts on monday at 00:00:00 and ends on sunday at 23:59:59
+        """
+        pass
+
+    def calendar_week(self, week_number):
+        """
+        filters QuerySet to only show runs of the specified calendar week
+
+        A week starts on a monday. The week of a year that contains the first
+        Thursday has the week number 1
+
+        :param week_number: Week number according to the ISO-8601 standard.
+        """
+        pass
+
+    def print(self):
+        """
+        Prints out QuerySet to have an easy Overview
+        """
+
+        print("{:<10}{:<11}{:<8}{}".format("run", "type", "reco", "good"))
+        for run in self:
+            print("{:<8}{:<11}{:<8}{}".format(run.run_number, run.type.runtype, run.type.reco, run.is_good()))
