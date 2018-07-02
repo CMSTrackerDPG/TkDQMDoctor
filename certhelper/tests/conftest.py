@@ -1,11 +1,15 @@
 import logging
 
 import pytest
+from mixer.backend.django import mixer
 from selenium import webdriver
+
+from certhelper.models import RunInfo
+
+pytestmark = pytest.mark.django_db
 
 # Disables Logging when testing
 logging.disable(logging.CRITICAL)
-
 
 SUPERUSER_USERNAME = "superuser"
 SHIFTER1_USERNAME = "shifter1"
@@ -21,9 +25,7 @@ PASSWORD = "VerySecurePasswort"
 def superuser(django_user_model):
     """returns a user with superuser rights"""
     return django_user_model.objects.create_superuser(
-        username=SUPERUSER_USERNAME,
-        password=PASSWORD,
-        email=""
+        username=SUPERUSER_USERNAME, password=PASSWORD, email=""
     )
 
 
@@ -81,7 +83,7 @@ def admin(django_user_model):
 def firefox():
     """returns a Firefox browser webdriver instance"""
     options = webdriver.FirefoxOptions()
-    options.add_argument('--headless')
+    options.add_argument("--headless")
     firefox_webdriver = webdriver.Firefox(firefox_options=options)
     firefox_webdriver.implicitly_wait(60)
     yield firefox_webdriver
@@ -92,10 +94,255 @@ def firefox():
 def authenticated_browser(firefox, client, live_server, superuser):
     """returns a firefox browser instance with logged-in superuser"""
     client.login(username=SUPERUSER_USERNAME, password=PASSWORD)
-    cookie = client.cookies['sessionid']
+    cookie = client.cookies["sessionid"]
 
     firefox.get(live_server.url)
-    firefox.add_cookie({'name': 'sessionid', 'value': cookie.value, 'secure': False, 'path': '/'})
+    firefox.add_cookie(
+        {"name": "sessionid", "value": cookie.value, "secure": False, "path": "/"}
+    )
     firefox.refresh()
 
     return firefox
+
+
+@pytest.fixture
+def some_certified_runs():
+    """
+    run     type       reco    good
+    1       Collisions Express True
+    2       Collisions Express True
+    3       Collisions Express True
+    4       Collisions Express True
+    5       Collisions Express False
+    6       Collisions Express False
+    7       Collisions Express False
+    1       Collisions Prompt  True
+    3       Collisions Prompt  True
+    4       Collisions Prompt  False
+    5       Collisions Prompt  True
+    6       Collisions Prompt  False
+    10      Cosmics    Express True
+    11      Cosmics    Express True
+    12      Cosmics    Express True
+    13      Cosmics    Express True
+    14      Cosmics    Express True
+    11      Cosmics    Prompt  True
+    14      Cosmics    Prompt  False
+    """
+
+    collisions_express = mixer.blend(
+        "certhelper.Type", runtype="Collisions", reco="Express"
+    )
+    collisions_prompt = mixer.blend(
+        "certhelper.Type", runtype="Collisions", reco="Prompt"
+    )
+    cosmics_express = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Express")
+    cosmics_prompt = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Prompt")
+
+    # == Collisions ==
+    # == Express ==
+    # == Good ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=1,
+        type=collisions_express,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=2,
+        type=collisions_express,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=3,
+        type=collisions_express,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=4,
+        type=collisions_express,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+
+    # == Bad ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=5,
+        type=collisions_express,
+        pixel="Good",
+        sistrip="Bad",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=6,
+        type=collisions_express,
+        pixel="Bad",
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=7,
+        type=collisions_express,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Bad",
+    )
+
+    # == Prompt ==
+    # == Good ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=1,
+        type=collisions_prompt,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=3,
+        type=collisions_prompt,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=5,
+        type=collisions_prompt,
+        pixel="Good",
+        sistrip="Good",
+        tracking="Good",
+    )
+
+    # == Bad ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=4,
+        type=collisions_prompt,
+        pixel="Good",
+        sistrip="Bad",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=6,
+        type=collisions_prompt,
+        pixel="Bad",
+        sistrip="Good",
+        tracking="Good",
+    )
+
+    # == Cosmics ==
+    # == Express ==
+    # == Good ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=10,
+        type=cosmics_express,
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=11,
+        type=cosmics_express,
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=12,
+        type=cosmics_express,
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=13,
+        type=cosmics_express,
+        sistrip="Good",
+        tracking="Good",
+    )
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=14,
+        type=cosmics_express,
+        sistrip="Good",
+        tracking="Good",
+    )
+
+    # == Prompt ==
+    # == Good ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=11,
+        type=cosmics_prompt,
+        sistrip="Good",
+        tracking="Good",
+    )
+    # == Bad ==
+    mixer.blend(
+        "certhelper.RunInfo",
+        run_number=14,
+        type=cosmics_prompt,
+        sistrip="Bad",
+        tracking="Good",
+    )
+
+    assert 19 == len(RunInfo.objects.all())
+    assert 12 == len(RunInfo.objects.filter(type__runtype="Collisions"))
+    assert 7 == len(RunInfo.objects.filter(type__runtype="Cosmics"))
+
+    assert 7 == len(
+        RunInfo.objects.filter(type__runtype="Collisions", type__reco="Express")
+    )
+    assert 5 == len(
+        RunInfo.objects.filter(type__runtype="Collisions", type__reco="Prompt")
+    )
+
+    assert 5 == len(
+        RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Express")
+    )
+    assert 2 == len(
+        RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Prompt")
+    )
+
+    assert 4 == len(
+        RunInfo.objects.filter(type__runtype="Collisions", type__reco="Express").good()
+    )
+    assert 3 == len(
+        RunInfo.objects.filter(type__runtype="Collisions", type__reco="Express").bad()
+    )
+    assert 3 == len(
+        RunInfo.objects.filter(type__runtype="Collisions", type__reco="Prompt").good()
+    )
+    assert 2 == len(
+        RunInfo.objects.filter(type__runtype="Collisions", type__reco="Prompt").bad()
+    )
+
+    assert 5 == len(
+        RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Express").good()
+    )
+    assert 0 == len(
+        RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Express").bad()
+    )
+    assert 1 == len(
+        RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Prompt").good()
+    )
+    assert 1 == len(
+        RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Prompt").bad()
+    )
