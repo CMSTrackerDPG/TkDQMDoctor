@@ -353,6 +353,23 @@ class RunInfo(SoftDeletionModel):
                         logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
                         return False
                 return self.is_good() != express_runs[0].is_good()
+        elif self.type.reco == "Express":
+            """Check if the Prompt certification has been done before the Express"""
+            try:
+                prompt_run = RunInfo.objects.get(type__reco="Prompt", run_number=self.run_number)
+                return self.is_good() != prompt_run.is_good()
+            except RunInfo.DoesNotExist:
+                """Most common case, just return False"""
+                return False
+            except RunInfo.MultipleObjectsReturned:
+                logger.error("More than 2 Prompt certifications exist for run {}".format(self.run_number))
+                logger.info("Checking if all prompt runs have the same good/bad status")
+                prompt_runs = RunInfo.objects.filter(type__reco="Prompt", run_number=self.run_number)
+                for run in prompt_runs:
+                    if prompt_runs[0].is_good() != run.is_good():
+                        logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
+                        return False
+                return self.is_good() != prompt_runs[0].is_good()
         return False
 
     def validate_unique(self, exclude=None):
