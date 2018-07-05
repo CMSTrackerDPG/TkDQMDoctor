@@ -1,10 +1,11 @@
 import django_filters
 from django import forms
 from django.contrib.auth.models import User
+from django.db import models
 from django.forms.widgets import SelectDateWidget
 from django.utils import timezone
-from django.db import models
-from certhelper.models import RunInfo, SubCategory, SubSubCategory, Type
+
+from certhelper.models import RunInfo, Type
 
 
 class RunInfoFilter(django_filters.FilterSet):
@@ -44,23 +45,7 @@ class RunInfoFilter(django_filters.FilterSet):
 
     class Meta:
         model = RunInfo
-        fields = ['type', 'date', 'category', 'subcategory', 'subsubcategory']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.form.fields['subcategory'].queryset = SubCategory.objects.none()
-        self.form.fields['subsubcategory'].queryset = SubSubCategory.objects.none()
-
-        if 'category' in self.data and self.data['category']:  # if category is set in RunInfo Form
-            try:
-                category_id = self.data.get('category')
-                self.form.fields['subcategory'].queryset = SubCategory.objects.filter(parent_category=category_id)
-                if 'subcategory' in self.data and self.data['subcategory']:
-                    subcategory_id = self.data.get('subcategory')
-                    self.form.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(
-                        parent_category=subcategory_id)
-            except (ValueError, TypeError):
-                pass
+        fields = ['type', 'date', 'problem_categories']
 
 
 class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
@@ -85,9 +70,7 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
         fields = {
             'date': ['gte', 'lte', ],
             'run_number': ['gte', 'lte', ],
-            'category': ['exact'],
-            'subcategory': ['exact'],
-            'subsubcategory': ['exact'],
+            'problem_categories': ['exact'],
         }
         filter_overrides = {
             models.DateField: {

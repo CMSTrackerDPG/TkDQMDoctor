@@ -88,38 +88,13 @@ class RunInfoForm(ModelForm):
             'tracking',
             'comment',
             'date',
-            'category',
-            'subcategory',
-            'subsubcategory',
+            'problem_categories',
         ]
 
         widgets = {
             'int_luminosity': TextInput(attrs={'placeholder': "Unit: /pb "}),
             # 'date': DateInput()
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        """" Initialize the Subcategories empty, only the subcategories corresponding
-        to the particular category should be shown, when selected"""
-        self.fields['subcategory'].queryset = SubCategory.objects.none()
-        self.fields['subsubcategory'].queryset = SubSubCategory.objects.none()
-
-        if 'category' in self.data and self.data['category']:  # if category is set in RunInfo Form
-            try:
-                category_id = self.data.get('category')
-                self.fields['subcategory'].queryset = SubCategory.objects.filter(parent_category=category_id)
-                if 'subcategory' in self.data and self.data['subcategory']:
-                    subcategory_id = self.data.get('subcategory')
-                    self.fields['subsubcategory'].queryset = SubSubCategory.objects.filter(
-                        parent_category=subcategory_id)
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk:  # if a RunInfo model instance already exists, (edit button pressed)
-            if self.instance.category:  # if category is not empty
-                self.fields['subcategory'].queryset = self.instance.category.subcategory_set
-                if self.instance.subcategory:
-                    self.fields['subsubcategory'].queryset = self.instance.subcategory.subsubcategory_set
 
     # TODO write dedicated clean_tracking, clean_... instead one single clean
     def clean(self):

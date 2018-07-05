@@ -140,9 +140,6 @@ def summaryView(request):
     runs = RunInfo.objects.filter(userid=request.user)
 
     date_filter_value = request.GET.get('date', None)
-    category_id = request.GET.get('category', None)
-    subcategory_id = request.GET.get('subcategory', None)
-    subsubcategory_id = request.GET.get('subsubcategory', None)
 
     date_from = request.GET.get('date_range_0', None)
     date_to = request.GET.get('date_range_1', None)
@@ -195,28 +192,6 @@ def summaryView(request):
             alert_errors.append("Invalid Run Number: " + str(runs_to))
             runs = RunInfo.objects.none()
 
-    if category_id:
-        if is_valid_id(category_id, Category):
-            runs = runs.filter(category=category_id)
-            alert_filters.append("Category: " + str(category_id))
-            if subcategory_id:
-                if is_valid_id(subcategory_id, SubCategory):
-                    runs = runs.filter(subcategory=subcategory_id)
-                    alert_filters.append("Subcategory: " + str(subcategory_id))
-
-                    if subsubcategory_id:
-                        if is_valid_id(subsubcategory_id, SubSubCategory):
-                            runs = runs.filter(subsubcategory=subsubcategory_id)
-                            alert_filters.append("SubSubcategory: " + str(subsubcategory_id))
-                        else:
-                            alert_errors.append("Invalid SubSubCategory ID: " + str(subsubcategory_id))
-                            runs = RunInfo.objects.none()
-                else:
-                    alert_errors.append("Invalid SubCategory ID: " + str(subcategory_id))
-                    runs = RunInfo.objects.none()
-        else:
-            alert_errors.append("Invalid Category ID: " + str(category_id))
-            runs = RunInfo.objects.none()
 
     if type_id:
         if is_valid_id(type_id, Type):
@@ -226,7 +201,7 @@ def summaryView(request):
             alert_errors.append("Invalid Type: " + str(type_id))
             runs = RunInfo.objects.none()
 
-    if not date_filter_value and not category_id and not type_id and not date_from and not date_to and not runs_from and not runs_to:
+    if not date_filter_value and not type_id and not date_from and not date_to and not runs_from and not runs_to:
         alert_infos.append("No filters applied. Showing every run you have ever certified!")
     context = {}
 

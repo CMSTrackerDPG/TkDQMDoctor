@@ -97,18 +97,8 @@
             </tr>
 
             <tr>
-                <td>{{form.category.label}}</td>
-                <td>{{form.category|addclass:'form-control'}}</td>
-            </tr>
-
-            <tr id="subcategory_row">
-                <td>{{form.subcategory.label}}</td>
-                <td>{{form.subcategory|addclass:'form-control'}}</td>
-            </tr>
-
-            <tr id="subsubcategory_row">
-                <td>{{form.subsubcategory.label}}</td>
-                <td>{{form.subsubcategory|addclass:'form-control'}}</td>
+                <td>{{form.problem_categories.label}}</td>
+                <td>{{form.problem_categories|addclass:'form-control'}}</td>
             </tr>
 
             <tr>
@@ -134,55 +124,6 @@
 {% block script %}
     <script>
         $(document).ready(function () {
-            let category = $("#id_category");
-            let subcategory = $("#id_subcategory");
-
-            if( subcategory.val() === "" ){
-                $("#subcategory_row").hide();
-                $("#subsubcategory_row").hide();
-            }
-
-            category.change(function () {
-                const category_id = $(this).val();  // get the selected category_id from the drop-down menu
-
-                $.ajax({
-                    url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
-                    data: {
-                        'categoryid': category_id  // add the category_id to the GET parameters
-                    },
-                    success: function (data) {  // date is the return of the load_subcategories view function
-                        subcategory.html(data);  // replace drop-down options with with the data from load_subcategories view
-                    }
-                });
-                subcategory.val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
-
-                if(category_id !== ""){
-                    $("#subcategory_row").show()
-                } else {
-                    $("#subcategory_row").hide()
-                }
-            });
-
-            subcategory.change(function () {
-                const subcategory_id = $(this).val();
-
-                $.ajax({
-                    url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
-                    data: {
-                        'subcategoryid': subcategory_id
-                    },
-                    success: function (data) {
-                        $("#id_subsubcategory").html(data);
-                    }
-                });
-
-                if(subcategory_id !== ""){
-                    $("#subsubcategory_row").show()
-                } else {
-                    $("#subsubcategory_row").hide()
-                }
-            });
-
             $("#id_sistrip").change(function () {
                 if($(this).val() === "Bad"){
                     $("#id_tracking").val("Bad");
