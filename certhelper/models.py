@@ -298,6 +298,7 @@ class RunInfo(SoftDeletionModel):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
     subsubcategory = models.ForeignKey(SubSubCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    problem_categories = models.ManyToManyField('categories.Category', blank=True)
 
     class Meta:
         ordering = ('-run_number',)
