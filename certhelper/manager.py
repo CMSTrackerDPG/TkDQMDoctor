@@ -3,6 +3,8 @@ from certhelper.query import SoftDeletionQuerySet, RunInfoQuerySet
 
 
 class SoftDeletionManager(models.Manager):
+    use_in_migrations = True
+
     def __init__(self, *args, **kwargs):
         self.alive_only = kwargs.pop('alive_only', True)
         super(SoftDeletionManager, self).__init__(*args, **kwargs)
