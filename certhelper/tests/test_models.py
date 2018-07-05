@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from mixer.backend.django import mixer
 
-from certhelper.models import RunInfo
+from certhelper.models import RunInfo, UserProfile
 
 pytestmark = pytest.mark.django_db
 
@@ -11,12 +11,13 @@ pytestmark = pytest.mark.django_db
 class TestUserProfile:
     def test_init(self):
         user = mixer.blend(User)
-        assert user.userprofile is not None
-        assert user.userprofile.user_privilege == 0  # Guest per default
-        assert user.userprofile.get_user_privilege_display() == "Guest"  # Guest per default
+        with pytest.raises(UserProfile.DoesNotExist):
+            user.userprofile, "Should only create UserProfile per default"
+        mixer.blend("certhelper.UserProfile", user=user)
 
     def test_upgrade_user_privilege_if_changed(self):
         user = mixer.blend(User)
+        mixer.blend("certhelper.UserProfile", user=user)
         userprofile = user.userprofile
         assert userprofile.user_privilege == 0
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
@@ -35,6 +36,7 @@ class TestUserProfile:
 
     def test_upgrade_to_shiftleader(self):
         user = mixer.blend(User)
+        mixer.blend("certhelper.UserProfile", user=user)
         userprofile = user.userprofile
         assert userprofile.user_privilege == 0
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
@@ -43,6 +45,7 @@ class TestUserProfile:
 
     def test_downgrade_not_possible(self):
         user = mixer.blend(User)
+        mixer.blend("certhelper.UserProfile", user=user)
         userprofile = user.userprofile
 
         userprofile.extra_data = {"groups": ["tkdqmdoctor-admins"]}
@@ -53,6 +56,7 @@ class TestUserProfile:
         assert userprofile.user_privilege == 50
 
         user = mixer.blend(User)
+        mixer.blend("certhelper.UserProfile", user=user)
         userprofile = user.userprofile
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
         userprofile.upgrade_user_privilege()
@@ -63,6 +67,7 @@ class TestUserProfile:
 
     def test_properties(self):
         user = mixer.blend(User)
+        mixer.blend("certhelper.UserProfile", user=user)
         userprofile = user.userprofile
         assert userprofile.user_privilege == 0
         assert userprofile.is_guest

@@ -32,6 +32,7 @@ def superuser(django_user_model):
 @pytest.fixture
 def shifter(django_user_model):
     user = django_user_model.objects.create(username=SHIFTER1_USERNAME)
+    mixer.blend("certhelper.UserProfile", user=user)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
     user.userprofile.upgrade_user_privilege()
@@ -42,6 +43,7 @@ def shifter(django_user_model):
 @pytest.fixture
 def second_shifter(django_user_model):
     user = django_user_model.objects.create(username=SHIFTER2_USERNAME)
+    mixer.blend("certhelper.UserProfile", user=user)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
     user.userprofile.upgrade_user_privilege()
@@ -52,6 +54,7 @@ def second_shifter(django_user_model):
 @pytest.fixture
 def shiftleader(django_user_model):
     user = django_user_model.objects.create(username=SHIFTLEADER_USERNAME)
+    mixer.blend("certhelper.UserProfile", user=user)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
     user.userprofile.upgrade_user_privilege()
@@ -62,6 +65,7 @@ def shiftleader(django_user_model):
 @pytest.fixture
 def expert(django_user_model):
     user = django_user_model.objects.create(username=EXPERT_USERNAME)
+    mixer.blend("certhelper.UserProfile", user=user)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-experts"]}
     user.userprofile.upgrade_user_privilege()
@@ -72,6 +76,7 @@ def expert(django_user_model):
 @pytest.fixture
 def admin(django_user_model):
     user = django_user_model.objects.create(username=ADMIN_USERNAME)
+    mixer.blend("certhelper.UserProfile", user=user)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-admins"]}
     user.userprofile.upgrade_user_privilege()

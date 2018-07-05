@@ -13,29 +13,16 @@ from certhelper.utilities.logger import get_configured_logger
 logger = get_configured_logger(loggername=__name__, filename="signals.log")
 
 
-@receiver(pre_save, sender=User)
-def user_pre_save(sender, instance, **kwargs):
-    logger.info("User {} with id {} is about to be saved".format(instance, instance.id))
-
-
-@receiver(pre_save, sender=UserProfile)
-def userprofile_pre_save(sender, instance, **kwargs):
-    logger.info("UserProfile {} for User {} is about to be saved".format(instance, instance.user))
-
-
 @receiver(post_save, sender=UserProfile)
 def userprofile_post_save(sender, instance, created, **kwargs):
     if created:
-        logger.info("New UserProfile {} with id {} for User {} has been created".format(instance, instance.id, instance.user))
+        logger.info("New UserProfile with id {} for User {} has been created".format(instance.id, instance.user))
     else:
-        logger.info("UserProfile {} with id {} for User {} has been saved".format(instance, instance.id, instance.user))
+        logger.info("UserProfile with id {} for User {} has been saved".format(instance.id, instance.user))
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """
-    Called when a new User has been created
-    """
+def user_post_save(sender, instance, created, **kwargs):
     if created:
         logger.info("New User {} with id {} has been created".format(instance, instance.id))
     else:
@@ -115,7 +102,7 @@ def update_user_privilege_by_e_groups(request, user, **kwargs):
 
     try:
         userprofile = socialaccount.user.userprofile
-    except AttributeError:
+    except UserProfile.DoesNotExist:
         try:
             logger.info("No UserProfile exists for User {}!".format(socialaccount.user))
             UserProfile.objects.create(user=socialaccount.user)
