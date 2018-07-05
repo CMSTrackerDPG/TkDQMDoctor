@@ -4,7 +4,7 @@ from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.signals import social_account_updated
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from certhelper.models import UserProfile
@@ -13,31 +13,33 @@ from certhelper.utilities.logger import get_configured_logger
 logger = get_configured_logger(loggername=__name__, filename="signals.log")
 
 
+@receiver(pre_save, sender=User)
+def user_pre_save(sender, instance, **kwargs):
+    logger.info("User {} with id {} is about to be saved".format(instance, instance.id))
+
+
+@receiver(pre_save, sender=UserProfile)
+def userprofile_pre_save(sender, instance, **kwargs):
+    logger.info("UserProfile {} for User {} is about to be saved".format(instance, instance.user))
+
+
+@receiver(post_save, sender=UserProfile)
+def userprofile_post_save(sender, instance, created, **kwargs):
+    if created:
+        logger.info("New UserProfile {} with id {} for User {} has been created".format(instance, instance.id, instance.user))
+    else:
+        logger.info("UserProfile {} with id {} for User {} has been saved".format(instance, instance.id, instance.user))
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """
     Called when a new User has been created
     """
     if created:
-        logger.info("UserProfile has been created for {}".format(instance))
-        UserProfile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """
-    Called when an existing User has been updated
-    """
-    try:
-        instance.userprofile.save()
-        logger.debug("UserProfile has been saved for {}".format(instance))
-    except UserProfile.DoesNotExist:
-        logger.error("No UserProfile exists for User {}!".format(instance))
-        UserProfile.objects.create(user=instance)
-        logger.info("UserProfile was therefore created subsequently for {}".format(instance))
-    except Exception as e:
-        logger.error("Failed to save UserProfile")
-        logger.exception(e)
+        logger.info("New User {} with id {} has been created".format(instance, instance.id))
+    else:
+        logger.info("User {} with id {} has been saved".format(instance, instance.id))
 
 
 @receiver(django.contrib.auth.signals.user_logged_in)
