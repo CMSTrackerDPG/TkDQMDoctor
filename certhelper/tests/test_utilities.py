@@ -67,8 +67,8 @@ class TestUtilities:
     def test_get_this_week_filter_parameter(self):
         # TODO better test
         param = get_this_week_filter_parameter()
-        assert param.startswith("?date__gte_day")
-        assert param.endswith(str(datetime.datetime.now().year))
+        assert param.startswith("?date__gte")
+        assert "date__lte" in param
 
     def test_request_contains_filter_parameter(self):
         req = RequestFactory().get('/')
