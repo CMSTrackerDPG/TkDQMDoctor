@@ -84,12 +84,13 @@ def request_contains_filter_parameter(request):
 def get_this_week_filter_parameter():
     start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
     end_of_week = start_of_week + timezone.timedelta(6)
-    get_parameters = "?date__gte_day=" + str(start_of_week.day)
-    get_parameters += "&date__gte_month=" + str(start_of_week.month)
-    get_parameters += "&date__gte_year=" + str(start_of_week.year)
-    get_parameters += "&date__lte_day=" + str(end_of_week.day)
-    get_parameters += "&date__lte_month=" + str(end_of_week.month)
-    get_parameters += "&date__lte_year=" + str(end_of_week.year)
+
+    date_gte = str(start_of_week.year) + "-" + str(start_of_week.month) + "-" + str(start_of_week.day)
+    date_lte = str(end_of_week.year) + "-" + str(end_of_week.month) + "-" + str(end_of_week.day)
+
+    get_parameters = "?date__gte=" + str(date_gte)
+    get_parameters += "&date__lte=" + str(date_lte)
+
     return get_parameters
 
 

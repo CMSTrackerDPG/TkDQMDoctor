@@ -75,4 +75,15 @@
     {% load static %}
     <script src="{% static "certhelper/components/shiftleader.js" %}"></script>
     <script src="{% static "certhelper/components/restore_selected_tabs.js" %}"></script>
+    <script src="{% static "certhelper/components/filter.js" %}"></script>
+    <script>
+        $(document).ready(function () {
+            $("#sl-filter-form").submit(function () {
+                var form = $(this);
+                disable_empty_filter_fields(form); // simpliflies URL alot by removing unused fields
+                simplify_date_filter_parameters(form); // shortens date GET parameters in URL
+                return true; // ensure form still submits
+            });
+        });
+    </script>
 {% endblock script %}
