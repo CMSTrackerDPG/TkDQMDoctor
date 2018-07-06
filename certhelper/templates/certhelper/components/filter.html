@@ -44,6 +44,16 @@
                                 {% render_field filter.form.date__lte|add_class:"form-control" %}
                             </div>
                         </div>
+
+                        <div class="row top-buffer">
+                            <div style="text-align: center;">
+                                <button type="button" class="btn" onclick="set_date_range_filter_to_last_week()">Last Week</button>
+                                <span style='margin-right:1.25em;'></span>
+                                <button type="button" class="btn" onclick="set_date_range_filter_to_this_week()">This Week</button>
+                                <span style='margin-right:1.25em;'></span>
+                                <button type="button" class="btn" onclick="set_date_range_filter_to_today()">Today</button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -82,7 +92,7 @@
                         <div class="row">
                             <div class="col-sm-1"></div>
                             <div class="col-sm-10">
-                                {% render_field filter.form.type|add_class:"form-control" %}
+                                {% render_field filter.form.type__runtype|add_class:"form-control" %}
                             </div>
                         </div>
                     </div>

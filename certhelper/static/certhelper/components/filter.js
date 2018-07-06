@@ -59,3 +59,44 @@ function disable_empty_filter_fields(form){
         return !this.value || this.value == "0";
     }).attr("disabled", "disabled");
 }
+
+
+function set_date_range_filter_to_this_week(){
+    const today = new Date(); // current date
+    let monday = new Date(today);
+    let sunday = new Date(today);
+
+    monday.setDate(today.getDate() - today.getDay() + 1);
+    sunday.setDate(monday.getDate() + 6);
+
+    set_date_range_filter_to(monday, sunday);
+}
+
+function set_date_range_filter_to_last_week(){
+    const today = new Date();
+    let about_a_week_ago = new Date(today);
+    about_a_week_ago.setDate(today.getDay() - 7);
+
+    let monday = new Date(about_a_week_ago);
+    let sunday = new Date(about_a_week_ago);
+
+    monday.setDate(about_a_week_ago.getDate() - about_a_week_ago.getDay() + 1);
+    sunday.setDate(monday.getDate() + 6);
+
+    set_date_range_filter_to(monday, sunday);
+}
+
+function set_date_range_filter_to_today(){
+    const today = new Date();
+    set_date_range_filter_to(today, today);
+}
+
+function set_date_range_filter_to(date_from, date_to){
+    $("#id_date__gte_day").val(date_from.getDate());
+    $("#id_date__gte_month").val(date_from.getMonth() + 1);
+    $("#id_date__gte_year").val(date_from.getFullYear());
+
+    $("#id_date__lte_day").val(date_to.getDate());
+    $("#id_date__lte_month").val(date_to.getMonth() + 1);
+    $("#id_date__lte_year").val(date_to.getFullYear());
+}
