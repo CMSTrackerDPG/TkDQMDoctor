@@ -121,10 +121,13 @@ class UserProfile(models.Model):
                                 logger.error("Group {} does not exist".format(self.SHIFT_LEADER_GROUP_NAME))
                                 user_permissions = Permission.objects.filter(content_type__model="user")
                                 certhelper_permissions = Permission.objects.filter(content_type__app_label="certhelper")
+                                categories_permissions = Permission.objects.filter(content_type__app_label="categories")
                                 g = Group.objects.create(name=self.SHIFT_LEADER_GROUP_NAME)
                                 for permission in user_permissions:
                                     g.permissions.add(permission)
                                 for permission in certhelper_permissions:
+                                    g.permissions.add(permission)
+                                for permission in categories_permissions:
                                     g.permissions.add(permission)
                                 g.save()
                                 logger.error("Group {} has been created".format(self.SHIFT_LEADER_GROUP_NAME))
