@@ -1,5 +1,6 @@
 {% extends 'certhelper/base.html' %}
 {% load myfilters %}
+{% load bootstrap3 %}
 
 {% block title %}Add Run{% endblock %}
 
@@ -93,12 +94,24 @@
             <tr>
                 <td>{{form.tracking.label}}</td>
                 <td>{{form.tracking|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+                <td>
+                    <a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'>
+                        <span class="glyphicon glyphicon-list-alt"></span> Checklist
+                    </a>
+                </td>
             </tr>
 
             <tr>
                 <td>{{form.problem_categories.label}}</td>
                 <td>{{form.problem_categories|addclass:'form-control'}}</td>
+                <td>
+                    <a href="#"
+                       data-toggle="tooltip"
+                       title="use CTRL + Click to select and deselect multiple users"
+                       class="btn">
+                        {% bootstrap_icon "question-sign" %} Help
+                    </a>
+                </td>
             </tr>
 
             <tr>
