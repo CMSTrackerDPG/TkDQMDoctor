@@ -71,6 +71,12 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
             'date': ['gte', 'lte', ],
             'run_number': ['gte', 'lte', ],
             'problem_categories': ['exact'],
+            'type__runtype': ['exact'],
+            'type__reco': ['exact'],
+            'type__bfield': ['exact'],
+            'type__beamtype': ['exact'],
+            'type__beamenergy': ['exact'],
+            'type__dataset': ['exact'],
         }
         filter_overrides = {
             models.DateField: {
