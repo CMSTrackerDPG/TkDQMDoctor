@@ -1,18 +1,13 @@
-{% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
-<title>TkDQM Doc: Pixel Help</title>
+{% extends checklist_base_template_name %}
 
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+{% block title %}TkDQM Doc: SiStrip Help{% endblock %}
+{% block checklist_block_id %}pixel-id{% endblock %}
+{% block checklist_headline %}Pixel Helper{% endblock %}
 
-<h1 align="center">Pixel Helper</h1>
-<div class="container">
-
+{% block checklist_content %}
     This page contains the list of checks to be done for every run, but also some useful information about possible issues and links to the documentation.
 
     <h3>Pixel check list</h3>
-
 
     (TO BE UPDATED WITH THE NEW <a href="/twiki/bin/view/CMS/SUMMARY" class="twikiLink">SUMMARY</a> MAPS FOR 2018)
 
@@ -27,8 +22,6 @@
     </ul>
 
     <h3>Tips for investigating potential issues </h3>
-
-
 
     <h3><a name="Pixel_Plots"></a> Descriptions of pixel plots </h3>
 
@@ -60,8 +53,4 @@
     </li></ol>
     <p />
 
-
-
-
-</div>
-
+{% endblock %}

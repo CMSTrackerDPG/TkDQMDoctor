@@ -15,6 +15,7 @@ the access privileges.
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
+from certhelper.views import ChecklistTemplateView
 from . import views
 
 app_name = 'certhelper'
@@ -34,20 +35,27 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/restore_run/$', views.restore_run_view, name='restore_run'),
 
     # checklists
-    url(r'^checklists/general$', TemplateView.as_view(template_name='certhelper/checklists/general.html'),
+    url(r'^checklists/general$', ChecklistTemplateView.as_view(
+        template_name='certhelper/checklists/general.html'),
         name='general_checklist'),
-    url(r'^checklists/trackermap$', TemplateView.as_view(template_name='certhelper/checklists/trackermap.html'),
+    url(r'^checklists/trackermap$', ChecklistTemplateView.as_view(
+        template_name='certhelper/checklists/trackermap.html'),
         name='trackermap_checklist'),
-    url(r'^checklists/pixel$', TemplateView.as_view(template_name='certhelper/checklists/pixel.html'),
+    url(r'^checklists/pixel$', ChecklistTemplateView.as_view(
+        template_name='certhelper/checklists/pixel.html'),
         name='pixel_checklist'),
-    url(r'^checklists/sistrip$', TemplateView.as_view(template_name='certhelper/checklists/sistrip.html'),
+    url(r'^checklists/sistrip$', ChecklistTemplateView.as_view(
+        template_name='certhelper/checklists/sistrip.html'),
         name='sistrip_checklist'),
-    url(r'^checklists/tracking$', TemplateView.as_view(template_name='certhelper/checklists/tracking.html'),
+    url(r'^checklists/tracking$', ChecklistTemplateView.as_view(
+        template_name='certhelper/checklists/tracking.html'),
         name='tracking_checklist'),
 
     # info
-    url(r'^help/$', TemplateView.as_view(template_name='certhelper/info/help.html'), name='help'),
-    url(r'^info/comment', TemplateView.as_view(template_name='certhelper/info/comment.html'), name='comment_info'),
+    url(r'^help/$', TemplateView.as_view(
+        template_name='certhelper/info/help.html'), name='help'),
+    url(r'^info/comment', TemplateView.as_view(
+        template_name='certhelper/info/comment.html'), name='comment_info'),
 
     # logout
     url(r'^logout/', views.logout_view, name='logout'),

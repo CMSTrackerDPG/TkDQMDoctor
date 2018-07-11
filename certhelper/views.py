@@ -394,3 +394,10 @@ def validate_central_certification_list(request):
     run_numbers = set(run_numbers)  # remove duplicates
     data = RunInfo.objects.all().compare_list_if_certified(run_numbers)
     return JsonResponse(data)
+
+
+class ChecklistTemplateView(TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["checklist_base_template_name"] = 'certhelper/checklists/base.html'
+        return context
