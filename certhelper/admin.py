@@ -19,14 +19,35 @@ class UserAdmin(BaseUserAdmin):
 
 class ReferenceRunAdmin(admin.ModelAdmin):
     exclude = ['created_at', 'updated_at', 'deleted_at']
+    list_display = ('reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset')
 
 
 class RunInfoAdmin(admin.ModelAdmin):
-    exclude = ['created_at', 'updated_at', 'deleted_at']
+    fieldsets = [
+        ("User", {'fields': ['userid']}),
+        ("Information", {'fields': ['type', 'reference_run', 'run_number', 'trackermap', 'number_of_ls', 'int_luminosity']}),
+        ("Health", {'fields': ['pixel', 'sistrip', 'tracking']}),
+        ("Problem Categories", {'fields': ['problem_categories', 'category', 'subcategory', 'subsubcategory']}),
+        ("Comments", {'fields': ['comment']}),
+        ('Date', {'fields': ['date', 'created_at', 'updated_at']}),
+    ]
+    list_display = ('runtype', 'reco', 'run_number', 'is_good', 'date')
+    exclude = ['deleted_at']
+    readonly_fields = ('created_at', 'updated_at', 'category', 'subcategory', 'subsubcategory')
 
 
 class TypeAdmin(admin.ModelAdmin):
     exclude = ['created_at', 'updated_at', 'deleted_at']
+    list_display = ('reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset')
+
+
+class ChecklistItemInline(admin.TabularInline):
+    model = ChecklistItem
+    extra = 3
+
+
+class ChecklistAdmin(admin.ModelAdmin):
+    inlines = [ChecklistItemInline]
 
 
 # Register your models here.
@@ -35,3 +56,4 @@ admin.site.register(User, UserAdmin)
 admin.site.register(ReferenceRun, ReferenceRunAdmin)
 admin.site.register(RunInfo, RunInfoAdmin)
 admin.site.register(Type, TypeAdmin)
+admin.site.register(Checklist, ChecklistAdmin)

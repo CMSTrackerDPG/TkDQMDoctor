@@ -64,7 +64,33 @@ class DateInput(forms.DateInput):
 class ReferenceRunForm(ModelForm):
     class Meta:
         model = ReferenceRun
-        fields = ['reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset', ]
+        fields = ['reference_run', 'reco', 'runtype', 'bfield', 'beamtype',
+                  'beamenergy', 'dataset', ]
+
+
+class ChecklistFormMixin(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(ChecklistFormMixin, self).__init__(*args, **kwargs)
+        for checklist in Checklist.objects.all():
+            for item in checklist.checklistitem_set.all():
+                field_name = "checklist_{}_item_{}".format(checklist.pk, item.pk)
+                self.fields[field_name] = \
+                    forms.BooleanField(
+                        label=item.short_description,
+                        required=True,
+                        help_text=item.description
+                    )
+                self[field_name].modal_name = item.modal_name if item.modal_name else ""
+
+    def checklists(self):
+        checklist_list = []  # List of checklists containing their checkbox items
+        for checklist in Checklist.objects.all():
+            tmp_list = {"name": checklist.name, "items": []}
+            for name, field in self.fields.items():
+                if name.startswith("checklist_{}_".format(checklist.pk)):
+                    tmp_list["items"].append(self[name])
+            checklist_list.append(tmp_list)
+        return checklist_list
 
 
 class RunInfoForm(ModelForm):
@@ -93,31 +119,24 @@ class RunInfoForm(ModelForm):
 
         widgets = {
             'int_luminosity': TextInput(attrs={'placeholder': "Unit: /pb "}),
-            # 'date': DateInput()
         }
 
     # TODO write dedicated clean_tracking, clean_... instead one single clean
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
 
-        is_pixel_good = cleaned_data.get('pixel') == 'Good'
-        is_pixel_bad = cleaned_data.get('pixel') == 'Bad'
-        is_sistrip_good = cleaned_data.get('sistrip') == 'Good'
         is_sistrip_bad = cleaned_data.get('sistrip') == 'Bad'
         is_tracking_good = cleaned_data.get('tracking') == 'Good'
-        comment_string = cleaned_data.get('comment')
-        # is_cosmic_run = (cleaned_data.get('Type')).get('runtype')=='Cosmics'
-
-        # if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
-        #   self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
-
-        # if not (is_sistrip_good and is_tracking_good ) :#and comment_string=="":
-        #   self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
         if is_sistrip_bad and is_tracking_good:  # and comment_string=="":
-            self.add_error(None, ValidationError("Tracking can not be GOOD if SiStrip is BAD. Please correct."))
+            self.add_error(None, ValidationError(
+                "Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
         return cleaned_data
+
+
+class RunInfoWithChecklistForm(ChecklistFormMixin, RunInfoForm):
+    pass
 
 
 class TypeForm(ModelForm):
@@ -126,5 +145,6 @@ class TypeForm(ModelForm):
         fields = ["reco", "runtype", "bfield", "beamtype", "beamenergy", "dataset"]
         widgets = {
             'dataset': TextInput(
-                attrs={'placeholder': "e.g. /Cosmics/Run2017F-PromptReco-v1/DQMIO", 'class': "form-control"}),
+                attrs={'placeholder': "e.g. /Cosmics/Run2017F-PromptReco-v1/DQMIO",
+                       'class': "form-control"}),
         }

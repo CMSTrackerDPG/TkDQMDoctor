@@ -1,32 +1,37 @@
 import re
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.generic import TemplateView
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
 from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
-from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id, \
-    request_contains_filter_parameter, get_this_week_filter_parameter, get_today_filter_parameter
+from certhelper.utilities.mixins import ChecklistTemplateContextMixin
+from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, \
+    is_valid_id, request_contains_filter_parameter, get_this_week_filter_parameter, \
+    get_today_filter_parameter
 from .forms import *
 from .tables import *
 
 
 @method_decorator(login_required, name="dispatch")
-class CreateRun(generic.CreateView):
-    """Form which allows for creation of a new entry in RunInfo
+class CreateRun(ChecklistTemplateContextMixin, generic.CreateView):
+    """
+    Form which allows for creation of a new entry in RunInfo
     """
 
     model = RunInfo
-    form_class = RunInfoForm
+    form_class = RunInfoWithChecklistForm
     template_name_suffix = '_form'
     success_url = '/'
 
@@ -80,12 +85,8 @@ class ListReferences(SingleTableView):
     table_class = ReferenceRunTable
 
 
-def same_user_or_shiftleader_check(user):
-    pass
-
-
 @method_decorator(login_required, name="dispatch")
-class UpdateRun(generic.UpdateView):
+class UpdateRun(ChecklistTemplateContextMixin, generic.UpdateView):
     """Updates a specific Run from the RunInfo table
     """
 
@@ -113,7 +114,8 @@ class UpdateRun(generic.UpdateView):
     def dispatch(self, request, *args, **kwargs):
         if self.same_user_or_shiftleader(request.user):
             return super(UpdateRun, self).dispatch(request, *args, **kwargs)
-        return redirect_to_login(request.get_full_path(), login_url=reverse('admin:login'))
+        return redirect_to_login(request.get_full_path(),
+                                 login_url=reverse('admin:login'))
 
 
 @method_decorator(login_required, name="dispatch")
@@ -139,7 +141,6 @@ class CreateType(generic.CreateView):
 
 
 # TODO clean up this mess
-
 @login_required
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
@@ -201,7 +202,6 @@ def summaryView(request):
             alert_errors.append("Invalid Run Number: " + str(runs_to))
             runs = RunInfo.objects.none()
 
-
     if type_id:
         if is_valid_id(type_id, Type):
             runs = runs.filter(type=type_id)
@@ -261,7 +261,8 @@ def logout_status(request):
     logout_successful = False
     if not request.user.is_authenticated:
         logout_successful = True
-    return render(request, 'certhelper/logout_status.html', {'logout_successful': logout_successful})
+    return render(request, 'certhelper/logout_status.html',
+                  {'logout_successful': logout_successful})
 
 
 def load_subcategories(request):

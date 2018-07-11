@@ -25,7 +25,6 @@ from certhelper.manager import SoftDeletionManager, RunInfoManager
 from certhelper.utilities.logger import get_configured_logger
 from certhelper.utilities.utilities import get_full_name
 
-
 logger = get_configured_logger(loggername=__name__, filename="models.log")
 
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
@@ -34,6 +33,16 @@ BFIELD_CHOICES = (('0 T', '0 T'), ('3.8 T', '3.8 T'))
 BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'), ('HeavyIon-Proton', 'HeavyIon-Proton'),
                     ('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
 BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
+
+
+def get_name(self):
+    """
+    Tries to return the full name and username of a User
+    """
+    return get_full_name(self)
+
+
+User.add_to_class("__str__", get_name)
 
 
 class UserProfile(models.Model):
@@ -180,7 +189,8 @@ class SoftDeletionModel(models.Model):
     Marks object as deleted rather than irrevocably deleting that object
     Also adds timestamps for creation time and update time
 
-    check https://medium.com/@adriennedomingus/soft-deletion-in-django-e4882581c340 for further information
+    check https://medium.com/@adriennedomingus/soft-deletion-in-django-e4882581c340
+    for further information
     """
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
@@ -211,7 +221,10 @@ class SoftDeletionModel(models.Model):
 
 
 class Category(SoftDeletionModel):
-    name = models.CharField(max_length=30, help_text="Title for the category of problems found")
+    name = models.CharField(
+        max_length=30,
+        help_text="Title for the category of problems found"
+    )
 
     class Meta:
         ordering = ('name',)
@@ -326,6 +339,14 @@ class RunInfo(SoftDeletionModel):
     def is_bad(self):
         return not self.is_good()
 
+    @property
+    def runtype(self):
+        return self.type.runtype
+
+    @property
+    def reco(self):
+        return self.type.reco
+
     def flag_has_changed(self):
         """
         Checks whether or not the flag from Express to Prompt has changed.
@@ -405,3 +426,32 @@ class RunInfo(SoftDeletionModel):
     def save(self):
         self.validate_unique()
         super(RunInfo, self).save()
+
+
+class Checklist(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+class ChecklistItem(models.Model):
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    short_description = models.CharField(
+        max_length=100,
+        help_text="Text that will be displayed at the bullet point"
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Text that will be displayed as a tooltip over the bullet point"
+    )
+    modal_name = models.CharField(
+        blank=True,
+        null=True,
+        max_length=15,
+        help_text="Name of the HTML modal to open within the page on click. e.g. "
+                  "if modal id is 'modal-trackermap-id' then enter just 'trackermap' "
+    )
+
+    def __str__(self):
+        return self.short_description

@@ -63,12 +63,12 @@
             <tr>
                 <td>{{form.run_number.label}}</td>
                 <td>{{form.run_number|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:general_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-general-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
             </tr>
             <tr>
                 <td>{{form.trackermap.label}}</td>
                 <td>{{form.trackermap|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:trackermap_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-trackermap-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
             </tr>
             <tr>
                 <td>{{form.number_of_ls.label}}</td>
@@ -82,22 +82,22 @@
             <tr>
                 <td>{{form.pixel.label}}</td>
                 <td>{{form.pixel|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:pixel_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-pixel-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
             </tr>
 
             <tr>
                 <td>{{form.sistrip.label}}</td>
                 <td>{{form.sistrip|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:sistrip_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
+                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-sistrip-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
             </tr>
 
             <tr>
                 <td>{{form.tracking.label}}</td>
                 <td>{{form.tracking|addclass:'form-control'}}</td>
                 <td>
-                    <a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'>
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-tracking-id">
                         <span class="glyphicon glyphicon-list-alt"></span> Checklist
-                    </a>
+                    </button>
                 </td>
             </tr>
 
@@ -105,12 +105,11 @@
                 <td>{{form.problem_categories.label}}</td>
                 <td>{{form.problem_categories|addclass:'form-control'}}</td>
                 <td>
-                    <a href="#"
-                       data-toggle="tooltip"
-                       title="use CTRL + Click to select and deselect multiple users"
-                       class="btn">
+                    <span data-toggle="tooltip"
+                          title="use CTRL + Click to select and deselect multiple users"
+                          class="btn">
                         {% bootstrap_icon "question-sign" %} Help
-                    </a>
+                    </span>
                 </td>
             </tr>
 
@@ -122,21 +121,48 @@
 
             <tr>
                 <td>{{form.date.label}}</td>
-                <td>{{form.date}}</td>
+                <td>
+                    <div class="form-inline">
+                        {{form.date}}
+                    </div>
+                </td>
             </tr>
+            {% url "certhelper:create" as create_url %}
+            {% if request.path == create_url %}
+                <tr>
+                    <td colspan="3"><h3><div style="text-align: center;">Checklist</div></h3></td>
+                </tr>
 
+                <tr>
+                    {% include "certhelper/components/checklist.html" %}
+                </tr>
+            {% endif %}
         </table>
+
         <div align="center">
             <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Ok</button>
-            <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
+            <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'">
+                <span class="glyphicon glyphicon-remove"></span> Abort
+            </button>
         </div>
+
     </form>
+
+    {% include "certhelper/checklists/general.html" %}
+    {% include "certhelper/checklists/trackermap.html" %}
+    {% include "certhelper/checklists/pixel.html" %}
+    {% include "certhelper/checklists/sistrip.html" %}
+    {% include "certhelper/checklists/tracking.html" %}
 
 {% endblock content %}
 
 {% block script %}
     <script>
         $(document).ready(function () {
+            $("#id_date_day").addClass("form-control");
+            $("#id_date_month").addClass("form-control");
+            $("#id_date_year").addClass("form-control");
+
             $("#id_sistrip").change(function () {
                 if($(this).val() === "Bad"){
                     $("#id_tracking").val("Bad");
