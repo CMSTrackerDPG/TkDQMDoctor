@@ -12,43 +12,43 @@ class TestRunInfoManager:
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Cosmics"),
                           sistrip="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
         assert run.pk == 1
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Cosmics"),
                           sistrip="Good", tracking="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
         assert run.pk == 2
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Cosmics"),
                           sistrip="Good", tracking="Good")
-        assert run.is_good() is True
+        assert run.is_good is True
         assert run.pk == 3
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           sistrip="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
         assert run.pk == 4
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           pixel="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
         assert run.pk == 5
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           tracking="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
         assert run.pk == 6
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           pixel="Good", sistrip="Good", tracking="Good")
-        assert run.is_good() is True
+        assert run.is_good is True
         assert run.pk == 7
 
         assert len(RunInfo.objects.all()) == 7

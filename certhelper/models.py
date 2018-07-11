@@ -324,6 +324,7 @@ class RunInfo(SoftDeletionModel):
                " (ref: " + str(self.reference_run.reference_run) + ", " + \
                str(self.reference_run.runtype) + " " + str(self.reference_run.reco) + ")"
 
+    @property
     def is_good(self):
         assert self.type.runtype in ['Cosmics', 'Collisions']
         good_criteria = ['Good', 'Lowstat']
@@ -336,8 +337,9 @@ class RunInfo(SoftDeletionModel):
                 return False
         return True
 
+    @property
     def is_bad(self):
-        return not self.is_good()
+        return not self.is_good
 
     @property
     def runtype(self):
@@ -347,6 +349,7 @@ class RunInfo(SoftDeletionModel):
     def reco(self):
         return self.type.reco
 
+    @property
     def flag_has_changed(self):
         """
         Checks whether or not the flag from Express to Prompt has changed.
@@ -365,7 +368,7 @@ class RunInfo(SoftDeletionModel):
         if self.type.reco == "Prompt":
             try:
                 express_run = RunInfo.objects.get(type__reco="Express", run_number=self.run_number)
-                return self.is_good() != express_run.is_good()
+                return self.is_good != express_run.is_good
             except RunInfo.DoesNotExist:
                 logger.warning("Certification for run_number {} exists for Prompt but not Express!".format(self.run_number))
                 return False
@@ -374,15 +377,15 @@ class RunInfo(SoftDeletionModel):
                 logger.info("Checking if all express runs have the same good/bad status")
                 express_runs = RunInfo.objects.filter(type__reco="Express", run_number=self.run_number)
                 for run in express_runs:
-                    if express_runs[0].is_good() != run.is_good():
+                    if express_runs[0].is_good != run.is_good:
                         logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
                         return False
-                return self.is_good() != express_runs[0].is_good()
+                return self.is_good != express_runs[0].is_good
         elif self.type.reco == "Express":
             """Check if the Prompt certification has been done before the Express"""
             try:
                 prompt_run = RunInfo.objects.get(type__reco="Prompt", run_number=self.run_number)
-                return self.is_good() != prompt_run.is_good()
+                return self.is_good != prompt_run.is_good
             except RunInfo.DoesNotExist:
                 """Most common case, just return False"""
                 return False
@@ -391,10 +394,10 @@ class RunInfo(SoftDeletionModel):
                 logger.info("Checking if all prompt runs have the same good/bad status")
                 prompt_runs = RunInfo.objects.filter(type__reco="Prompt", run_number=self.run_number)
                 for run in prompt_runs:
-                    if prompt_runs[0].is_good() != run.is_good():
+                    if prompt_runs[0].is_good != run.is_good:
                         logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
                         return False
-                return self.is_good() != prompt_runs[0].is_good()
+                return self.is_good != prompt_runs[0].is_good
         return False
 
     def validate_unique(self, exclude=None):

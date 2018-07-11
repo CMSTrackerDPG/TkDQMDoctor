@@ -89,7 +89,7 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         for run_number in list_of_run_numbers:
             try:
                 run = self.get(run_number=run_number)
-                if run.is_good():
+                if run.is_good:
                     d["good"].append(run_number)
                 else:
                     d["bad"].append(run_number)
@@ -97,10 +97,10 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
                 d["missing"].append(run_number)
             except MultipleObjectsReturned:
                 runs = self.filter(run_number=run_number)
-                is_good = runs[0].is_good()
+                is_good = runs[0].is_good
                 conflict = False
                 for run in runs:
-                    if run.is_good() != is_good:
+                    if run.is_good != is_good:
                         conflict = True
                 if conflict:
                     d["conflicting"].append(run_number)
@@ -117,7 +117,7 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
         Example: Run was certified good in express and bad promptreco
         """
-        return list({run.run_number for run in self if run.flag_has_changed()})
+        return list({run.run_number for run in self if run.flag_has_changed})
 
     def today(self):
         pass
@@ -154,4 +154,4 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
         print("{:<10}{:<11}{:<8}{}".format("run", "type", "reco", "good"))
         for run in self:
-            print("{:<8}{:<11}{:<8}{}".format(run.run_number, run.type.runtype, run.type.reco, run.is_good()))
+            print("{:<8}{:<11}{:<8}{}".format(run.run_number, run.type.runtype, run.type.reco, run.is_good))

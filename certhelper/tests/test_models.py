@@ -152,42 +152,42 @@ class TestRuninfo:
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Cosmics"),
                           sistrip="Bad")
-        assert run.is_good() is False
-        assert run.is_bad() is True
+        assert run.is_good is False
+        assert run.is_bad is True
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Cosmics"),
                           sistrip="Good", tracking="Bad")
-        assert run.is_good() is False
-        assert run.is_bad() is True
+        assert run.is_good is False
+        assert run.is_bad is True
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Cosmics"),
                           sistrip="Good", tracking="Good")
-        assert run.is_good() is True
-        assert run.is_bad() is False
+        assert run.is_good is True
+        assert run.is_bad is False
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           sistrip="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           pixel="Bad")
-        assert run.is_good() is False
+        assert run.is_good is False
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           tracking="Bad")
-        assert run.is_good() is False
-        assert run.is_bad() is True
+        assert run.is_good is False
+        assert run.is_bad is True
 
         run = mixer.blend('certhelper.RunInfo',
                           type=mixer.blend('certhelper.Type', runtype="Collisions"),
                           pixel="Good", sistrip="Good", tracking="Good")
-        assert run.is_good() is True
-        assert run.is_bad() is False
+        assert run.is_good is True
+        assert run.is_bad is False
 
         assert len(RunInfo.objects.all()) == 7
 

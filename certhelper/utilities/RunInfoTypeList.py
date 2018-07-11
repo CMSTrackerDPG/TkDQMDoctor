@@ -30,7 +30,7 @@ class RunInfoTypeList:
             self.tk_dict[run.trackermap] = []
         self.tk_dict[run.trackermap].append(run.run_number)
 
-        good_bad_key = 'Good' if run.is_good() else 'Bad'
+        good_bad_key = 'Good' if run.is_good else 'Bad'
         if good_bad_key not in self.certified_dict:
             self.certified_dict[good_bad_key] = []
             self.sums_dict[good_bad_key] = {'ls': 0, 'int_lum': 0}
