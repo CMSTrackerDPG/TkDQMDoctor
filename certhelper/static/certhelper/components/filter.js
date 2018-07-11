@@ -69,13 +69,17 @@ function set_date_range_filter_to_this_week(){
     monday.setDate(today.getDate() - today.getDay() + 1);
     sunday.setDate(monday.getDate() + 6);
 
+    console.log("monday + " + monday);
+    console.log("sunday + " + sunday);
+
+
     set_date_range_filter_to(monday, sunday);
 }
 
 function set_date_range_filter_to_last_week(){
     const today = new Date();
     let about_a_week_ago = new Date(today);
-    about_a_week_ago.setDate(today.getDay() - 7);
+    about_a_week_ago.setDate(today.getDate() - 7);
 
     let monday = new Date(about_a_week_ago);
     let sunday = new Date(about_a_week_ago);
