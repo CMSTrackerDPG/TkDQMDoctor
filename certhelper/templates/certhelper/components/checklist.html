@@ -6,7 +6,7 @@
 
                 {% for item in checklist.items %}
                     <label style="font-weight: normal" title="{{ item.help_text }}">
-                        {{ item }} {{ item.label }} {{ item.modal_name }}
+                        {{ item }} {{ item.label }}
                         {% if item.modal_name %}
                             <button type="button"
                                     class="btn btn-link btn-sm"
