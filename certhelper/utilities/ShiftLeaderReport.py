@@ -33,6 +33,9 @@ class ShiftLeaderReport:
     def sum_int_lum(self, runtype, reco, bad_only=False, day=None):
         return self.get_attribute("int_luminosity", runtype, reco, bad_only, day)
 
+    def run_numbers(self, runtype, reco, day=None):
+        return self.get_attribute("run_numbers", runtype, reco, bad_only=False, day=day)
+
     def get_attribute(self, attribute, runtype, reco, bad_only=False, day=None, default_value=0):
         return self.get_item(runtype, reco, bad_only, day).get(attribute, default_value)
 
@@ -90,6 +93,7 @@ class ShiftLeaderReport:
             for reco in self.recos:
                 context[type][reco] = {}
                 context[bad][type][reco] = {}
+                context[type][reco]["run_numbers"] = {}
                 for attr in self.attributes:
                     context[type][reco][attr] = 0
                     context[bad][type][reco][attr] = 0
@@ -104,7 +108,6 @@ class ShiftLeaderReport:
         """
         context = self.build_context_structure()
 
-        # TODO test this!!
         context[self.bad_keyword][self.num_runs_keyword] = 0
         context[self.bad_keyword][self.intlum_keyword] = 0
 
@@ -124,6 +127,9 @@ class ShiftLeaderReport:
                 #TODO TEST THIS
                 context[self.bad_keyword][self.num_runs_keyword] += num_runs
                 context[self.bad_keyword][self.intlum_keyword] += int_lum
+
+                run_numbers = self.run_numbers(runtype, reco, day=day)
+                context[runtype][reco]["run_numbers"] = run_numbers
 
         if day:
             context["name"] = to_weekdayname(day)

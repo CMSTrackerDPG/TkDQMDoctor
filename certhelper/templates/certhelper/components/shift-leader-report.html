@@ -24,6 +24,19 @@
             </ul>
         </li>
         <li class="active"><a data-toggle="tab" href="#slr-weekly-cert">Weekly Certification</a></li>
+
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                List of runs <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a data-toggle="tab" href="#slr-list-of-runs-all">All days</a></li>
+
+                {% for day in slreport.day %}
+                    <li><a data-toggle="tab" href="#slr-list-of-runs-{{ day.date }}">{{ day.name }} ({{ day.date }})</a></li>
+                {% endfor %}
+            </ul>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -32,5 +45,6 @@
         {% endcomment %}
         {% include "certhelper/components/shiftleader/day-by-day.html" %}
         {% include "certhelper/components/shiftleader/weekly-cert.html" %}
+        {% include "certhelper/components/shiftleader/list-of-runs.html" %}
     </div>
 {% endwith %}

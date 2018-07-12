@@ -45,37 +45,77 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
     def good(self):
         good_criteria = ['Good', 'Lowstat']
 
-        return self.filter(sistrip__in=good_criteria).filter(tracking__in=good_criteria).filter(
+        return self.filter(sistrip__in=good_criteria).filter(
+            tracking__in=good_criteria).filter(
             Q(type__runtype="Cosmics") | Q(pixel__in=good_criteria))
 
     def bad(self):
         bad_criteria = ['Bad', 'Excluded']
 
-        return self.filter(Q(sistrip__in=bad_criteria) | Q(tracking__in=bad_criteria) | (
-                Q(pixel__in=bad_criteria) & Q(type__runtype="Collisions")))
+        return self.filter(
+            Q(sistrip__in=bad_criteria) | Q(tracking__in=bad_criteria) | (
+                    Q(pixel__in=bad_criteria) & Q(type__runtype="Collisions")))
 
     # TODO rename 'type__runtype' to just 'run__type'
     def summary(self):
-        return self \
+        """
+        Create basic summary with int_luminosity and number_of_ls per type
+        """
+        summary_dict = self \
             .order_by('type__runtype', 'type__reco') \
             .values('type__runtype', 'type__reco') \
             .annotate(
-                runs_certified=Count('pk'),
-                # TODO consider replacing FloatField with DecimalField
-                int_luminosity=Sum('int_luminosity', output_field=FloatField()),
-                number_of_ls=Sum('number_of_ls')
-            )
+            runs_certified=Count('pk'),
+            # TODO consider replacing FloatField with DecimalField
+            int_luminosity=Sum('int_luminosity', output_field=FloatField()),
+            number_of_ls=Sum('number_of_ls')
+        )
+        """
+        Add List of run_numbers per type to the summary
+        """
+        for d in summary_dict:
+            good_run_numbers = [r["run_number"] for r in self.filter(
+                type__runtype=d.get("type__runtype"),
+                type__reco=d.get("type__reco")) \
+                .good() \
+                .order_by("run_number") \
+                .values('run_number')]
+            bad_run_numbers = [r["run_number"] for r in self.filter(
+                type__runtype=d.get("type__runtype"),
+                type__reco=d.get("type__reco")) \
+                .bad() \
+                .order_by("run_number") \
+                .values('run_number')]
+            d.update({"run_numbers": {
+                "good": good_run_numbers,
+                "bad": bad_run_numbers}})
+
+        return summary_dict
 
     def summary_per_day(self):
-        return self \
+        summary_dict = self \
             .order_by('date', 'type__runtype', 'type__reco') \
             .values('date', 'type__runtype', 'type__reco') \
             .annotate(
-                runs_certified=Count('pk'),
-                int_luminosity=Sum('int_luminosity', output_field=FloatField()),
-                number_of_ls=Sum('number_of_ls'),
-                day=(ExtractWeekDay('date'))
-            )
+            runs_certified=Count('pk'),
+            int_luminosity=Sum('int_luminosity', output_field=FloatField()),
+            number_of_ls=Sum('number_of_ls'),
+            day=(ExtractWeekDay('date'))
+        )
+
+        """
+        Add List of run_numbers per day and type to the summary
+        """
+        for d in summary_dict:
+            runs = self.filter(
+                date=d.get("date"),
+                type__runtype=d.get("type__runtype"),
+                type__reco=d.get("type__reco")) \
+                .order_by("run_number")
+            run_numbers = [run.run_number for run in runs]
+            d.update({"run_numbers": self.compare_list_if_certified(run_numbers)})
+
+        return summary_dict
 
     def compare_list_if_certified(self, list_of_run_numbers):
         """
@@ -154,4 +194,5 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
         print("{:<10}{:<11}{:<8}{}".format("run", "type", "reco", "good"))
         for run in self:
-            print("{:<8}{:<11}{:<8}{}".format(run.run_number, run.type.runtype, run.type.reco, run.is_good))
+            print("{:<8}{:<11}{:<8}{}".format(run.run_number, run.type.runtype,
+                                              run.type.reco, run.is_good))

@@ -53,7 +53,7 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
     userid = django_filters.filters.ModelMultipleChoiceFilter(
         name='userid',
         to_field_name='pk',
-        queryset=User.objects.all(),
+        queryset=User.objects.all().order_by("first_name", "last_name", "username"),
         widget=forms.SelectMultiple(attrs={
             'class': 'form-control',
             'size': '15',
