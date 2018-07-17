@@ -98,11 +98,20 @@ class UpdateRun(generic.UpdateView):
     # form_class.instance.userid = self.request.user # not neccessary to update
     #    return super(UpdateRun, self).form_valid(form_class)
 
-    def same_user_or_shiftleader_check(self, user):
-        return self.get_object().userid == user or user.userprofile.has_shift_leader_rights
+    def same_user_or_shiftleader(self, user):
+        """
+        checks if the user trying to edit the run is the same user that created the run,
+        has at least shift leader rights or is a super user (admin)
+        """
+        try:
+            return self.get_object().userid == user or \
+                   user.is_superuser or \
+                   user.userprofile.has_shift_leader_rights
+        except UserProfile.DoesNotExist:
+            return False
 
     def dispatch(self, request, *args, **kwargs):
-        if self.get_object().userid == request.user or request.user.userprofile.has_shift_leader_rights:
+        if self.same_user_or_shiftleader(request.user):
             return super(UpdateRun, self).dispatch(request, *args, **kwargs)
         return redirect_to_login(request.get_full_path(), login_url=reverse('admin:login'))
 
