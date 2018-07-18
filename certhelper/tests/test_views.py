@@ -1,11 +1,10 @@
 import types
 
 import pytest
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory
 from mixer.backend.django import mixer
 
-import certhelper
 from certhelper.views import *
 
 pytestmark = pytest.mark.django_db
