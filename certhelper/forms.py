@@ -77,16 +77,19 @@ class ChecklistFormMixin(forms.Form):
 
     Form can only be submitted when all the checkboxes have been ticked
 
+    Whether the checkbox is ticked or not is just checked client-side (html)
+    and NOT server-side.
+
     Example Usage:
     form.checklist_sistrip -> renders the SiStrip Checklist checkbox
     """
 
     def __init__(self, *args, **kwargs):
         super(ChecklistFormMixin, self).__init__(*args, **kwargs)
-        self.ALLOWED_CHECKLISTS = ('general', 'trackermap', 'pixel', 'sistrip', 'tracking')
-        for checklist in Checklist.objects.filter(identifier__in=self.ALLOWED_CHECKLISTS):
+        for checklist in Checklist.objects.all():
             field_name = "checklist_{}".format(checklist.identifier)
-            self.fields[field_name] = forms.BooleanField(required=True)
+            # required in HTML field, not required in server-side form validation
+            self.fields[field_name] = forms.BooleanField(required=False)
 
     def checklists(self):
         """
@@ -98,7 +101,7 @@ class ChecklistFormMixin(forms.Form):
         form.checklists.pixel.checklist -> returns the Checklist model instance
         """
         checklist_list = {}  # List of checklists containing their checkbox items
-        for checklist in Checklist.objects.filter(identifier__in=self.ALLOWED_CHECKLISTS):
+        for checklist in Checklist.objects.all():
             field_name = "checklist_{}".format(checklist.identifier)
             checklist_list.update({
                 checklist.identifier: {

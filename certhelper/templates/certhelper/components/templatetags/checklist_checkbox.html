@@ -3,7 +3,7 @@
     {% load widget_tweaks %}
     <div class="col-sm-offset-3 col-sm-9 checklist">
         <label class="no-bold-label">
-            {% render_field checkbox %}
+            {% render_field checkbox required=required %}
             <span class="glyphicon glyphicon-list-alt"></span> {{ checklist.title }} Checklist
 
             <button type="button"
