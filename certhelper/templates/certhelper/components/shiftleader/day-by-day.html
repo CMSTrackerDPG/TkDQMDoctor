@@ -8,18 +8,18 @@
             <li>Fills <strong>[list of fills]</strong>
                 <ul>
                     <li>
-                        <strong>[insert here]</strong> colliding bunches, peak lumi <strong>[insert here]</strong> x 10<sup>34</sup> cm<sup>2</sup>/s
+                        <strong>[insert here]</strong> colliding bunches, peak lumi <strong>[insert here]</strong> x 10³⁴ cm²/s
                     </li>
                 </ul>
             </li>
             <li>Number of runs certified:
                 <ul>
-                    <li>Collisions: <strong>{{ day.Collisions.Express.number_of_runs }}</strong> in Stream-Express (<strong>{{ day.Collisions.Express.int_lum }} pb<sup>-1</sup></strong>), <strong>{{ day.Collisions.Prompt.number_of_runs }}</strong> in Prompt-Reco (<strong>{{ day.Collisions.Prompt.int_lum }} pb<sup>-1</sup></strong>)</li>
+                    <li>Collisions: <strong>{{ day.Collisions.Express.number_of_runs }}</strong> in Stream-Express (<strong>{{ day.Collisions.Express.int_lum }} pb⁻¹</strong>), <strong>{{ day.Collisions.Prompt.number_of_runs }}</strong> in Prompt-Reco (<strong>{{ day.Collisions.Prompt.int_lum }} pb⁻¹</strong>)</li>
                     <li>Cosmics: <strong>{{ day.Cosmics.Express.number_of_runs }}</strong> in Stream Express, <strong>{{ day.Cosmics.Prompt.number_of_runs }}</strong> in Prompt Reco</li>
                 </ul>
             </li>
             <li>
-                Total number of BAD runs = <strong>{{ day.Bad.number_of_runs }}</strong> (<strong>{{ day.Bad.int_lum }} pb<sup>-1</sup></strong>) (see next slide for details)
+                Total number of BAD runs = <strong>{{ day.Bad.number_of_runs }}</strong> (<strong>{{ day.Bad.int_lum }} pb⁻¹</strong>) (see next slide for details)
                 <ul>
                     <li>Number of changed flags from Express to Prompt=<strong>{{ day.number_of_changed_flags }}</strong>{% if day.runs_with_changed_flags %} ({{ day.runs_with_changed_flags }}){% endif %}</li>
                 </ul>
