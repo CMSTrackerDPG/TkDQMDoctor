@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from nested_admin.nested import NestedStackedInline, NestedModelAdmin
+
 from .models import *
 
 
@@ -19,21 +21,27 @@ class UserAdmin(BaseUserAdmin):
 
 class ReferenceRunAdmin(admin.ModelAdmin):
     exclude = ['created_at', 'updated_at', 'deleted_at']
-    list_display = ('reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset')
+    list_display = (
+        'reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy',
+        'dataset')
 
 
 class RunInfoAdmin(admin.ModelAdmin):
     fieldsets = [
         ("User", {'fields': ['userid']}),
-        ("Information", {'fields': ['type', 'reference_run', 'run_number', 'trackermap', 'number_of_ls', 'int_luminosity']}),
+        ("Information", {'fields': ['type', 'reference_run', 'run_number', 'trackermap',
+                                    'number_of_ls', 'int_luminosity']}),
         ("Health", {'fields': ['pixel', 'sistrip', 'tracking']}),
-        ("Problem Categories", {'fields': ['problem_categories', 'category', 'subcategory', 'subsubcategory']}),
+        ("Problem Categories", {
+            'fields': ['problem_categories', 'category', 'subcategory',
+                       'subsubcategory']}),
         ("Comments", {'fields': ['comment']}),
         ('Date', {'fields': ['date', 'created_at', 'updated_at']}),
     ]
     list_display = ('runtype', 'reco', 'run_number', 'is_good', 'date')
     exclude = ['deleted_at']
-    readonly_fields = ('created_at', 'updated_at', 'category', 'subcategory', 'subsubcategory')
+    readonly_fields = (
+        'created_at', 'updated_at', 'category', 'subcategory', 'subsubcategory')
 
 
 class TypeAdmin(admin.ModelAdmin):
@@ -41,13 +49,19 @@ class TypeAdmin(admin.ModelAdmin):
     list_display = ('reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset')
 
 
-class ChecklistItemInline(admin.TabularInline):
+class ChecklistItemInline(NestedStackedInline):
     model = ChecklistItem
     extra = 3
 
 
-class ChecklistAdmin(admin.ModelAdmin):
+class ChecklistItemGroupInline(NestedStackedInline):
+    model = ChecklistItemGroup
+    extra = 1
     inlines = [ChecklistItemInline]
+
+
+class ChecklistAdmin(NestedModelAdmin):
+    inlines = [ChecklistItemGroupInline]
 
 
 # Register your models here.

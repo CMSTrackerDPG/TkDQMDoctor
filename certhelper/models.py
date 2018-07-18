@@ -16,6 +16,7 @@ TypeForm           |  Type
 import logging
 
 from allauth.socialaccount.fields import JSONField
+from ckeditor.fields import RichTextField
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -30,7 +31,8 @@ logger = get_configured_logger(loggername=__name__, filename="models.log")
 RECO_CHOICES = (('Express', 'Express'), ('Prompt', 'Prompt'), ('reReco', 'reReco'))
 RUNTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Collisions', 'Collisions'))
 BFIELD_CHOICES = (('0 T', '0 T'), ('3.8 T', '3.8 T'))
-BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'), ('HeavyIon-Proton', 'HeavyIon-Proton'),
+BEAMTYPE_CHOICES = (('Cosmics', 'Cosmics'), ('Proton-Proton', 'Proton-Proton'),
+                    ('HeavyIon-Proton', 'HeavyIon-Proton'),
                     ('HeavyIon-HeavyIon', 'HeavyIon-HeavyIon'))
 BEAMENERGY_CHOICES = (('Cosmics', 'Cosmics'), ('5 TeV', '5 TeV'), ('13 TeV', '13 TeV'))
 
@@ -109,10 +111,14 @@ class UserProfile(models.Model):
             assert egroups is not None
 
             for user_privilege, necessary_group_list in self.criteria_groups_dict.items():
-                logger.debug("user_privilege = {}, necessary_group_list = {}".format(user_privilege, necessary_group_list))
+                logger.debug("user_privilege = {}, necessary_group_list = {}".format(
+                    user_privilege, necessary_group_list))
                 if any(egroup in necessary_group_list for egroup in egroups):
-                    logger.debug("Criteria matched for user_privilege {}, self.user_privilege={}".format(user_privilege, self.user_privilege))
-                    logger.debug("Checked group list for privilege {} is {}".format(user_privilege, necessary_group_list))
+                    logger.debug(
+                        "Criteria matched for user_privilege {}, self.user_privilege={}".format(
+                            user_privilege, self.user_privilege))
+                    logger.debug("Checked group list for privilege {} is {}".format(
+                        user_privilege, necessary_group_list))
                     if self.user_privilege < user_privilege:
                         self.user_privilege = user_privilege
                         logger.info("User {} has been granted {} status".format(
@@ -125,13 +131,19 @@ class UserProfile(models.Model):
                             try:
                                 g = Group.objects.get(name=self.SHIFT_LEADER_GROUP_NAME)
                                 self.user.groups.add(g)
-                                logger.info("User {} has been added to Group {}".format(self.user, self.SHIFT_LEADER_GROUP_NAME))
+                                logger.info("User {} has been added to Group {}".format(
+                                    self.user, self.SHIFT_LEADER_GROUP_NAME))
                             except Group.DoesNotExist:
-                                logger.error("Group {} does not exist".format(self.SHIFT_LEADER_GROUP_NAME))
-                                user_permissions = Permission.objects.filter(content_type__model="user")
-                                certhelper_permissions = Permission.objects.filter(content_type__app_label="certhelper")
-                                categories_permissions = Permission.objects.filter(content_type__app_label="categories")
-                                g = Group.objects.create(name=self.SHIFT_LEADER_GROUP_NAME)
+                                logger.error("Group {} does not exist".format(
+                                    self.SHIFT_LEADER_GROUP_NAME))
+                                user_permissions = Permission.objects.filter(
+                                    content_type__model="user")
+                                certhelper_permissions = Permission.objects.filter(
+                                    content_type__app_label="certhelper")
+                                categories_permissions = Permission.objects.filter(
+                                    content_type__app_label="categories")
+                                g = Group.objects.create(
+                                    name=self.SHIFT_LEADER_GROUP_NAME)
                                 for permission in user_permissions:
                                     g.permissions.add(permission)
                                 for permission in certhelper_permissions:
@@ -139,14 +151,18 @@ class UserProfile(models.Model):
                                 for permission in categories_permissions:
                                     g.permissions.add(permission)
                                 g.save()
-                                logger.error("Group {} has been created".format(self.SHIFT_LEADER_GROUP_NAME))
+                                logger.error("Group {} has been created".format(
+                                    self.SHIFT_LEADER_GROUP_NAME))
                                 self.user.groups.add(g)
-                                logger.info("User {} has been added to Group {}".format(self.user, self.SHIFT_LEADER_GROUP_NAME))
+                                logger.info("User {} has been added to Group {}".format(
+                                    self.user, self.SHIFT_LEADER_GROUP_NAME))
 
                             logger.info("User {} is now staff".format(self.user))
                     else:
-                        logger.debug("Privilege not updated because it is already higher user_privilege={}, "
-                                     "self.user_privilege={}".format(user_privilege, self.user_privilege))
+                        logger.debug(
+                            "Privilege not updated because it is already higher user_privilege={}, "
+                            "self.user_privilege={}".format(user_privilege,
+                                                            self.user_privilege))
         except AssertionError:
             logger.error("No e-groups found")
         except Exception as e:
@@ -175,7 +191,8 @@ class UserProfile(models.Model):
 
     @property
     def has_shifter_rights(self):
-        return self.user_privilege in (self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN) \
+        return self.user_privilege in (
+        self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN) \
                or self.user.is_staff or self.user.is_superuser
 
     @property
@@ -236,7 +253,8 @@ class Category(SoftDeletionModel):
 # TODO make parent_category not nullable
 class SubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
-    parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True,
+                                        blank=True)
 
     class Meta:
         ordering = ('name',)
@@ -248,7 +266,8 @@ class SubCategory(SoftDeletionModel):
 # TODO make parent_category not nullable
 class SubSubCategory(SoftDeletionModel):
     name = models.CharField(max_length=30)
-    parent_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
+    parent_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE,
+                                        null=True, blank=True)
 
     class Meta:
         ordering = ('name',)
@@ -258,18 +277,23 @@ class SubSubCategory(SoftDeletionModel):
 
 
 class Type(SoftDeletionModel):
-    reco = models.CharField(max_length=30, choices=RECO_CHOICES)  # Express, Prompt, reReco
-    runtype = models.CharField(max_length=30, choices=RUNTYPE_CHOICES)  # Cosmics, Collisions
+    reco = models.CharField(max_length=30,
+                            choices=RECO_CHOICES)  # Express, Prompt, reReco
+    runtype = models.CharField(max_length=30,
+                               choices=RUNTYPE_CHOICES)  # Cosmics, Collisions
     bfield = models.CharField(max_length=30, choices=BFIELD_CHOICES)
     beamtype = models.CharField(max_length=30, choices=BEAMTYPE_CHOICES)
     beamenergy = models.CharField(max_length=10, choices=BEAMENERGY_CHOICES)
     dataset = models.CharField(max_length=150)
 
     class Meta:
-        unique_together = ["reco", "runtype", "bfield", "beamtype", "beamenergy", "dataset"]
+        ordering = ('runtype', 'reco', '-id')
+        unique_together = ["reco", "runtype", "bfield", "beamtype", "beamenergy",
+                           "dataset"]
 
     def __str__(self):
-        return str(self.reco) + " " + str(self.runtype) + " " + str(self.bfield) + " " + str(self.beamtype) + " " + str(
+        return str(self.reco) + " " + str(self.runtype) + " " + str(
+            self.bfield) + " " + str(self.beamtype) + " " + str(
             self.beamenergy) + " " + str(self.dataset)
 
 
@@ -284,12 +308,15 @@ class ReferenceRun(SoftDeletionModel):
     dataset = models.CharField(max_length=150)
 
     class Meta:
-        unique_together = ["reference_run", "reco", "runtype", "bfield", "beamtype", "beamenergy", "dataset"]
+        unique_together = ["reference_run", "reco", "runtype", "bfield", "beamtype",
+                           "beamenergy", "dataset"]
         ordering = ('-reference_run',)
 
     def __str__(self):
-        return str(self.reference_run) + " " + str(self.reco) + " " + str(self.runtype) + " " + str(
-            self.bfield) + " " + str(self.beamtype) + " " + str(self.beamenergy) + " " + str(self.dataset)
+        return str(self.reference_run) + " " + str(self.reco) + " " + str(
+            self.runtype) + " " + str(
+            self.bfield) + " " + str(self.beamtype) + " " + str(
+            self.beamenergy) + " " + str(self.dataset)
 
 
 # Runs that shifters are certifying
@@ -297,7 +324,8 @@ class RunInfo(SoftDeletionModel):
     objects = RunInfoManager()
     all_objects = RunInfoManager(alive_only=False)
 
-    GOOD_BAD_CHOICES = (('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
+    GOOD_BAD_CHOICES = (
+    ('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
     TRACKERMAP_CHOICES = (('Exists', 'Exists'), ('Missing', 'Missing'))
     userid = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
@@ -311,18 +339,23 @@ class RunInfo(SoftDeletionModel):
     tracking = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
     comment = models.TextField(blank=True)
     date = models.DateField()
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
-    subsubcategory = models.ForeignKey(SubSubCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True,
+                                 blank=True)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True,
+                                    blank=True)
+    subsubcategory = models.ForeignKey(SubSubCategory, on_delete=models.SET_NULL,
+                                       null=True, blank=True)
     problem_categories = models.ManyToManyField('categories.Category', blank=True)
 
     class Meta:
         ordering = ('-run_number',)
 
     def __str__(self):
-        return str(self.run_number) + ", " + str(self.type.runtype) + " " + str(self.type.reco) + \
+        return str(self.run_number) + ", " + str(self.type.runtype) + " " + str(
+            self.type.reco) + \
                " (ref: " + str(self.reference_run.reference_run) + ", " + \
-               str(self.reference_run.runtype) + " " + str(self.reference_run.reco) + ")"
+               str(self.reference_run.runtype) + " " + str(
+            self.reference_run.reco) + ")"
 
     @property
     def is_good(self):
@@ -367,35 +400,48 @@ class RunInfo(SoftDeletionModel):
         """
         if self.type.reco == "Prompt":
             try:
-                express_run = RunInfo.objects.get(type__reco="Express", run_number=self.run_number)
+                express_run = RunInfo.objects.get(type__reco="Express",
+                                                  run_number=self.run_number)
                 return self.is_good != express_run.is_good
             except RunInfo.DoesNotExist:
-                logger.warning("Certification for run_number {} exists for Prompt but not Express!".format(self.run_number))
+                logger.warning(
+                    "Certification for run_number {} exists for Prompt but not Express!".format(
+                        self.run_number))
                 return False
             except RunInfo.MultipleObjectsReturned:
-                logger.error("More than 2 Express certifications exist for run {}".format(self.run_number))
-                logger.info("Checking if all express runs have the same good/bad status")
-                express_runs = RunInfo.objects.filter(type__reco="Express", run_number=self.run_number)
+                logger.error(
+                    "More than 2 Express certifications exist for run {}".format(
+                        self.run_number))
+                logger.info(
+                    "Checking if all express runs have the same good/bad status")
+                express_runs = RunInfo.objects.filter(type__reco="Express",
+                                                      run_number=self.run_number)
                 for run in express_runs:
                     if express_runs[0].is_good != run.is_good:
-                        logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
+                        logger.error(
+                            "Contradiction detected. Cannot unambiguously determine if the flag has changed")
                         return False
                 return self.is_good != express_runs[0].is_good
         elif self.type.reco == "Express":
             """Check if the Prompt certification has been done before the Express"""
             try:
-                prompt_run = RunInfo.objects.get(type__reco="Prompt", run_number=self.run_number)
+                prompt_run = RunInfo.objects.get(type__reco="Prompt",
+                                                 run_number=self.run_number)
                 return self.is_good != prompt_run.is_good
             except RunInfo.DoesNotExist:
                 """Most common case, just return False"""
                 return False
             except RunInfo.MultipleObjectsReturned:
-                logger.error("More than 2 Prompt certifications exist for run {}".format(self.run_number))
+                logger.error(
+                    "More than 2 Prompt certifications exist for run {}".format(
+                        self.run_number))
                 logger.info("Checking if all prompt runs have the same good/bad status")
-                prompt_runs = RunInfo.objects.filter(type__reco="Prompt", run_number=self.run_number)
+                prompt_runs = RunInfo.objects.filter(type__reco="Prompt",
+                                                     run_number=self.run_number)
                 for run in prompt_runs:
                     if prompt_runs[0].is_good != run.is_good:
-                        logger.error("Contradiction detected. Cannot unambiguously determine if the flag has changed")
+                        logger.error(
+                            "Contradiction detected. Cannot unambiguously determine if the flag has changed")
                         return False
                 return self.is_good != prompt_runs[0].is_good
         return False
@@ -432,29 +478,56 @@ class RunInfo(SoftDeletionModel):
 
 
 class Checklist(models.Model):
-    name = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
+    description = RichTextField(
+        blank=True,
+        help_text="Text that will be displayed above the checklist items to provide "
+                  "further information needed to the explain the problems"
+    )
+
+    additional_description = RichTextField(
+        blank=True,
+        help_text="Text that will be displayed under the checklist items to provide "
+                  "tips and links"
+    )
+
+    "identifier can be used to check via javascript if checkbox has been ticked "
+    "and to pop up a modal related to the checklist"
+    identifier = models.SlugField(
+        unique=True,
+        max_length=15,
+        help_text="Short unique word used to identify the checklist in the website. "
+                  "Examples: general, trackermap, pixel, sistrip, tracking"
+    )
 
     def __str__(self):
-        return self.name
+        return self.title
+
+
+class ChecklistItemGroup(models.Model):
+    """
+    Groups a bunch of Checklist Items together
+    E.g. one group for tips and one for general checks
+    """
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+
+    name = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Used as a Subheadline to group bullet points together")
+
+    description = RichTextField(
+        blank=True,
+        help_text="Text that will be displayed above the checklist items to provide"
+                  "further information needed to the explain the problems"
+    )
 
 
 class ChecklistItem(models.Model):
-    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
-    short_description = models.CharField(
-        max_length=100,
+    checklistgroup = models.ForeignKey(ChecklistItemGroup, on_delete=models.CASCADE)
+    text = RichTextField(
         help_text="Text that will be displayed at the bullet point"
-    )
-    description = models.TextField(
-        blank=True,
-        help_text="Text that will be displayed as a tooltip over the bullet point"
-    )
-    modal_name = models.CharField(
-        blank=True,
-        null=True,
-        max_length=15,
-        help_text="Name of the HTML modal to open within the page on click. e.g. "
-                  "if modal id is 'modal-trackermap-id' then enter just 'trackermap' "
     )
 
     def __str__(self):
-        return self.short_description
+        return self.text
