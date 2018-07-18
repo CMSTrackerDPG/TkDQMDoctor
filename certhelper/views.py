@@ -14,9 +14,9 @@ from django_filters.views import FilterView
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
+from certhelper.models import UserProfile, SubSubCategory, SubCategory
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
 from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
-from certhelper.utilities.mixins import ChecklistTemplateContextMixin
 from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, \
     is_valid_id, request_contains_filter_parameter, get_this_week_filter_parameter, \
     get_today_filter_parameter
@@ -25,14 +25,13 @@ from .tables import *
 
 
 @method_decorator(login_required, name="dispatch")
-class CreateRun(ChecklistTemplateContextMixin, generic.CreateView):
+class CreateRun(generic.CreateView):
     """
     Form which allows for creation of a new entry in RunInfo
     """
-
     model = RunInfo
     form_class = RunInfoWithChecklistForm
-    template_name_suffix = '_form'
+    template_name = 'certhelper/runinfo_form.html'
     success_url = '/'
 
     def form_valid(self, form_class):
@@ -41,15 +40,17 @@ class CreateRun(ChecklistTemplateContextMixin, generic.CreateView):
 
 
 def listruns(request):
-    """passes all RunInfo objects to list.html
     """
-
+    passes all RunInfo objects to list.html
+    """
     if not request_contains_filter_parameter(request):
         return HttpResponseRedirect("/%s" % get_today_filter_parameter())
 
-    # We make sure that the logged in user can only see his own runs
-    # In case the user is not logged in we show all objects
-    # but remove the edit and remove buttons from the tableview.
+    """
+    Make sure that the logged in user can only see his own runs
+    In case the user is not logged in show all objects,
+    but remove the edit and remove buttons from the tableview.
+    """
     if request.user.is_authenticated:
         run_info_list = RunInfo.objects.filter(userid=request.user)
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
@@ -77,27 +78,22 @@ def listruns(request):
 
 @method_decorator(login_required, name="dispatch")
 class ListReferences(SingleTableView):
-    """Display ReferenceRuns in a tableview
+    """
+    Display ReferenceRuns in a tableview
     !!! USES DJANGO-TABLES2 !!! 
     """
-
     model = ReferenceRun
     table_class = ReferenceRunTable
 
 
 @method_decorator(login_required, name="dispatch")
-class UpdateRun(ChecklistTemplateContextMixin, generic.UpdateView):
-    """Updates a specific Run from the RunInfo table
+class UpdateRun(generic.UpdateView):
     """
-
+    Updates a specific Run from the RunInfo table
+    """
     model = RunInfo
     form_class = RunInfoForm
-    success_url = '/'
     template_name = 'certhelper/runinfo_form.html'
-
-    # def form_valid(self, form_class):
-    # form_class.instance.userid = self.request.user # not neccessary to update
-    #    return super(UpdateRun, self).form_valid(form_class)
 
     def same_user_or_shiftleader(self, user):
         """
@@ -117,12 +113,16 @@ class UpdateRun(ChecklistTemplateContextMixin, generic.UpdateView):
         return redirect_to_login(request.get_full_path(),
                                  login_url=reverse('admin:login'))
 
+    def get_success_url(self):
+        is_same_user = self.get_object().userid == self.request.user
+        return reverse('certhelper:shiftleader') if not is_same_user else "/"
+
 
 @method_decorator(login_required, name="dispatch")
 class DeleteRun(generic.DeleteView):
-    """Deletes a specific Run from the RunInfo table    
     """
-
+    Deletes a specific Run from the RunInfo table
+    """
     model = RunInfo
     form_class = RunInfoForm
     success_url = '/shiftleader/'
@@ -131,9 +131,9 @@ class DeleteRun(generic.DeleteView):
 
 @method_decorator(login_required, name="dispatch")
 class CreateType(generic.CreateView):
-    """Form to create a new Type (RunType)
     """
-
+    Form to create a new Type (RunType)
+    """
     model = Type
     form_class = TypeForm
     template_name_suffix = '_form'
@@ -211,7 +211,8 @@ def summaryView(request):
             runs = RunInfo.objects.none()
 
     if not date_filter_value and not type_id and not date_from and not date_to and not runs_from and not runs_to:
-        alert_infos.append("No filters applied. Showing every run you have ever certified!")
+        alert_infos.append(
+            "No filters applied. Showing every run you have ever certified!")
     context = {}
 
     reference_run_ids = runs.values_list('reference_run').distinct()
@@ -223,7 +224,8 @@ def summaryView(request):
 
     for run in runs:
         if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
-            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
+            runinfotypelists.append(
+                RunInfoTypeList(run.type, len(runinfotypelists) + 1))
         runinfotypelists[-1].add_run(run)
 
     context['runs'] = []
@@ -246,7 +248,8 @@ def summaryView(request):
 
 @login_required
 def logout_view(request):
-    """ Logout current user
+    """
+    Logout current user (also from CERN)
     """
     if request.user.is_authenticated:
         logout(request)
@@ -268,19 +271,23 @@ def logout_status(request):
 def load_subcategories(request):
     category_id = request.GET.get('categoryid')
     if category_id:
-        subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
+        subcategories = SubCategory.objects.filter(
+            parent_category=category_id).order_by('name')
     else:
         subcategories = SubCategory.objects.none()
-    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subcategories})
+    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html',
+                  {'categories': subcategories})
 
 
 def load_subsubcategories(request):
     subcategory_id = request.GET.get('subcategoryid')
     if subcategory_id:
-        subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
+        subsubcategories = SubSubCategory.objects.filter(
+            parent_category=subcategory_id).order_by('name')
     else:
         subsubcategories = SubCategory.objects.none()
-    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
+    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html',
+                  {'categories': subsubcategories})
 
 
 # TODO make this faster, unneccessary databaes queries slows down page load when no filters are applied
@@ -297,7 +304,8 @@ def generate_summary(queryset):
 
     for run in runs:
         if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
-            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
+            runinfotypelists.append(
+                RunInfoTypeList(run.type, len(runinfotypelists) + 1))
         runinfotypelists[-1].add_run(run)
 
     context['runs'] = []
@@ -340,7 +348,8 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['summary'] = generate_summary(self.filterset.qs)
         context['slreport'] = ShiftLeaderReport(self.filterset.qs).get_context()
-        context['deleted_runs'] = DeletedRunInfoTable(RunInfo.all_objects.dead().order_by('-run_number'))
+        context['deleted_runs'] = DeletedRunInfoTable(
+            RunInfo.all_objects.dead().order_by('-run_number'))
         return context
 
 
@@ -352,7 +361,8 @@ def hard_deleteview(request, run_number):
     except RunInfo.DoesNotExist:
         raise Http404("The run with the runnumber {} doesnt exist".format(run_number))
     except RunInfo.MultipleObjectsReturned:
-        raise Http404("Multiple certifications with the runnumber {} exist".format(run_number))
+        raise Http404(
+            "Multiple certifications with the runnumber {} exist".format(run_number))
 
     if request.method == "POST":
         run.hard_delete()
@@ -397,6 +407,7 @@ def validate_central_certification_list(request):
     return JsonResponse(data)
 
 
+# TODO update Checklist by Checklist model, return 404 if page doesnt exist
 class ChecklistTemplateView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

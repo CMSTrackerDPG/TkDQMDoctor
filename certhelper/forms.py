@@ -50,11 +50,13 @@ that has lots of attributes and you want to modify only a few of them.
 Option2 on the other hand is prefered if you want to add styling (bootstrap classes for instance)
 to a lot of you attributes of the Model.
 """
-
+from categories.models import Category
 from django import forms
-from django.forms import ModelForm, TextInput
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm, TextInput, CheckboxSelectMultiple
+from django.utils import timezone
 
-from .models import *
+from .models import RunInfo, Checklist, ReferenceRun, Type
 
 
 class DateInput(forms.DateInput):
@@ -69,31 +71,46 @@ class ReferenceRunForm(ModelForm):
 
 
 class ChecklistFormMixin(forms.Form):
+    """
+    Adds mandatory Checklist checkboxes to the form
+    E.g. general, trackermap, sistrip, pixel, tracking
+
+    Form can only be submitted when all the checkboxes have been ticked
+
+    Example Usage:
+    form.checklist_sistrip -> renders the SiStrip Checklist checkbox
+    """
+
     def __init__(self, *args, **kwargs):
         super(ChecklistFormMixin, self).__init__(*args, **kwargs)
-        for checklist in Checklist.objects.all():
-            for item in checklist.checklistitem_set.all():
-                field_name = "checklist_{}_item_{}".format(checklist.pk, item.pk)
-                self.fields[field_name] = \
-                    forms.BooleanField(
-                        label=item.short_description,
-                        required=True,
-                        help_text=item.description
-                    )
-                self[field_name].modal_name = item.modal_name if item.modal_name else ""
+        self.ALLOWED_CHECKLISTS = ('general', 'trackermap', 'pixel', 'sistrip', 'tracking')
+        for checklist in Checklist.objects.filter(identifier__in=self.ALLOWED_CHECKLISTS):
+            field_name = "checklist_{}".format(checklist.identifier)
+            self.fields[field_name] = forms.BooleanField(required=True)
 
     def checklists(self):
-        checklist_list = []  # List of checklists containing their checkbox items
-        for checklist in Checklist.objects.all():
-            tmp_list = {"name": checklist.name, "items": []}
-            for name, field in self.fields.items():
-                if name.startswith("checklist_{}_".format(checklist.pk)):
-                    tmp_list["items"].append(self[name])
-            checklist_list.append(tmp_list)
+        """
+        returns a dictionary containing the fields (checkboxes) created in the __init__
+        method and the corresponding Checklist model instances
+
+        Example Usage:
+        form.checklists.pixel.field -> returns the rendered Checklist checkbox
+        form.checklists.pixel.checklist -> returns the Checklist model instance
+        """
+        checklist_list = {}  # List of checklists containing their checkbox items
+        for checklist in Checklist.objects.filter(identifier__in=self.ALLOWED_CHECKLISTS):
+            field_name = "checklist_{}".format(checklist.identifier)
+            checklist_list.update({
+                checklist.identifier: {
+                    "checklist": checklist,
+                    "field": self[field_name]
+                }})
         return checklist_list
 
 
 class RunInfoForm(ModelForm):
+    next = forms.CharField(required=False)
+
     date = forms.DateField(
         widget=forms.SelectDateWidget(years=range(2017, timezone.now().year + 2)),
         initial=timezone.now
@@ -121,14 +138,19 @@ class RunInfoForm(ModelForm):
             'int_luminosity': TextInput(attrs={'placeholder': "Unit: /pb "}),
         }
 
-    # TODO write dedicated clean_tracking, clean_... instead one single clean
+    def __init__(self, *args, **kwargs):
+        super(RunInfoForm, self).__init__(*args, **kwargs)
+
+        self.fields["problem_categories"].widget = CheckboxSelectMultiple()
+        self.fields["problem_categories"].queryset = Category.objects.all()
+
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
 
         is_sistrip_bad = cleaned_data.get('sistrip') == 'Bad'
         is_tracking_good = cleaned_data.get('tracking') == 'Good'
 
-        if is_sistrip_bad and is_tracking_good:  # and comment_string=="":
+        if is_sistrip_bad and is_tracking_good:
             self.add_error(None, ValidationError(
                 "Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 

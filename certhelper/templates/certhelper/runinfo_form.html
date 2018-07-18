@@ -1,11 +1,34 @@
 {% extends 'certhelper/base.html' %}
-{% load myfilters %}
-{% load bootstrap3 %}
+{% block title %}List{% endblock %}
 
-{% block title %}Add Run{% endblock %}
+{% load widget_tweaks %}
+{% load bootstrap3 %}
+{% load form_tags %}
+{% load static %}
 
 {% block style %}
     <style>
+        .add-type {
+            color: green;
+        }
+
+        .problem_categories{
+            overflow-y: scroll;
+            height:200px;
+        }
+
+        .bottom-buffer {
+            margin-bottom: 5px;
+        }
+
+        .checklist {
+            margin-top: 5px;
+        }
+
+        .no-bold-label {
+            font-weight: normal !important;
+        }
+
         /*
          * for the dynamic list of ref runs in
          *  drop-down menu based on selected type
@@ -17,254 +40,156 @@
 {% endblock style %}
 
 {% block content %}
-    <h1 align="center">Add Run</h1>
-    {{form.title}}
-
-    {% if form.errors %}
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="alert alert-danger">
-                    <strong>{{ error|escape }}</strong>
-                </div>
-            {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <form method="POST" action=""> {% csrf_token %}
-        <table class="table table-condensed" style="max-width:650px;" align="center">
-            <tr>
-                <td>{{form.type.label}}</td>
-                <td>{{form.type|addclass:'form-control'}} </td>
-                <td><button type="button" class="btn btn-link" onclick="location.href='{% url 'certhelper:createtype' %}'"><span class="glyphicon glyphicon-plus-sign"></span> Add Type</button></td>
-            </tr>
-            <tr>
-                <td style="vertical-align: middle;">{{form.reference_run.label}}</td>
-                <td style="vertical-align: middle;">{{form.reference_run|addclass:'form-control'}}</td>
-                <td>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="radio-ref-run" id="radio-same-type" value="same-type" checked>
-                            Match Type
-                        </label>
+    <div class="container">
+        <p>
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
                     </div>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="radio-ref-run" id="radio-all" value="all">
-                            Show All
-                        </label>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>{{form.run_number.label}}</td>
-                <td>{{form.run_number|addclass:'form-control'}}</td>
-                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-general-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-            </tr>
-            <tr>
-                <td>{{form.trackermap.label}}</td>
-                <td>{{form.trackermap|addclass:'form-control'}}</td>
-                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-trackermap-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-            </tr>
-            <tr>
-                <td>{{form.number_of_ls.label}}</td>
-                <td>{{form.number_of_ls|addclass:'form-control'}}</td>
-            </tr>
-            <tr>
-                <td>{{form.int_luminosity.label}} </td>
-                <td>{{form.int_luminosity|addclass:'form-control'}}</td>
-            </tr>
-
-            <tr>
-                <td>{{form.pixel.label}}</td>
-                <td>{{form.pixel|addclass:'form-control'}}</td>
-                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-pixel-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-            </tr>
-
-            <tr>
-                <td>{{form.sistrip.label}}</td>
-                <td>{{form.sistrip|addclass:'form-control'}}</td>
-                <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-sistrip-id"><span class="glyphicon glyphicon-list-alt"></span> Checklist</button></td>
-            </tr>
-
-            <tr>
-                <td>{{form.tracking.label}}</td>
-                <td>{{form.tracking|addclass:'form-control'}}</td>
-                <td>
-                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#modal-tracking-id">
-                        <span class="glyphicon glyphicon-list-alt"></span> Checklist
-                    </button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>{{form.problem_categories.label}}</td>
-                <td>{{form.problem_categories|addclass:'form-control'}}</td>
-                <td>
-                    <span data-toggle="tooltip"
-                          title="use CTRL + Click to select and deselect multiple users"
-                          class="btn">
-                        {% bootstrap_icon "question-sign" %} Help
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td>{{form.comment.label}}</td>
-                <td>{{form.comment|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</a></td>
-            </tr>
-
-            <tr>
-                <td>{{form.date.label}}</td>
-                <td>
-                    <div class="form-inline">
-                        {{form.date}}
-                    </div>
-                </td>
-            </tr>
-            {% url "certhelper:create" as create_url %}
-            {% if request.path == create_url %}
-                <tr>
-                    <td colspan="3"><h3><div style="text-align: center;">Checklist</div></h3></td>
-                </tr>
-
-                <tr>
-                    {% include "certhelper/components/checklist.html" %}
-                </tr>
+                {% endfor %}
             {% endif %}
-        </table>
+        </p>
 
-        <div align="center">
-            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Ok</button>
-            <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'">
-                <span class="glyphicon glyphicon-remove"></span> Abort
-            </button>
-        </div>
+        <form class="well form-horizontal" method="POST" action=""> {% csrf_token %}
+            {# TODO change title when editing Run #}
+            <legend style="text-align: center;"><h1>Add new Run</h1></legend>
 
-    </form>
+            {# Run type #}
+            <div class="form-group">
+                {# Checkboxes to filter Type (Collisions, Cosmics, Prompt, ... #}
+                {% include 'certhelper/components/runinfo_form/runtype_checkboxes.html' %}
 
-    {% include "certhelper/checklists/general.html" %}
-    {% include "certhelper/checklists/trackermap.html" %}
-    {% include "certhelper/checklists/pixel.html" %}
-    {% include "certhelper/checklists/sistrip.html" %}
-    {% include "certhelper/checklists/tracking.html" %}
+                <label class="col-sm-3 control-label" for="id_{{ form.type.name }}">
+                    {{ form.type.label }}
+                </label>
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        {% render_field form.type class="form-control" %}
+                        <span class="input-group-btn">
+                            {# TODO Add Type as modal instead of different page but with option as different page #}
+                            <button class="btn btn-default"
+                                    type="button"
+                                    onclick="location.href='{% url 'certhelper:createtype' %}'">
+                                <span class="glyphicon glyphicon-plus-sign add-type"></span> Add
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-{% endblock content %}
+            {# Reference run #}
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-6 bottom-buffer">
+                    <div class="checkbox">
+                        <label class="col-sm-6">
+                            <input type="checkbox"
+                                   name="match_type"
+                                   id="id_match_type"
+                                   checked> Match Type
+                        </label>
+                    </div>
+                </div>
+            </div>
+            {% bootstrap_field form.reference_run field_class="col-sm-6" label_class="col-sm-3"%}
+
+            {# Run number #}
+            <div class="form-group">
+                {% render_label_and_field_for form.run_number %}
+                {% render_checklist_checkbox form.checklists.general %}
+            </div>
+
+            {# Trackermap #}
+            <div class="form-group">
+                {% render_label_and_field_for form.trackermap %}
+                {% render_checklist_checkbox form.checklists.trackermap %}
+            </div>
+
+            {# Number of LS #}
+            {% bootstrap_field form.number_of_ls field_class="col-sm-6" label_class="col-sm-3"%}
+
+            {# Int. luminosity #}
+            {% bootstrap_field form.int_luminosity field_class="col-sm-6" label_class="col-sm-3" addon_after='pb<sup>-1</sup>'%}
+
+            {# Pixel #}
+            <div class="form-group">
+                {% render_label_and_field_for form.pixel %}
+                {% render_checklist_checkbox form.checklists.pixel %}
+                {# {% render_checklist_for form.checklists.pixel %} #}
+            </div>
+
+            {# SiStrip #}
+            <div class="form-group">
+                {% render_label_and_field_for form.sistrip %}
+                {% render_checklist_checkbox form.checklists.sistrip %}
+                {# {% render_checklist_for form.checklists.sistrip %} #}
+            </div>
+
+            {# Tracking #}
+            <div class="form-group">
+                {% render_label_and_field_for form.tracking %}
+                {% render_checklist_checkbox form.checklists.tracking %}
+                {# {% render_checklist_for form.checklists.tracking %} #}
+            </div>
+
+            {# Categories of Problems #}
+            {% bootstrap_field form.problem_categories field_class="problem_categories col-sm-6" label_class="col-sm-3"%}
+
+            {# Comments #}
+            {% bootstrap_field form.comment field_class="col-sm-6" label_class="col-sm-3"%}
+
+            {# Date #}
+            {% bootstrap_field form.date field_class="col-sm-6" label_class="col-sm-3"%}
+
+            {# Buttons #}
+            {% include 'certhelper/components/runinfo_form/form_buttons.html' %}
+        </form>
+    </div>
+
+    {% render_checklist_modal form.checklists.general %}
+    {% render_checklist_modal form.checklists.trackermap %}
+    {% render_checklist_modal form.checklists.pixel %}
+    {% render_checklist_modal form.checklists.sistrip %}
+    {% render_checklist_modal form.checklists.tracking %}
+{% endblock %}
+
 
 {% block script %}
+    <script src="{% static "certhelper/components/runinfo_form.js" %}"></script>
     <script>
         $(document).ready(function () {
-            $("#id_date_day").addClass("form-control");
-            $("#id_date_month").addClass("form-control");
-            $("#id_date_year").addClass("form-control");
-
-            $("#id_sistrip").change(function () {
-                if($(this).val() === "Bad"){
-                    $("#id_tracking").val("Bad");
-                }
+            /**
+             * Popup Checklist modal with items when trying to check a checklist checkbox
+             */
+            $('[id^="id_checklist_"]').each(function() {
+                popupChecklistModal($(this));
             });
 
-            let int_luminosity = $('#id_int_luminosity');
-
-            int_luminosity.on('focusout',function(){
-                if(int_luminosity.val() !== "") {
-                    const rounded = parseFloat(int_luminosity.val()).toFixed(1);
-                    int_luminosity.val(rounded);
-                }
+            /**
+             * Update Type-dropdown-list based on ticked checkboxes
+             */
+            $("[name='recotype'], [name='runtype'], #id_type").change(function(){
+                filterTypeOptionsByCheckboxes();
             });
 
-            class RunType{
-                static get_type_text(){
-                    return $("#id_type option:selected").text().toLowerCase();
-                }
-
-                static get_word(index, text = this.get_type_text()){
-                    return text.toLowerCase().split(" ")[index];
-                }
-
-                static get_word_if_matches(allowed_choices, word_index){
-                    try {
-                        const word = this.get_word(word_index);
-                        const index = allowed_choices.indexOf(word);
-                        if (index !== -1)
-                            return allowed_choices[index];
-
-                    } catch(err) {
-                        return null;
-                    }
-                    return null;
-                }
-
-                static get_reco(){
-                    const allowed_reco_choices = ["express", "prompt", "rereco"];
-                    return this.get_word_if_matches(allowed_reco_choices, 0)
-                }
-
-                static get_runtype(){
-                    const allowed_runtype_choices = ["cosmics", "collisions"];
-                    return this.get_word_if_matches(allowed_runtype_choices, 1)
-                }
-
-                static get_bfield(){
-                    const allowed_bfield_choices = ["0", "3.8"];
-                    return this.get_word_if_matches(allowed_bfield_choices, 2)
-                }
-
-                static text_matches_reco(text){
-                    return this.get_word(1, text) === this.get_reco();
-                }
-
-
-                static text_matches_runtype(text){
-                    return this.get_word(2, text) === this.get_runtype();
-                }
-
-
-                static text_matches_bfield(text){
-                    return this.get_word(3, text) === this.get_bfield();
-                }
-
-                static matches(text){
-                    const lower_text = text.toLowerCase();
-                    return this.text_matches_reco(lower_text)
-                        && this.text_matches_runtype(lower_text)
-                        && this.text_matches_bfield(lower_text)
-                }
-            }
-
-            $('input[type=radio][name=radio-ref-run]').on('change', function() {
-                update_reference_run_list();
+            /**
+             * Update Reference-run-dropdown-list based on selected Type
+             */
+            $("#id_type, #id_match_type").change(function () {
+                updateReferenceRunList()
             });
 
-            $("#id_type").change(function () {
-                update_reference_run_list()
-            });
-
-            function update_reference_run_list(){
-                show_all_reference_runs();
-                const checked = $('input[type=radio][name=radio-ref-run]:checked').val();
-                if(checked === "same-type") {
-                    disable_not_matching_ref_runs();
-                }
-            }
-
-            function disable_not_matching_ref_runs(){
-                $('#id_reference_run > option').each(function() {
-                    if(!RunType.matches($( this ).text()))
-                        $( this ).prop('disabled', true);
-                });
-            }
-
-            function show_all_reference_runs(){
-                $('#id_reference_run > option').each(function() {
-                    $( this ).prop('disabled', false);
-                });
-            }
+            /**
+             * Update Reference-run-dropdown-list on page load
+             */
+            updateReferenceRunList();
         });
     </script>
 {% endblock script %}

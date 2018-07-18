@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/restore_run/$', views.restore_run_view, name='restore_run'),
 
     # checklists
+    # TODO one general checklists page for all checklists /checklists/
     url(r'^checklists/general$', ChecklistTemplateView.as_view(
         template_name='certhelper/checklists/general.html'),
         name='general_checklist'),

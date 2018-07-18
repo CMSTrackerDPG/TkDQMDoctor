@@ -10,6 +10,12 @@ register = template.Library()
 def addclass(value, arg):
     return value.as_widget(attrs={'class': arg})
 
+@register.filter
+def add_label_class(field, class_name):
+    return field.as_widget(attrs={
+        "class": " ".join((field.css_classes(), class_name))
+    })
+
 
 @register.filter(name='addplaceholder')
 def addplaceholder(value, arg):
