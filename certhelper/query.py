@@ -1,5 +1,8 @@
+import collections
+
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.db.models import QuerySet, Q, Count, Sum, FloatField
+from django.db.models import QuerySet, Q, Count, Sum, FloatField, When, Case, Value, \
+    CharField
 from django.db.models.functions import ExtractWeekDay
 from django.utils import timezone
 
@@ -42,6 +45,41 @@ class SoftDeletionQuerySet(QuerySet):
 
 
 class RunInfoQuerySet(SoftDeletionQuerySet):
+    def annotate_status(self):
+        good_criteria = ['Good', 'Lowstat']
+
+        return self.annotate(status=Case(
+            When(
+                (Q(type__runtype="Cosmics") | Q(pixel__in=good_criteria)) &
+                Q(sistrip__in=good_criteria) &
+                Q(tracking__in=good_criteria),
+                then=Value('good')),
+            default=Value('bad'),
+            output_field=CharField())
+        )
+
+    def filter_flag_changed(self):
+        """
+        Filters the queryset to all runs where the flag has changed
+        """
+        from certhelper.models import RunInfo
+        # Group by unique run_number, status pairs
+        # if a run_number appears more than once, it means that the flag changed
+        run_number_list = [run["run_number"]
+                           for run
+                           in RunInfo.objects.all() \
+                               .annotate_status() \
+                               .order_by("run_number") \
+                               .values("run_number", "status") \
+                               .annotate(times_certified=Count("run_number"))]
+
+        changed_flag_runs = [run
+                             for run, count
+                             in collections.Counter(run_number_list).items()
+                             if count > 1]
+
+        return self.filter(run_number__in=changed_flag_runs)
+
     def good(self):
         good_criteria = ['Good', 'Lowstat']
 
@@ -66,7 +104,6 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             .values('type__runtype', 'type__reco') \
             .annotate(
             runs_certified=Count('pk'),
-            # TODO consider replacing FloatField with DecimalField
             int_luminosity=Sum('int_luminosity', output_field=FloatField()),
             number_of_ls=Sum('number_of_ls')
         )
@@ -74,18 +111,22 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         Add List of run_numbers per type to the summary
         """
         for d in summary_dict:
-            good_run_numbers = [r["run_number"] for r in self.filter(
+            runs_per_type = self.filter(
                 type__runtype=d.get("type__runtype"),
-                type__reco=d.get("type__reco")) \
-                .good() \
-                .order_by("run_number") \
-                .values('run_number')]
-            bad_run_numbers = [r["run_number"] for r in self.filter(
-                type__runtype=d.get("type__runtype"),
-                type__reco=d.get("type__reco")) \
-                .bad() \
-                .order_by("run_number") \
-                .values('run_number')]
+                type__reco=d.get("type__reco")).order_by("run_number")
+
+            good_run_numbers = [
+                r.run_number
+                for r in
+                runs_per_type.good()
+            ]
+
+            bad_run_numbers = [
+                r.run_number
+                for r in
+                runs_per_type.bad()
+            ]
+
             d.update({"run_numbers": {
                 "good": good_run_numbers,
                 "bad": bad_run_numbers}})
@@ -125,29 +166,37 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         :rtype: dictionary {"good": [], "bad": [], "missing": [], "conflicting": []}
         """
 
-        d = {"good": [], "bad": [], "missing": [], "conflicting": []}
+        d = {
+            "good": [],
+            "bad": [],
+            "missing": [],
+            "different_flags": [],
+        }
+
+        runs = self.annotate_status()
+
+        cleaned_run_number_list = [
+            i for i in list_of_run_numbers
+            if type(i) == int or i.isdigit()]
+
+        changed_flag_runs = runs\
+            .filter(run_number__in=cleaned_run_number_list)\
+            .filter_flag_changed()
+
         for run_number in list_of_run_numbers:
             try:
-                run = self.get(run_number=run_number)
-                if run.is_good:
-                    d["good"].append(run_number)
-                else:
-                    d["bad"].append(run_number)
+                run = runs.get(run_number=run_number)
+                d["{}".format(run.status)].append(run_number)
             except (ObjectDoesNotExist, ValueError):
                 d["missing"].append(run_number)
             except MultipleObjectsReturned:
-                runs = self.filter(run_number=run_number)
-                is_good = runs[0].is_good
-                conflict = False
-                for run in runs:
-                    if run.is_good != is_good:
-                        conflict = True
-                if conflict:
-                    d["conflicting"].append(run_number)
-                elif is_good:
-                    d["good"].append(run_number)
+                run_pair = changed_flag_runs.filter(run_number=run_number)
+                if run_pair.exists():
+                    d["different_flags"].append(run_number)
                 else:
-                    d["bad"].append(run_number)
+                    r = runs.filter(run_number=run_number)
+                    d["{}".format(r[0].status)].append(run_number)
+
         return d
 
     def changed_flags(self):
@@ -157,7 +206,7 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
         Example: Run was certified good in express and bad promptreco
         """
-        return list({run.run_number for run in self if run.flag_has_changed})
+        return list(set([run.run_number for run in self.filter_flag_changed()]))
 
     def today(self):
         pass

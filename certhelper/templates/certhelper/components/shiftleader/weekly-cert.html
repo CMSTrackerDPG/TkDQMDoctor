@@ -7,33 +7,33 @@
 
     <h3>Weekly Certification</h3>
     <p>
-        <ul>
-<li>Collisions:
     <ul>
-        <li>Prompt-Reco: total number=<strong>{{ slreport.Collisions.Prompt.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Collisions.Prompt.int_lum }}  pb⁻¹</strong>
-            <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Collisions.Prompt.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Bad.Collisions.Prompt.int_lum }} pb⁻¹</strong></li></ul>
+        <li>Collisions:
+            <ul>
+                <li>Prompt-Reco: total number=<strong>{{ slreport.Collisions.Prompt.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Collisions.Prompt.int_lum }}  pb⁻¹</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Collisions.Prompt.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Bad.Collisions.Prompt.int_lum }} pb⁻¹</strong></li></ul>
+                </li>
+                <li>Stream-Express: total number=<strong>{{ slreport.Collisions.Express.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Collisions.Express.int_lum }} pb⁻¹</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Collisions.Express.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Bad.Collisions.Express.int_lum }} pb⁻¹</strong></li></ul>
+                </li>
+            </ul>
         </li>
-        <li>Stream-Express: total number=<strong>{{ slreport.Collisions.Express.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Collisions.Express.int_lum }} pb⁻¹</strong>
-            <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Collisions.Express.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Bad.Collisions.Express.int_lum }} pb⁻¹</strong></li></ul>
+        <li>Cosmics:
+            <ul>
+                <li>Prompt-Reco: total number=<strong>{{ slreport.Cosmics.Prompt.number_of_runs }}</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Cosmics.Prompt.number_of_runs }}</strong></li></ul>
+                </li>
+                <li>Stream-Express: total number=<strong>{{ slreport.Cosmics.Express.number_of_runs }}</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Cosmics.Express.number_of_runs }}</strong></li></ul>
+                </li>
+            </ul>
         </li>
-    </ul>
-</li>
-<li>Cosmics:
-    <ul>
-    <li>Prompt-Reco: total number=<strong>{{ slreport.Cosmics.Prompt.number_of_runs }}</strong>
-        <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Cosmics.Prompt.number_of_runs }}</strong></li></ul>
-    </li>
-        <li>Stream-Express: total number=<strong>{{ slreport.Cosmics.Express.number_of_runs }}</strong>
-            <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Cosmics.Express.number_of_runs }}</strong></li></ul>
+        <li>Central certification:
+            <ul>
+                <li>list of runs: <span id="id-cc-span"><b>[insert here]</b></span><span id="id-cc-legend"></span></li>
+                <li>deadline has been met?</li>
+            </ul>
         </li>
-    </ul>
-</li>
-    <li>Central certification:
-        <ul>
-            <li>list of runs: <span id="id-cc-span"><b>[insert here]</b></span><span id="id-cc-legend"></span></li>
-            <li>deadline has been met?</li>
-        </ul>
-    </li>
     </ul>
     </p>
 </div>

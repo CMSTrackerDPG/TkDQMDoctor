@@ -31,10 +31,10 @@ $(document).ready(function () {
                             newtext += ", ";
                         newtext += '<span class="missing-runs">' +value + '</span>'
                     });
-                    $.each( data.conflicting.sort(function(a, b){return a-b}), function( key, value ) {
+                    $.each( data.different_flags.sort(function(a, b){return a-b}), function( key, value ) {
                         if(newtext !== "")
                             newtext += ", ";
-                        newtext += '<span class="conflicting-runs">' +value + '</span>'
+                        newtext += '<span class="different-flags">' +value + '</span>'
                     });
 
                     let legend = "";
@@ -44,8 +44,8 @@ $(document).ready(function () {
                         legend += '<span class="bad-runs"> BAD </span>';
                     if(data.missing.length > 0)
                         legend += '<span class="missing-runs"> MISSING </span>';
-                    if(data.conflicting.length > 0)
-                        legend += '<span class="conflicting-runs"> CONFLICTING </span>';
+                    if(data.different_flags.length > 0)
+                        legend += '<span class="different-flags"> DIFFERENT Flags</span>';
 
                     $("#id-cc-span").html(newtext);
                     $("#id-cc-legend").html("<br/>Legend:" + legend);

@@ -31,7 +31,7 @@ class TestRunInfoQuerySet:
         assert set([1234, 6655, 6543, 444, "800"]) == set(d["good"])
         assert set([9876, 8765]) == set(d["bad"])
         assert set([7777, 888, "abde"]) == set(d["missing"])
-        assert set([4321, 333]) == set(d["conflicting"])
+        assert set([4321, 333]) == set(d["different_flags"])
 
     def test_changed_flags(self, some_certified_runs):
         """
@@ -56,11 +56,20 @@ class TestRunInfoQuerySet:
         14      Cosmics    Express True
         14      Cosmics    Prompt  False
         """
-
-        a = RunInfo.objects.all().changed_flags()
-
         assert 3 == len(RunInfo.objects.all().changed_flags())
         assert {5, 4, 14} == set(RunInfo.objects.all().changed_flags())
 
     def test_no_changed_flags(self):
         assert 0 == len(RunInfo.objects.all().changed_flags())
+
+    def test_new_flags_changed(self, some_certified_runs):
+        runs = RunInfo.objects.all().order_by("type__runtype", "type__reco",
+                                              "run_number")
+
+        runs = runs.annotate_status().filter_flag_changed().order_by("run_number")
+
+        # print(runs)
+        for run in runs:
+            print("{} {} {}".format(run.run_number, run.type.reco, run.status))
+
+        assert True
