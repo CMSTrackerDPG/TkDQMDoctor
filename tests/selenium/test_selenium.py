@@ -1,7 +1,8 @@
 from django.urls import reverse
 from selenium.webdriver.support.ui import Select
 
-from certhelper.tests.conftest import *
+from tests.credentials import SUPERUSER_USERNAME, PASSWORD, SHIFTLEADER_USERNAME, \
+    SHIFTER1_USERNAME, SHIFTER2_USERNAME
 
 
 class TestLogin:

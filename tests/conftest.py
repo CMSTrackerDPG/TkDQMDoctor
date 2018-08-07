@@ -5,21 +5,13 @@ from mixer.backend.django import mixer
 from selenium import webdriver
 
 from certhelper.models import RunInfo
+from tests.credentials import SUPERUSER_USERNAME, PASSWORD, SHIFTER1_USERNAME, \
+    SHIFTER2_USERNAME, SHIFTLEADER_USERNAME, EXPERT_USERNAME, ADMIN_USERNAME
 
 pytestmark = pytest.mark.django_db
 
 # Disables Logging when testing
 logging.disable(logging.CRITICAL)
-
-SUPERUSER_USERNAME = "superuser"
-SHIFTER1_USERNAME = "shifter1"
-SHIFTER2_USERNAME = "shifter2"
-SHIFTLEADER_USERNAME = "shiftleader1"
-EXPERT_USERNAME = "expert1"
-ADMIN_USERNAME = "admin"
-
-PASSWORD = "VerySecurePasswort"
-
 
 @pytest.fixture
 def superuser(django_user_model):
