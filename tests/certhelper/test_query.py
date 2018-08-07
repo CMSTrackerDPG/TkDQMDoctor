@@ -10,20 +10,33 @@ class TestRunInfoQuerySet:
     def test_compare_list_if_certified(self):
         t1 = mixer.blend("certhelper.Type")
         t2 = mixer.blend("certhelper.Type")
-        mixer.blend("certhelper.RunInfo", run_number=1234, type=t1, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=8765, pixel="Good", sistrip="Good", tracking="Bad")
-        mixer.blend("certhelper.RunInfo", run_number=4321, type=t1, pixel="Good", sistrip="Good", tracking="Bad")
-        mixer.blend("certhelper.RunInfo", run_number=6543, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=6655, type=t1, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=9876, pixel="Good", sistrip="Good", tracking="Bad")
-        mixer.blend("certhelper.RunInfo", run_number=444, type=t1, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=444, type=t2, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=333, type=t1, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=333, type=t2, pixel="Good", sistrip="Good", tracking="Bad")
+        mixer.blend("certhelper.RunInfo", run_number=1234, type=t1, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=8765, pixel="Good", sistrip="Good",
+                    tracking="Bad")
+        mixer.blend("certhelper.RunInfo", run_number=4321, type=t1, pixel="Good",
+                    sistrip="Good", tracking="Bad")
+        mixer.blend("certhelper.RunInfo", run_number=6543, pixel="Good", sistrip="Good",
+                    tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=6655, type=t1, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=9876, pixel="Good", sistrip="Good",
+                    tracking="Bad")
+        mixer.blend("certhelper.RunInfo", run_number=444, type=t1, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=444, type=t2, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=333, type=t1, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=333, type=t2, pixel="Good",
+                    sistrip="Good", tracking="Bad")
         mixer.blend("certhelper.RunInfo", run_number=999)
-        mixer.blend("certhelper.RunInfo", run_number=800, type=t2, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=4321, type=t2, pixel="Good", sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=1234, type=t2, pixel="Good", sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=800, type=t2, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=4321, type=t2, pixel="Good",
+                    sistrip="Good", tracking="Good")
+        mixer.blend("certhelper.RunInfo", run_number=1234, type=t2, pixel="Good",
+                    sistrip="Good", tracking="Good")
 
         d = RunInfo.objects.all().compare_list_if_certified(
             [333, 1234, 6655, "800", 4321, 7777, 9876, "abde", 8765, 6543, 888, 444])
@@ -111,3 +124,10 @@ class TestRunInfoQuerySet:
 
         for run in runs:
             assert "ReReco" == run.type.reco
+
+    def test_run_numbers(self):
+        mixer.blend("certhelper.RunInfo", run_number=123456)
+        mixer.blend("certhelper.RunInfo", run_number=234567)
+        mixer.blend("certhelper.RunInfo", run_number=345678)
+
+        assert [123456, 234567, 345678] == RunInfo.objects.all().run_numbers()

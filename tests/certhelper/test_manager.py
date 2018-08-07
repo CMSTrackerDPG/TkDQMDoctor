@@ -246,3 +246,27 @@ class TestRunInfoManager:
         assert len(RunInfo.all_objects.all()) == 5
         assert len(RunInfo.all_objects.all().alive()) == 5
         assert len(RunInfo.all_objects.all().dead()) == 0
+
+    def test_check_if_certified(self, some_certified_runs):
+        check = RunInfo.objects.check_if_certified(
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+        )
+
+        assert check["good"] == [1, 3, 11]
+        assert check["bad"] == [6]
+        assert check["missing"] == [0, 8, 15]
+        assert check["prompt_missing"] == [2, 7, 10, 12, 13]
+        assert check["changed_good"] == [5]
+        assert check["changed_bad"] == [4, 14]
+
+        check = RunInfo.objects.check_if_certified(
+            [0, "1", "2", 3, "4", 5, "6", "hase", "7", 8,
+             "10", 11, "12", "13", "14", "15", "abc"]
+        )
+
+        assert check["good"] == [1, 3, 11]
+        assert check["bad"] == [6]
+        assert check["missing"] == [0, 8, 15]
+        assert check["prompt_missing"] == [2, 7, 10, 12, 13]
+        assert check["changed_good"] == [5]
+        assert check["changed_bad"] == [4, 14]

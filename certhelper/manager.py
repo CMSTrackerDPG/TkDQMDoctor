@@ -1,5 +1,6 @@
 from django.db import models
 from certhelper.query import SoftDeletionQuerySet, RunInfoQuerySet
+from certhelper.utilities.utilities import uniquely_sorted
 
 
 class SoftDeletionManager(models.Manager):
@@ -38,3 +39,59 @@ class RunInfoManager(SoftDeletionManager):
 
     def bad(self):
         return RunInfoQuerySet(self.model).bad()
+
+    def check_if_certified(self, list_of_run_numbers):
+        list_of_run_numbers = uniquely_sorted(list_of_run_numbers)
+
+        runs = RunInfoQuerySet(self.model)
+        flags = {
+            "good": [],
+            "bad": [],
+            "missing": [],
+            "prompt_missing": [],
+            "changed_good": [],  # Express Bad -> Prompt Good
+            "changed_bad": [],  # Express Good -> Prompt Bad
+        }
+
+        runs = runs.filter(run_number__in=list_of_run_numbers).annotate_status()
+
+        prompt_runs = runs.prompt()
+        good_runs = prompt_runs.good()
+        bad_runs = prompt_runs.bad()
+
+        flags["good"] = good_runs.run_numbers()
+        flags["bad"] = bad_runs.run_numbers()
+
+        non_missing_prompt_run_numbers = [run["run_number"] for run in prompt_runs \
+            .order_by("run_number") \
+            .values("run_number") \
+            .distinct()]
+
+        non_missing_run_numbers = [run["run_number"] for run in runs \
+            .order_by("run_number") \
+            .values("run_number") \
+            .distinct()]
+
+        flags["missing"] = list(
+            (set(list_of_run_numbers) - set(non_missing_run_numbers)))
+
+        flags["prompt_missing"] = list(
+            set(non_missing_run_numbers) - set(non_missing_prompt_run_numbers))
+
+        express_runs = runs.express().filter(run_number__in=non_missing_run_numbers)
+        good_express = express_runs.good().run_numbers()
+        bad_express = express_runs.bad().run_numbers()
+
+        for run in good_express:
+            if run in flags["bad"]:
+                flags["bad"].remove(run)
+                flags["changed_bad"].append(run)
+
+        for run in bad_express:
+            if run in flags["good"]:
+                flags["good"].remove(run)
+                flags["changed_good"].append(run)
+
+        for d in flags.values():
+            d.sort()
+        return flags

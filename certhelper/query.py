@@ -251,6 +251,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
     def rereco(self):
         return self.filter(type__reco="ReReco")
 
+    def run_numbers(self):
+        return sorted(list(set([run.run_number for run in self])))
 
     def print(self):
         """
