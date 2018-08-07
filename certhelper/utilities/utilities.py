@@ -20,7 +20,8 @@ def get_date_string(year, month, day):
     datestring = None
 
     if year and month and day:  # if attributes exist
-        if int(year) in range(1900, 3000) and int(month) in range(1, 13) and int(day) in range(1, 32):
+        if int(year) in range(1900, 3000) and int(month) in range(1, 13) and int(
+                day) in range(1, 32):
             if len(month) == 1: month = "0" + month
             if len(day) == 1: day = "0" + day
             datestring = year + "-" + month + "-" + day
@@ -45,7 +46,8 @@ def get_filters_from_request_GET(request):
     for candidate in filter_candidates:
         tmp = request.GET.get(candidate, '')
         if tmp != '' and tmp != 0:
-            if not candidate.startswith('date_range') or candidate.startswith('date_range') and is_valid_date(tmp):
+            if not candidate.startswith('date_range') or candidate.startswith(
+                    'date_range') and is_valid_date(tmp):
                 applied_filters[candidate] = tmp
 
     year = request.GET.get('date_year', '')
@@ -85,8 +87,10 @@ def get_this_week_filter_parameter():
     start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
     end_of_week = start_of_week + timezone.timedelta(6)
 
-    date_gte = str(start_of_week.year) + "-" + str(start_of_week.month) + "-" + str(start_of_week.day)
-    date_lte = str(end_of_week.year) + "-" + str(end_of_week.month) + "-" + str(end_of_week.day)
+    date_gte = str(start_of_week.year) + "-" + str(start_of_week.month) + "-" + str(
+        start_of_week.day)
+    date_lte = str(end_of_week.year) + "-" + str(end_of_week.month) + "-" + str(
+        end_of_week.day)
 
     get_parameters = "?date__gte=" + str(date_gte)
     get_parameters += "&date__lte=" + str(date_lte)
@@ -134,3 +138,14 @@ def get_full_name(user):
         name += str(user.username)
 
     return name
+
+
+def extract_numbers_from_list(list_of_elements):
+    return [int(i) for i in list_of_elements
+            if type(i) == int or i.isdigit()]
+
+
+def uniquely_sorted(list_of_elements):
+    new_list = list(set(extract_numbers_from_list(list_of_elements)))
+    new_list.sort()
+    return new_list
