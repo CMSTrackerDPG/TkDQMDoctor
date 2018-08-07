@@ -403,7 +403,7 @@ def validate_central_certification_list(request):
     text = request.GET.get('text', None)
     run_numbers = re.sub('[^0-9]', ' ', text).split()  # only run_numbers
     run_numbers = set(run_numbers)  # remove duplicates
-    data = RunInfo.objects.all().compare_list_if_certified(run_numbers)
+    data = RunInfo.objects.check_if_certified(run_numbers)
     return JsonResponse(data)
 
 

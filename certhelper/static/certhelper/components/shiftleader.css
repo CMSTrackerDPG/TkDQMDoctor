@@ -6,10 +6,20 @@
     color: red;
 }
 
+.prompt-missing-runs {
+    color: orangered
+}
+
 .missing-runs {
     color: orange;
 }
 
-.different-flags {
-    color: purple;
+.changed-good-runs {
+    color: darkgreen;
+    text-decoration: underline;
+}
+
+.changed-bad-runs {
+    color: darkred;
+    text-decoration: underline;
 }
