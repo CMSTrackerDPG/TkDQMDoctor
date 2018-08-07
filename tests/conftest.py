@@ -1,10 +1,12 @@
 import logging
+import random
 
 import pytest
 from mixer.backend.django import mixer
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 
-from certhelper.models import RunInfo
+from certhelper.models import RunInfo, ChecklistItemGroup
 from tests.credentials import SUPERUSER_USERNAME, PASSWORD, SHIFTER1_USERNAME, \
     SHIFTER2_USERNAME, SHIFTLEADER_USERNAME, EXPERT_USERNAME, ADMIN_USERNAME
 
@@ -82,7 +84,6 @@ def firefox():
     options = webdriver.FirefoxOptions()
     options.add_argument("--headless")
     firefox_webdriver = webdriver.Firefox(firefox_options=options)
-    firefox_webdriver.implicitly_wait(60)
     yield firefox_webdriver
     firefox_webdriver.quit()
 
@@ -100,6 +101,11 @@ def authenticated_browser(firefox, client, live_server, superuser):
     firefox.refresh()
 
     return firefox
+
+
+@pytest.fixture
+def wait(firefox):
+    return WebDriverWait(firefox, 10)
 
 
 @pytest.fixture
@@ -343,3 +349,28 @@ def some_certified_runs():
     assert 1 == len(
         RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Prompt").bad()
     )
+
+@pytest.fixture
+def some_checklists():
+    general = mixer.blend("certhelper.Checklist", identifier="general")
+    trackermap = mixer.blend("certhelper.Checklist", identifier="trackermap")
+    sistrip = mixer.blend("certhelper.Checklist", identifier="sistrip")
+    pixel = mixer.blend("certhelper.Checklist", identifier="pixel")
+    tracking = mixer.blend("certhelper.Checklist", identifier="tracking")
+
+    mixer.blend("certhelper.ChecklistItemGroup", checklist=general)
+    mixer.blend("certhelper.ChecklistItemGroup", checklist=trackermap)
+    mixer.blend("certhelper.ChecklistItemGroup", checklist=sistrip)
+    mixer.blend("certhelper.ChecklistItemGroup", checklist=pixel)
+    mixer.blend("certhelper.ChecklistItemGroup", checklist=tracking)
+
+    for i in range(random.randint(0, 15)):
+        mixer.blend("certhelper.Checklist")
+    for i in range(random.randint(0, 15)):
+        mixer.blend("certhelper.ChecklistItemGroup")
+    for i in range(random.randint(0, 15)):
+        mixer.blend("certhelper.ChecklistItem")
+
+    for checklistgroup in ChecklistItemGroup.objects.all():
+        for i in range(random.randint(0, 15)):
+            mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup)
