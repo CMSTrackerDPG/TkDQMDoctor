@@ -236,6 +236,22 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         """
         pass
 
+    def collisions(self):
+        return self.filter(type__runtype="Collisions")
+
+    def cosmics(self):
+        return self.filter(type__runtype="Cosmics")
+
+    def express(self):
+        return self.filter(type__reco="Express")
+
+    def prompt(self):
+        return self.filter(type__reco="Prompt")
+
+    def rereco(self):
+        return self.filter(type__reco="ReReco")
+
+
     def print(self):
         """
         Prints out QuerySet to have an easy Overview

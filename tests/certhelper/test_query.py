@@ -73,3 +73,41 @@ class TestRunInfoQuerySet:
             print("{} {} {}".format(run.run_number, run.type.reco, run.status))
 
         assert True
+
+    def test_collisions(self, some_certified_runs):
+        assert 0 != len(RunInfo.objects.all())
+        runs = RunInfo.objects.all().collisions()
+        assert 0 != len(runs)
+
+        for run in runs:
+            assert "Collisions" == run.type.runtype
+
+    def test_cosmics(self, some_certified_runs):
+        runs = RunInfo.objects.all().cosmics()
+        assert 0 != len(runs)
+
+        for run in runs:
+            assert "Cosmics" == run.type.runtype
+
+    def test_express(self, some_certified_runs):
+        runs = RunInfo.objects.all().express()
+        assert 0 != len(runs)
+
+        for run in runs:
+            assert "Express" == run.type.reco
+
+    def test_prompt(self, some_certified_runs):
+        runs = RunInfo.objects.all().prompt()
+        assert 0 != len(runs)
+
+        for run in runs:
+            assert "Prompt" == run.type.reco
+
+    def test_rereco(self, some_certified_runs):
+        mixer.blend("certhelper.RunInfo", type__reco="ReReco")
+        mixer.blend("certhelper.RunInfo", type__reco="ReReco")
+        runs = RunInfo.objects.all().rereco()
+        assert 0 != len(runs)
+
+        for run in runs:
+            assert "ReReco" == run.type.reco
