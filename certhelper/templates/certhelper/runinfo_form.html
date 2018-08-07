@@ -191,6 +191,14 @@
              * Update Reference-run-dropdown-list on page load
              */
             updateReferenceRunList();
+
+            let int_luminosity = $('#id_int_luminosity');
+            int_luminosity.on('focusout',function(){
+                if(int_luminosity.val() !== "") {
+                    const rounded = parseFloat(int_luminosity.val()).toFixed(1);
+                    int_luminosity.val(rounded);
+                }
+            });
         });
     </script>
 {% endblock script %}
