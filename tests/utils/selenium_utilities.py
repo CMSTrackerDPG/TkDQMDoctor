@@ -1,6 +1,7 @@
 import time
 
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, \
+    ElementClickInterceptedException
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -53,29 +54,47 @@ def add_some_reference_runs(browser):
 
     browser.find_element_by_link_text("VIEW SITE").click()
 
+def check_checklist(browser, wait, name):
+    browser.find_element_by_id("id_checklist_{}".format(name)).click()
+    browser.find_element_by_id("id_btn_checkall_{}".format(name)).click()
+    browser.find_element_by_id("id_submit_checklist_{}".format(name)).click()
+    wait.until(EC.invisibility_of_element_located((By.ID, "modal-{}-id".format(name))))
+    wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "modal-backdrop ".format(name))))
 
 def check_all_checklists(browser, wait):
+    check_checklist(browser, wait, "general")
+    check_checklist(browser, wait, "trackermap")
+    check_checklist(browser, wait, "pixel")
+    check_checklist(browser, wait, "sistrip")
+    check_checklist(browser, wait, "tracking")
+    """
     browser.find_element_by_id("id_checklist_general").click()
     browser.find_element_by_id("id_btn_checkall_general").click()
     browser.find_element_by_id("id_submit_checklist_general").click()
-    time.sleep(0.2)
-    wait.until(EC.element_to_be_clickable((By.ID, 'id_checklist_trackermap')))
-    browser.find_element_by_id("id_checklist_trackermap").click()
+    wait.until(EC.invisibility_of_element_located((By.ID, "modal-general-id")))
+    # time.sleep(0.2)
+    # wait.until(EC.element_to_be_clickable((By.ID, 'id_checklist_trackermap')))
+    # browser.find_element_by_id("id_checklist_trackermap").click()
+    click_checklist_checkbox(browser, 'id_checklist_trackermap')
     browser.find_element_by_id("id_btn_checkall_trackermap").click()
     browser.find_element_by_id("id_submit_checklist_trackermap").click()
-    wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_pixel")))
-    browser.find_element_by_id("id_checklist_pixel").click()
+    # wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_pixel")))
+    # browser.find_element_by_id("id_checklist_pixel").click()
+    click_checklist_checkbox(browser, 'id_checklist_pixel')
     browser.find_element_by_id("id_btn_checkall_pixel").click()
     browser.find_element_by_id("id_submit_checklist_pixel").click()
-    wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_sistrip")))
-    browser.find_element_by_id("id_checklist_sistrip").click()
+    # wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_sistrip")))
+    # browser.find_element_by_id("id_checklist_sistrip").click()
+    click_checklist_checkbox(browser, 'id_checklist_sistrip')
     browser.find_element_by_id("id_btn_checkall_sistrip").click()
     browser.find_element_by_id("id_submit_checklist_sistrip").click()
-    wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_tracking")))
-    browser.find_element_by_id("id_checklist_tracking").click()
+    # wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_tracking")))
+    # browser.find_element_by_id("id_checklist_tracking").click()
+    click_checklist_checkbox(browser, 'id_checklist_tracking')
     browser.find_element_by_id("id_btn_checkall_tracking").click()
     browser.find_element_by_id("id_submit_checklist_tracking").click()
     time.sleep(0.5)
+    """
 
 
 def fill_and_submit_add_run_form(browser, wait):
@@ -174,6 +193,16 @@ def wait_for_cell(browser, option_text, MAX_WAIT=10):
             assert option_text in [cell.text for cell in cells]
             return
         except(AssertionError, WebDriverException) as e:
+            if time.time() - start_time > MAX_WAIT:
+                raise e
+            time.sleep(0.1)
+
+def click_checklist_checkbox(browser, checklist_id, MAX_WAIT=10):
+    start_time = time.time()
+    while True:
+        try:
+            browser.find_element_by_id(checklist_id).click()
+        except ElementClickInterceptedException as e:
             if time.time() - start_time > MAX_WAIT:
                 raise e
             time.sleep(0.1)

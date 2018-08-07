@@ -1,3 +1,9 @@
+<style>
+.checklist-remark{
+    color: red;
+}
+</style>
+
 {# used for the show_checklist_modal template tag #}
 {% if checklist %}
     <div id="modal-{{ checklist.identifier }}-id" class="modal fade" role="dialog">
@@ -11,13 +17,14 @@
                         </h2>
                     </div>
                     <div class="modal-body">
-                        <p>{{ checklist.description|safe }}</p>
+                        <p class="checklist-description">{{ checklist.description|safe }}</p>
 
                         {% for itemgroup in checklist.checklistitemgroup_set.all %}
                             <h3>{{ itemgroup.name }}</h3>
-                            <p><span style="color: red;">Please check all items and press "OK"</span></p>
-                            <p>{{ itemgroup.description|safe }}</p>
-                            <p>
+                            <!-- TODO: replace style attribute with css class -->
+                            <p class="checklist-remark">Please check all items and press "OK"</p>
+                            <p class="checklist-description">{{ itemgroup.description|safe }}</p>
+                            <p class="checklist-description">
                             <table>
                                 {% for item in itemgroup.checklistitem_set.all %}
                                     <tr>
@@ -39,7 +46,7 @@
                             </p>
                         {% endfor %}
 
-                        <p>{{ checklist.additional_description|safe }}</p>
+                        <p class="checklist-description">{{ checklist.additional_description|safe }}</p>
                     </div>
                     <div class="modal-footer">
                         <div clas="row">
@@ -57,4 +64,3 @@
         </div>
     </div>
 {% endif %}
-

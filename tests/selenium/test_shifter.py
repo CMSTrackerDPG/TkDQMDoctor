@@ -34,10 +34,16 @@ class TestShifter:
             )
         )
 
+    def test_can_check_checklists(self, firefox, live_server, shifter, some_checklists,
+                                  wait):
+        firefox.get('%s' % live_server.url)
+        try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
+        firefox.find_element_by_link_text("Add Run").click()
+        check_all_checklists(firefox, wait)
+
     def test_create_new_certification(
             self, firefox, live_server, shifter, some_certified_runs,
             some_checklists, wait):
-
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
         firefox.find_element_by_link_text("Add Run").click()

@@ -105,7 +105,7 @@ def authenticated_browser(firefox, client, live_server, superuser):
 
 @pytest.fixture
 def wait(firefox):
-    return WebDriverWait(firefox, 10)
+    return WebDriverWait(firefox, 5)
 
 
 @pytest.fixture

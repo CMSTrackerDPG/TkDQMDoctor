@@ -76,14 +76,11 @@ class TestRunInfoQuerySet:
         assert 0 == len(RunInfo.objects.all().changed_flags())
 
     def test_new_flags_changed(self, some_certified_runs):
+        # TODO
         runs = RunInfo.objects.all().order_by("type__runtype", "type__reco",
                                               "run_number")
 
         runs = runs.annotate_status().filter_flag_changed().order_by("run_number")
-
-        # print(runs)
-        for run in runs:
-            print("{} {} {}".format(run.run_number, run.type.reco, run.status))
 
         assert True
 
