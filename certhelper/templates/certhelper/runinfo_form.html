@@ -122,7 +122,7 @@
                 <label class="col-sm-3 control-label" for="id_int_luminosity">Int luminosity</label>
                 <div class="col-sm-6">
                     <div class="input-group">
-                        <input type="text" name="int_luminosity" placeholder="Unit: /pb" class="form-control" title="" required="" id="id_int_luminosity">
+                        {% render_field form.int_luminosity class="form-control" %}
                         <span class="input-group-addon">pb<sup>-1</sup></span>
                     </div>
                 </div>

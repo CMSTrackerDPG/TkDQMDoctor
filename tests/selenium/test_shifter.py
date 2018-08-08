@@ -54,3 +54,25 @@ class TestShifter:
 
     def test_generate_summary(self):
         pass
+
+    def test_can_update_certification(
+            self, firefox, live_server, shifter, some_certified_runs,
+            some_checklists, wait):
+        firefox.get('%s' % live_server.url)
+        try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
+        firefox.find_element_by_link_text("Add Run").click()
+        check_all_checklists(firefox, wait)
+        fill_and_submit_add_run_form(firefox, wait)
+
+        wait_for_cell(firefox, "456789")
+
+        firefox.find_elements_by_class_name("edit_run")[1].find_element_by_tag_name("a").click()
+
+        wait.until(EC.presence_of_element_located((By.ID, "id_run_number")))
+        firefox.find_element_by_id("id_run_number").click()
+        firefox.find_element_by_id("id_run_number").clear()
+        firefox.find_element_by_id("id_run_number").send_keys("555789")
+
+        firefox.find_element_by_id("id_submit_add_run").click()
+
+        wait_for_cell(firefox, "555789")
