@@ -16,7 +16,8 @@ from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
 from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
+from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport, \
+    NewShiftLeaderReport
 from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, \
     is_valid_id, request_contains_filter_parameter, get_this_week_filter_parameter, \
     get_today_filter_parameter
@@ -347,7 +348,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['summary'] = generate_summary(self.filterset.qs)
-        context['slreport'] = ShiftLeaderReport(self.filterset.qs).get_context()
+        context['slreport'] = NewShiftLeaderReport(self.filterset.qs)
         context['deleted_runs'] = DeletedRunInfoTable(
             RunInfo.all_objects.dead().order_by('-run_number'))
         return context

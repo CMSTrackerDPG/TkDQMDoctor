@@ -54,12 +54,15 @@ def add_some_reference_runs(browser):
 
     browser.find_element_by_link_text("VIEW SITE").click()
 
+
 def check_checklist(browser, wait, name):
     browser.find_element_by_id("id_checklist_{}".format(name)).click()
     browser.find_element_by_id("id_btn_checkall_{}".format(name)).click()
     browser.find_element_by_id("id_submit_checklist_{}".format(name)).click()
     wait.until(EC.invisibility_of_element_located((By.ID, "modal-{}-id".format(name))))
-    wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "modal-backdrop ".format(name))))
+    wait.until(EC.invisibility_of_element_located(
+        (By.CLASS_NAME, "modal-backdrop ".format(name))))
+
 
 def check_all_checklists(browser, wait):
     check_checklist(browser, wait, "general")
@@ -128,7 +131,6 @@ def fill_and_submit_add_run_form(browser, wait):
     browser.find_element_by_id("id_submit_add_run").click()
 
 
-
 def wait_for_dropdown_option(browser, option_text, MAX_WAIT=10):
     start_time = time.time()
     while True:
@@ -184,18 +186,22 @@ def wait_for(browser, find_function, MAX_WAIT=10):
             time.sleep(0.1)
 
 
-def wait_for_cell(browser, option_text, MAX_WAIT=10):
+def wait_for_by_tag_name(browser, text, tag_name, MAX_WAIT=10):
     start_time = time.time()
     while True:
         try:
-            table = browser.find_element_by_tag_name('table')
-            cells = table.find_elements_by_tag_name('td')
-            assert option_text in [cell.text for cell in cells]
+            cells = browser.find_elements_by_tag_name(tag_name)
+            assert text in [cell.text for cell in cells]
             return
         except(AssertionError, WebDriverException) as e:
             if time.time() - start_time > MAX_WAIT:
                 raise e
             time.sleep(0.1)
+
+
+def wait_for_cell(browser, text, MAX_WAIT=10):
+    wait_for_by_tag_name(browser, text, "td", MAX_WAIT)
+
 
 def click_checklist_checkbox(browser, checklist_id, MAX_WAIT=10):
     start_time = time.time()
@@ -206,3 +212,23 @@ def click_checklist_checkbox(browser, checklist_id, MAX_WAIT=10):
             if time.time() - start_time > MAX_WAIT:
                 raise e
             time.sleep(0.1)
+
+
+def set_shift_leader_filter_date(browser, year_0, month_0, day_0, year_1, month_1, day_1):
+    """
+    Selects the filter date in the Shift Leader Page to the given parameters
+    and submits the form
+    """
+    Select(browser.find_element_by_id("id_date__gte_month")).select_by_visible_text(
+        month_0)
+    Select(browser.find_element_by_id("id_date__gte_day")).select_by_visible_text(
+        day_0)
+    Select(browser.find_element_by_id("id_date__gte_year")).select_by_visible_text(
+        year_0)
+    Select(browser.find_element_by_id("id_date__lte_month")).select_by_visible_text(
+        month_1)
+    Select(browser.find_element_by_id("id_date__lte_day")).select_by_visible_text(
+        day_1)
+    Select(browser.find_element_by_id("id_date__gte_year")).select_by_visible_text(
+        year_1)
+    browser.find_element_by_id("id_btn_filter").click()

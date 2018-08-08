@@ -1,4 +1,5 @@
 {% with 'monday tuesday wednesday thursday friday saturday sunday' as weekdays %}
+{% load myfilters %}
 
     {% for key, val in slreport.day.items %}
         <p><strong>key</strong>
@@ -18,8 +19,8 @@
                 Day by day <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-                {% for day in slreport.day %}
-                    <li><a data-toggle="tab" href="#slr-{{ day.date }}">{{ day.name }} ({{ day.date }})</a></li>
+                {% for day in slreport.day_by_day %}
+                    <li><a data-toggle="tab" href="#slr-{{ day.date|yyyymmdd }}">{{ day.name }} ({{ day.date|yyyymmdd }})</a></li>
                 {% endfor %}
             </ul>
         </li>
@@ -32,8 +33,8 @@
             <ul class="dropdown-menu">
                 <li><a data-toggle="tab" href="#slr-list-of-runs-all">All days</a></li>
 
-                {% for day in slreport.day %}
-                    <li><a data-toggle="tab" href="#slr-list-of-runs-{{ day.date }}">{{ day.name }} ({{ day.date }})</a></li>
+                {% for day in slreport.day_by_day %}
+                    <li><a data-toggle="tab" href="#slr-list-of-runs-{{ day.date|yyyymmdd }}">{{ day.name }} ({{ day.date|yyyymmdd }})</a></li>
                 {% endfor %}
             </ul>
         </li>

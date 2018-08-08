@@ -1,7 +1,7 @@
 {% load myfilters %}
 
-{% for day in slreport.day %}
-    <div id="slr-{{ day.date }}" class="tab-pane fade">
+{% for day in slreport.day_by_day %}
+    <div id="slr-{{ day.date|yyyymmdd }}" class="tab-pane fade">
         <h3>Day by day notes: {{ day.name|title }}, {{ day.date|yyyymmdd_to_ddmmyyyy }}</h3>
         <p>
         <ul>
@@ -14,14 +14,14 @@
             </li>
             <li>Number of runs certified:
                 <ul>
-                    <li>Collisions: <strong>{{ day.Collisions.Express.number_of_runs }}</strong> in Stream-Express (<strong>{{ day.Collisions.Express.int_lum }} pb⁻¹</strong>), <strong>{{ day.Collisions.Prompt.number_of_runs }}</strong> in Prompt-Reco (<strong>{{ day.Collisions.Prompt.int_lum }} pb⁻¹</strong>)</li>
-                    <li>Cosmics: <strong>{{ day.Cosmics.Express.number_of_runs }}</strong> in Stream Express, <strong>{{ day.Cosmics.Prompt.number_of_runs }}</strong> in Prompt Reco</li>
+                    <li>Collisions: <strong>{{ day.collisions.express.total_number }}</strong> in Stream-Express (<strong>{{ day.collisions.express.integrated_luminosity }} pb⁻¹</strong>), <strong>{{ day.collisions.prompt.total_number }}</strong> in Prompt-Reco (<strong>{{ day.collisions.prompt.integrated_luminosity }} pb⁻¹</strong>)</li>
+                    <li>Cosmics: <strong>{{ day.cosmics.express.total_number }}</strong> in Stream Express, <strong>{{ day.cosmics.prompt.total_number }}</strong> in Prompt Reco</li>
                 </ul>
             </li>
             <li>
-                Total number of BAD runs = <strong>{{ day.Bad.number_of_runs }}</strong> (<strong>{{ day.Bad.int_lum }} pb⁻¹</strong>) (see next slide for details)
+                Total number of BAD runs = <strong>{{ day.bad.total_number }}</strong> (<strong>{{ day.bad.integrated_luminosity }} pb⁻¹</strong>) (see next slide for details)
                 <ul>
-                    <li>Number of changed flags from Express to Prompt=<strong>{{ day.number_of_changed_flags }}</strong>{% if day.runs_with_changed_flags %} ({{ day.runs_with_changed_flags }}){% endif %}</li>
+                    <li>Number of changed flags from Express to Prompt=<strong>{{ day.flag_changed.total_number }}</strong>{% if day.flag_changed.total_number > 0 %} ({% for run_number in day.flag_changed.run_numbers %}{{ run_number }}{% endfor %}){% endif %}</li>
                 </ul>
             </li>
             <li>

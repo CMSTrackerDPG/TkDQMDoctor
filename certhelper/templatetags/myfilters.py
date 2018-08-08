@@ -34,5 +34,12 @@ def dateoffset(value, offset):
 
 @register.filter
 def yyyymmdd_to_ddmmyyyy(value):
-    newdate = datetime.datetime.strptime(value, '%Y-%m-%d')
+    if isinstance(value, datetime.date):
+        newdate = value
+    else:
+        newdate = datetime.datetime.strptime(value, '%Y-%m-%d')
     return newdate.strftime('%d-%m-%Y')
+
+@register.filter
+def yyyymmdd(value):
+    return value.strftime('%Y-%m-%d')

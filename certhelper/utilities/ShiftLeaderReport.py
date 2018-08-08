@@ -36,7 +36,8 @@ class ShiftLeaderReport:
     def run_numbers(self, runtype, reco, day=None):
         return self.get_attribute("run_numbers", runtype, reco, bad_only=False, day=day)
 
-    def get_attribute(self, attribute, runtype, reco, bad_only=False, day=None, default_value=0):
+    def get_attribute(self, attribute, runtype, reco, bad_only=False, day=None,
+                      default_value=0):
         return self.get_item(runtype, reco, bad_only, day).get(attribute, default_value)
 
     def get_active_days_list(self):
@@ -124,7 +125,7 @@ class ShiftLeaderReport:
                     self.num_runs_keyword: num_runs,
                     self.intlum_keyword: int_lum
                 }
-                #TODO TEST THIS
+                # TODO TEST THIS
                 context[self.bad_keyword][self.num_runs_keyword] += num_runs
                 context[self.bad_keyword][self.intlum_keyword] += int_lum
 
@@ -136,6 +137,71 @@ class ShiftLeaderReport:
             context["date"] = day
             runs_with_changed_flag = RunInfo.objects.filter(date=day).changed_flags()
             context["number_of_changed_flags"] = len(runs_with_changed_flag)
-            context["runs_with_changed_flags"] = ", ".join(str(run) for run in runs_with_changed_flag)
+            context["runs_with_changed_flags"] = ", ".join(
+                str(run) for run in runs_with_changed_flag)
         return context
 
+
+class ShiftLeaderReportBase:
+    """
+    Base class for the shift leader report
+    Just wraps the RunInfoQuerySet filter functions
+    """
+
+    def prompt(self):
+        return type(self)(self.runs.prompt())
+
+    def express(self):
+        return type(self)(self.runs.express())
+
+    def rereco(self):
+        return type(self)(self.runs.rereco())
+
+    def collisions(self):
+        return type(self)(self.runs.collisions())
+
+    def cosmics(self):
+        return type(self)(self.runs.cosmics())
+
+    def bad(self):
+        return type(self)(self.runs.bad())
+
+    def good(self):
+        return type(self)(self.runs.good())
+
+    def run_numbers(self):
+        return self.runs.run_numbers()
+
+    def integrated_luminosity(self):
+        return self.runs.integrated_luminosity()
+
+    def total_number(self):
+        return self.runs.total_number()
+
+    def flag_changed(self):
+        return self.runs.filter_flag_changed()
+
+
+class ShiftLeaderReportDay(ShiftLeaderReportBase):
+    def __init__(self, runs):
+        self.runs = runs
+        try:
+            day = runs[0].date
+            self.day_name = to_weekdayname(day)
+            self.day_date = day
+        except IndexError:
+            pass
+
+    def name(self):
+        return self.day_name
+
+    def date(self):
+        return self.day_date
+
+
+class NewShiftLeaderReport(ShiftLeaderReportBase):
+    def __init__(self, runs):
+        self.runs = runs
+
+    def day_by_day(self):
+        return [ShiftLeaderReportDay(day) for day in self.runs.per_day()]

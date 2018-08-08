@@ -254,12 +254,53 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
     def run_numbers(self):
         return sorted(list(set([run.run_number for run in self])))
 
+    def integrated_luminosity(self):
+        if len(self) == 0:
+            return 0
+        return float(self.aggregate(Sum('int_luminosity'))["int_luminosity__sum"])
+
+    def total_number(self):
+        return len(self)
+
+    def days(self):
+        return [d['date'].strftime('%Y-%m-%d') for d in
+                self.order_by('date').values('date').distinct()]
+
+    def reference_run_numbers(self):
+        ref_dict = self \
+            .order_by('reference_run__reference_run') \
+            .values('reference_run__reference_run') \
+            .distinct()
+
+        return [ref["reference_run__reference_run"] for ref in ref_dict]
+
+    def reference_runs(self):
+        from .models import ReferenceRun
+        return ReferenceRun.objects \
+            .filter(reference_run__in=self.reference_run_numbers()) \
+            .order_by("reference_run")
+
+    def per_day(self):
+        """
+        Returns a list of querysets where one queryset is a specific day
+        """
+        per_day_list = []
+        for day in self.days():
+            per_day_list.append(self.filter(date=day))
+
+        return per_day_list
+
     def print(self):
         """
         Prints out QuerySet to have an easy Overview
         """
+        print()
+        print("{:10} {:10} {:10} {:10} {:10} {:10}".format("run number", "type", "reco",
+                                                           "int lumi", "date", "flag"))
+        for run in self.annotate_status()[:50]:
+            print("{:10} {:10} {:10} {:10} {} {:10}".format(run.run_number,
+                                                            run.type.runtype,
+                                                            run.type.reco,
+                                                            run.int_luminosity,
+                                                            run.date, run.status))
 
-        print("{:<10}{:<11}{:<8}{}".format("run", "type", "reco", "good"))
-        for run in self:
-            print("{:<8}{:<11}{:<8}{}".format(run.run_number, run.type.runtype,
-                                              run.type.reco, run.is_good))

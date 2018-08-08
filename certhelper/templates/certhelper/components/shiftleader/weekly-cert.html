@@ -1,3 +1,4 @@
+{% load myfilters %}
 
 <div id="slr-weekly-cert" class="tab-pane fade in active">
     <div class="form-group">
@@ -10,21 +11,21 @@
     <ul>
         <li>Collisions:
             <ul>
-                <li>Prompt-Reco: total number=<strong>{{ slreport.Collisions.Prompt.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Collisions.Prompt.int_lum }}  pb⁻¹</strong>
-                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Collisions.Prompt.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Bad.Collisions.Prompt.int_lum }} pb⁻¹</strong></li></ul>
+                <li>Prompt-Reco: total number=<strong>{{ slreport.collisions.prompt.total_number }}</strong>, Integrated lumi=<strong>{{ slreport.collisions.prompt.integrated_luminosity }}  pb⁻¹</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.bad.collisions.prompt.total_number }}</strong>, Integrated lumi=<strong>{{ slreport.bad.collisions.prompt.integrated_luminosity }} pb⁻¹</strong></li></ul>
                 </li>
-                <li>Stream-Express: total number=<strong>{{ slreport.Collisions.Express.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Collisions.Express.int_lum }} pb⁻¹</strong>
-                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Collisions.Express.number_of_runs }}</strong>, Integrated lumi=<strong>{{ slreport.Bad.Collisions.Express.int_lum }} pb⁻¹</strong></li></ul>
+                <li>Stream-Express: total number=<strong>{{ slreport.collisions.express.total_number }}</strong>, Integrated lumi=<strong>{{ slreport.collisions.express.integrated_luminosity }} pb⁻¹</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.bad.collisions.express.total_number }}</strong>, Integrated lumi=<strong>{{ slreport.bad.collisions.express.integrated_luminosity }} pb⁻¹</strong></li></ul>
                 </li>
             </ul>
         </li>
         <li>Cosmics:
             <ul>
-                <li>Prompt-Reco: total number=<strong>{{ slreport.Cosmics.Prompt.number_of_runs }}</strong>
-                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Cosmics.Prompt.number_of_runs }}</strong></li></ul>
+                <li>Prompt-Reco: total number=<strong>{{ slreport.cosmics.prompt.total_number }}</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.bad.cosmics.prompt.total_number }}</strong></li></ul>
                 </li>
-                <li>Stream-Express: total number=<strong>{{ slreport.Cosmics.Express.number_of_runs }}</strong>
-                    <ul><li>BAD runs: total number=<strong>{{ slreport.Bad.Cosmics.Express.number_of_runs }}</strong></li></ul>
+                <li>Stream-Express: total number=<strong>{{ slreport.cosmics.express.total_number }}</strong>
+                    <ul><li>BAD runs: total number=<strong>{{ slreport.bad.cosmics.express.total_number }}</strong></li></ul>
                 </li>
             </ul>
         </li>

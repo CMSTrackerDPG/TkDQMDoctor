@@ -15,6 +15,7 @@ pytestmark = pytest.mark.django_db
 # Disables Logging when testing
 logging.disable(logging.CRITICAL)
 
+
 @pytest.fixture
 def superuser(django_user_model):
     """returns a user with superuser rights"""
@@ -350,6 +351,7 @@ def some_certified_runs():
         RunInfo.objects.filter(type__runtype="Cosmics", type__reco="Prompt").bad()
     )
 
+
 @pytest.fixture
 def some_checklists():
     general = mixer.blend("certhelper.Checklist", identifier="general")
@@ -374,3 +376,62 @@ def some_checklists():
     for checklistgroup in ChecklistItemGroup.objects.all():
         for i in range(random.randint(0, 15)):
             mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup)
+
+
+@pytest.fixture
+def runs_for_slr():
+    """
+    Certified runs used to test the shift leader report
+    """
+    conditions = [
+        ["Cosmics", "Express", 0.1234, 72, "2018-05-14", "Good"],
+        ["Collisions", "Prompt", 1.234, 5432, "2018-05-14", "Bad"],  #######
+        ["Cosmics", "Prompt", 0, 25, "2018-05-14", "Bad"],  ########
+        ["Collisions", "Express", 423.24, 2, "2018-05-15", "Good"],
+        ["Collisions", "Express", 0, 72, "2018-05-14", "Good"],
+        ["Cosmics", "Express", 0, 12, "2018-05-17", "Good"],
+        ["Cosmics", "Express", 0, 72, "2018-05-17", "Bad"],
+        ["Cosmics", "Express", 0, 42, "2018-05-14", "Bad"],  #######
+        ["Collisions", "Express", 124.123, 72, "2018-05-18", "Good"],
+        ["Cosmics", "Express", 0, 1242, "2018-05-14", "Good"],
+        ["Cosmics", "Express", 0, 72, "2018-05-20", "Good"],
+        ["Collisions", "Express", 999, 142, "2018-05-20", "Good"],
+        ["Collisions", "Prompt", 0, 72, "2018-05-20", "Bad"],  #######
+        ["Collisions", "Prompt", 123132.32, 4522, "2018-05-20", "Bad"],  #######
+        ["Collisions", "Express", 0, 72, "2018-05-20", "Good"],
+        ["Collisions", "Express", -1, 71232, "2018-05-14", "Good"],
+        ["Cosmics", "Express", 0, 712, "2018-05-17", "Good"],
+        ["Collisions", "Express", 5213, 142, "2018-05-14", "Good"],
+        ["Collisions", "Express", 154543, 72, "2018-05-18", "Good"],
+    ]
+
+    for condition in conditions:
+        mixer.blend(
+            'certhelper.RunInfo',
+            type=mixer.blend('certhelper.Type', runtype=condition[0],
+                             reco=condition[1]),
+            int_luminosity=condition[2],
+            number_of_ls=condition[3],
+            date=condition[4],
+            pixel=condition[5],
+            sistrip=condition[5],
+            tracking=condition[5],
+        )
+
+
+@pytest.fixture
+def runs_with_three_refs():
+    mixer.blend("certhelper.ReferenceRun", reference_run=12)  # unused on purpose
+    ref_1 = mixer.blend("certhelper.ReferenceRun", reference_run=1)
+    ref_2 = mixer.blend("certhelper.ReferenceRun", reference_run=2)
+    ref_3 = mixer.blend("certhelper.ReferenceRun", reference_run=3)
+    mixer.blend("certhelper.ReferenceRun")  # unused on purpose
+
+    mixer.blend("certhelper.RunInfo", reference_run=ref_1)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_2)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_3)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_2)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_3)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_2)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_1)
+    mixer.blend("certhelper.RunInfo", reference_run=ref_1)
