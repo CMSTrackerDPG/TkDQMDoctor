@@ -118,8 +118,21 @@
             {% bootstrap_field form.number_of_ls field_class="col-sm-6" label_class="col-sm-3"%}
 
             {# Int. luminosity #}
-            {% bootstrap_field form.int_luminosity field_class="col-sm-6" label_class="col-sm-3" addon_after='pb<sup>-1</sup>'%}
-
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="id_int_luminosity">Int luminosity</label>
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        <input type="text" name="int_luminosity" placeholder="Unit: /pb" class="form-control" title="" required="" id="id_int_luminosity">
+                        <span class="input-group-addon">pb<sup>-1</sup></span>
+                    </div>
+                </div>
+                <div class="col-sm-3"></div>
+                <div class="col-sm-offset-3 col-sm-9 ">
+                    <small id="passwordHelpBlock" class="form-text text-muted">
+                        Can be taken from <a id="id_cmswbm_link" href="https://cmswbm.cern.ch/cmsdb/servlet/RunSummary" target="_blank">WBM Run Summary</a> under "Run Live Lumi"
+                    </small>
+                </div>
+            </div>
             {# Pixel #}
             <div class="form-group">
                 {% render_label_and_field_for form.pixel %}
@@ -193,12 +206,23 @@
              */
             updateReferenceRunList();
 
+            /**
+             * Round the number of decimal places for int luminosity
+             */
             let int_luminosity = $('#id_int_luminosity');
             int_luminosity.on('focusout',function(){
                 if(int_luminosity.val() !== "") {
                     const rounded = parseFloat(int_luminosity.val()).toFixed(1);
                     int_luminosity.val(rounded);
                 }
+            });
+
+            /**
+             * Update the cmsbwm link in the help text for the int luminosity
+             */
+            let run_number = $('#id_run_number');
+            run_number.on('input',function(){
+                $('#id_cmswbm_link').attr("href", "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary?RUN=" + run_number.val())
             });
         });
     </script>
