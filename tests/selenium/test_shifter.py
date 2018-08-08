@@ -52,6 +52,18 @@ class TestShifter:
 
         wait_for_cell(firefox, "456789", MAX_WAIT=20)
 
+    def test_create_new_certification_without_checking_checklist(
+            self, firefox, live_server, shifter, some_certified_runs,
+            some_checklists, wait):
+        # TODO Remove/Change this test case once further instructions are given
+        firefox.get('%s' % live_server.url)
+        try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
+        firefox.find_element_by_link_text("Add Run").click()
+        fill_and_submit_add_run_form(firefox, wait)
+
+        wait_for_cell(firefox, "456789", MAX_WAIT=20)
+
+
     def test_generate_summary(self):
         pass
 
