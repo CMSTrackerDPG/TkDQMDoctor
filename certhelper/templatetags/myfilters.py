@@ -2,6 +2,7 @@ import datetime
 
 from django import template
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -9,6 +10,7 @@ register = template.Library()
 @register.filter(name='addclass')
 def addclass(value, arg):
     return value.as_widget(attrs={'class': arg})
+
 
 @register.filter
 def add_label_class(field, class_name):
@@ -40,6 +42,33 @@ def yyyymmdd_to_ddmmyyyy(value):
         newdate = datetime.datetime.strptime(value, '%Y-%m-%d')
     return newdate.strftime('%d-%m-%Y')
 
+
 @register.filter
 def yyyymmdd(value):
     return value.strftime('%Y-%m-%d')
+
+
+@register.filter
+def join_good_runs(list_of_run_numbers):
+    """
+    takes a list of run numbers and wraps them in <span class="good-runs">
+    """
+    if list_of_run_numbers:
+        rendered_string = '<span class="good-runs">'
+        rendered_string += ", ".join(str(x) for x in list_of_run_numbers)
+        rendered_string += '</span>'
+        return mark_safe(rendered_string)
+    return ""
+
+
+@register.filter
+def join_bad_runs(list_of_run_numbers):
+    """
+    takes a list of run numbers and wraps them in <span class="bad-runs">
+    """
+    if list_of_run_numbers:
+        rendered_string = '<span class="bad-runs">'
+        rendered_string += ", ".join(str(x) for x in list_of_run_numbers)
+        rendered_string += '</span>'
+        return mark_safe(rendered_string)
+    return ""

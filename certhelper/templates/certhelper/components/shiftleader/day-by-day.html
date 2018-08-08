@@ -21,7 +21,7 @@
             <li>
                 Total number of BAD runs = <strong>{{ day.bad.total_number }}</strong> (<strong>{{ day.bad.integrated_luminosity }} pb⁻¹</strong>) (see next slide for details)
                 <ul>
-                    <li>Number of changed flags from Express to Prompt=<strong>{{ day.flag_changed.total_number }}</strong>{% if day.flag_changed.total_number > 0 %} ({% for run_number in day.flag_changed.run_numbers %}{{ run_number }}{% endfor %}){% endif %}</li>
+                    <li>Number of changed flags from Express to Prompt=<strong>{{ day.flag_changed.total_number }}</strong>{% if day.flag_changed.total_number > 0 %} ({{ day.flag_changed.good.run_numbers|join_good_runs }} {{ day.flag_changed.bad.run_numbers|join_bad_runs }}){% endif %}</li>
                 </ul>
             </li>
             <li>
