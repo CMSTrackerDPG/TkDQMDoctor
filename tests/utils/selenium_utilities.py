@@ -32,7 +32,6 @@ def add_some_reference_runs(browser):
     browser.find_element_by_id("id_dataset").send_keys("/some/dataset")
     browser.find_element_by_name("_save").click()
     browser.find_element_by_link_text("ADD REFERENCE RUN").click()
-    # browser.find_element_by_css_selector("a.addlink").click()
 
     browser.find_element_by_id("id_reference_run").clear()
     browser.find_element_by_id("id_reference_run").send_keys("2")
@@ -70,34 +69,6 @@ def check_all_checklists(browser, wait):
     check_checklist(browser, wait, "pixel")
     check_checklist(browser, wait, "sistrip")
     check_checklist(browser, wait, "tracking")
-    """
-    browser.find_element_by_id("id_checklist_general").click()
-    browser.find_element_by_id("id_btn_checkall_general").click()
-    browser.find_element_by_id("id_submit_checklist_general").click()
-    wait.until(EC.invisibility_of_element_located((By.ID, "modal-general-id")))
-    # time.sleep(0.2)
-    # wait.until(EC.element_to_be_clickable((By.ID, 'id_checklist_trackermap')))
-    # browser.find_element_by_id("id_checklist_trackermap").click()
-    click_checklist_checkbox(browser, 'id_checklist_trackermap')
-    browser.find_element_by_id("id_btn_checkall_trackermap").click()
-    browser.find_element_by_id("id_submit_checklist_trackermap").click()
-    # wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_pixel")))
-    # browser.find_element_by_id("id_checklist_pixel").click()
-    click_checklist_checkbox(browser, 'id_checklist_pixel')
-    browser.find_element_by_id("id_btn_checkall_pixel").click()
-    browser.find_element_by_id("id_submit_checklist_pixel").click()
-    # wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_sistrip")))
-    # browser.find_element_by_id("id_checklist_sistrip").click()
-    click_checklist_checkbox(browser, 'id_checklist_sistrip')
-    browser.find_element_by_id("id_btn_checkall_sistrip").click()
-    browser.find_element_by_id("id_submit_checklist_sistrip").click()
-    # wait.until(EC.element_to_be_clickable((By.ID, "id_checklist_tracking")))
-    # browser.find_element_by_id("id_checklist_tracking").click()
-    click_checklist_checkbox(browser, 'id_checklist_tracking')
-    browser.find_element_by_id("id_btn_checkall_tracking").click()
-    browser.find_element_by_id("id_submit_checklist_tracking").click()
-    time.sleep(0.5)
-    """
 
 
 def fill_and_submit_add_run_form(browser, wait):
@@ -186,7 +157,7 @@ def wait_for(browser, find_function, MAX_WAIT=30):
             time.sleep(0.1)
 
 
-def wait_for_by_tag_name(browser, text, tag_name, MAX_WAIT=30):
+def wait_for_text_in_tag(browser, text, tag_name, MAX_WAIT=30):
     start_time = time.time()
     while True:
         try:
@@ -200,7 +171,7 @@ def wait_for_by_tag_name(browser, text, tag_name, MAX_WAIT=30):
 
 
 def wait_for_cell(browser, text, MAX_WAIT=30):
-    wait_for_by_tag_name(browser, text, "td", MAX_WAIT)
+    wait_for_text_in_tag(browser, text, "td", MAX_WAIT)
 
 
 def click_checklist_checkbox(browser, checklist_id, MAX_WAIT=30):
@@ -214,7 +185,8 @@ def click_checklist_checkbox(browser, checklist_id, MAX_WAIT=30):
             time.sleep(0.1)
 
 
-def set_shift_leader_filter_date(browser, year_0, month_0, day_0, year_1, month_1, day_1):
+def set_shift_leader_filter_date(browser, year_0, month_0, day_0, year_1, month_1,
+                                 day_1):
     """
     Selects the filter date in the Shift Leader Page to the given parameters
     and submits the form
