@@ -321,7 +321,7 @@ class TestNewShiftLeaderReport:
         assert day.bad().cosmics().express().integrated_luminosity() == 0
         assert day.bad().cosmics().prompt().integrated_luminosity() == 0
 
-    def test_list_of_run_numbers(self, ):
+    def test_list_of_run_numbers(self):
         create_runs(5, 1, "Collisions", "Express", good=True)
         create_runs(4, 6, "Collisions", "Express", good=False)
         create_runs(3, 10, "Collisions", "Prompt", good=True)
@@ -350,3 +350,24 @@ class TestNewShiftLeaderReport:
         assert [15, 16, 17] == report.collisions().prompt().bad().run_numbers()
         assert [26, 27, 28, 29] == report.cosmics().express().bad().run_numbers()
         assert [35, 36, 37] == report.cosmics().prompt().bad().run_numbers()
+
+    def test_list_of_run_certified(self):
+        create_runs(2, 1, "Collisions", "Express", good=True, date="2018-05-14")
+        create_runs(2, 6, "Collisions", "Express", good=False, date="2018-05-14")
+        create_runs(2, 10, "Collisions", "Prompt", good=True, date="2018-05-15")
+        create_runs(2, 15, "Collisions", "Prompt", good=False, date="2018-05-15")
+        create_runs(2, 21, "Cosmics", "Express", good=True, date="2018-05-14")
+        create_runs(2, 26, "Cosmics", "Express", good=False, date="2018-05-16")
+        create_runs(2, 30, "Cosmics", "Prompt", good=True, date="2018-05-14")
+        create_runs(2, 35, "Cosmics", "Prompt", good=False, date="2018-05-14")
+
+        runs = RunInfo.objects.all().order_by("run_number")
+        report = NewShiftLeaderReport(runs)
+
+        days = report.day_by_day()
+
+        assert [1, 2, 6, 7] == days[0].express().collisions().run_numbers()
+        assert [21, 22] == days[0].express().cosmics().run_numbers()
+        assert [26, 27] == days[2].express().cosmics().run_numbers()
+        assert [10, 11, 15, 16] == days[1].prompt().collisions().run_numbers()
+        assert [30, 31, 35, 36] == days[0].prompt().cosmics().run_numbers()

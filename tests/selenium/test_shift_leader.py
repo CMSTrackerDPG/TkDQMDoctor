@@ -1,11 +1,10 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.select import Select
 
 from tests.credentials import SHIFTLEADER_USERNAME, PASSWORD
 from tests.utils.selenium_utilities import try_to_login_user, \
-    add_some_reference_runs, wait_for_cell, wait_for_by_tag_name, set_shift_leader_filter_date
-from tests.utils.utilities import create_recent_run
+    add_some_reference_runs, wait_for_cell, set_shift_leader_filter_date
+from tests.utils.utilities import create_recent_run, create_runs
 
 
 class TestShiftLeader:
@@ -136,5 +135,40 @@ class TestShiftLeader:
         assert "Number of changed flags from Express to Prompt=0" in day_report
 
     def test_shift_leader_report_list_of_run_numbers(self, live_server, firefox,
-                                                     shiftleader, wait, runs_for_slr):
-        pass
+                                                     shiftleader, wait):
+        create_runs(2, 1, "Collisions", "Express", good=True, date="2018-05-14")
+        create_runs(2, 6, "Collisions", "Express", good=False, date="2018-05-14")
+        create_runs(2, 10, "Collisions", "Prompt", good=True, date="2018-05-15")
+        create_runs(2, 15, "Collisions", "Prompt", good=False, date="2018-05-15")
+        create_runs(2, 21, "Cosmics", "Express", good=True, date="2018-05-14")
+        create_runs(2, 26, "Cosmics", "Express", good=False, date="2018-05-16")
+        create_runs(2, 30, "Cosmics", "Prompt", good=True, date="2018-05-14")
+        create_runs(2, 35, "Cosmics", "Prompt", good=False, date="2018-05-14")
+
+        firefox.get('{}'.format(live_server.url))
+        try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        firefox.find_element_by_link_text("Shift Leader").click()
+
+        set_shift_leader_filter_date(firefox, "2018", "May", "14", "2018", "May", "20")
+
+        wait.until(EC.presence_of_element_located((By.ID, "slr-weekly-cert")))
+
+        firefox.find_element_by_link_text("List of runs").click()
+        firefox.find_element_by_link_text("All days").click()
+
+        wait.until(EC.presence_of_element_located((By.ID, "slr-list-of-runs-all")))
+
+        list_of_runs_div = firefox.find_element_by_id("slr-list-of-runs-all").text
+
+        assert "List of runs certified StreamExpress" in list_of_runs_div
+        assert "Collisions" in list_of_runs_div
+        assert "Monday: 1, 2, 6, 7" in list_of_runs_div
+        assert "Cosmics" in list_of_runs_div
+        assert "Monday: 21, 22" in list_of_runs_div
+        assert "Wednesday: 26, 27" in list_of_runs_div
+        assert "List of runs certified Prompt" in list_of_runs_div
+        assert "Collisions" in list_of_runs_div
+        assert "Tuesday: 10, 11, 15, 16" in list_of_runs_div
+        assert "Cosmics" in list_of_runs_div
+        assert "Monday: 30, 31, 35, 36" in list_of_runs_div
+

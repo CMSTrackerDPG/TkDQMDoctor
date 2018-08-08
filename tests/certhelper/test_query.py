@@ -248,7 +248,6 @@ class TestRunInfoQuerySet:
     def test_reference_run_ids(self, runs_with_three_refs):
         refs = RunInfo.objects.all().reference_run_numbers()
         assert 3 == len(refs)
-        print(refs)
         assert 1 == refs[0]
         assert 2 == refs[1]
         assert 3 == refs[2]
