@@ -82,9 +82,10 @@ function set_date_range_filter_to_last_week(){
     about_a_week_ago.setDate(today.getDate() - 7);
 
     let monday = new Date(about_a_week_ago);
-    let sunday = new Date(about_a_week_ago);
 
     monday.setDate(about_a_week_ago.getDate() - about_a_week_ago.getDay() + 1);
+
+    let sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
 
     set_date_range_filter_to(monday, sunday);
