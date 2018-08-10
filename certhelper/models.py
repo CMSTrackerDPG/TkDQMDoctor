@@ -24,7 +24,9 @@ from django.utils import timezone
 
 from certhelper.manager import SoftDeletionManager, RunInfoManager
 from certhelper.utilities.logger import get_configured_logger
-from certhelper.utilities.utilities import get_full_name
+from certhelper.utilities.utilities import get_full_name, \
+    get_highest_privilege_from_egroup_list, extract_egroups, \
+    get_or_create_shift_leader_group
 
 logger = get_configured_logger(loggername=__name__, filename="models.log")
 
@@ -99,75 +101,31 @@ class UserProfile(models.Model):
 
     user_privilege = models.IntegerField(choices=USER_PRIVILEGE_CHOICES, default=GUEST)
 
-    def upgrade_user_privilege(self):
-        """
-        Does upgrade a user privilege if the user is inside a higher privilege e-group
-        Does NOT downgrade a status, i.e. once a shift leader always a shift leader
-        """
-        try:
-            egroups = self.extra_data.get("groups")
-            logger.debug("extra_data = {}".format(self.extra_data))
-            logger.debug("egroups = {}".format(self.extra_data.get("groups")))
-            assert egroups is not None
+    def update_privilege(self):
+        egroups = extract_egroups(self.extra_data)
 
-            for user_privilege, necessary_group_list in self.criteria_groups_dict.items():
-                logger.debug("user_privilege = {}, necessary_group_list = {}".format(
-                    user_privilege, necessary_group_list))
-                if any(egroup in necessary_group_list for egroup in egroups):
-                    logger.debug(
-                        "Criteria matched for user_privilege {}, self.user_privilege={}".format(
-                            user_privilege, self.user_privilege))
-                    logger.debug("Checked group list for privilege {} is {}".format(
-                        user_privilege, necessary_group_list))
-                    if self.user_privilege < user_privilege:
-                        self.user_privilege = user_privilege
-                        logger.info("User {} has been granted {} status".format(
-                            self.user, self.get_user_privilege_display()))
-                        if self.user_privilege == self.ADMIN:
-                            self.user.is_superuser = True
-                            logger.info("User {} is now superuser".format(self.user))
-                        if self.user_privilege >= self.SHIFTLEADER:
-                            self.user.is_staff = True
-                            try:
-                                g = Group.objects.get(name=self.SHIFT_LEADER_GROUP_NAME)
-                                self.user.groups.add(g)
-                                logger.info("User {} has been added to Group {}".format(
-                                    self.user, self.SHIFT_LEADER_GROUP_NAME))
-                            except Group.DoesNotExist:
-                                logger.error("Group {} does not exist".format(
-                                    self.SHIFT_LEADER_GROUP_NAME))
-                                user_permissions = Permission.objects.filter(
-                                    content_type__model="user")
-                                certhelper_permissions = Permission.objects.filter(
-                                    content_type__app_label="certhelper")
-                                categories_permissions = Permission.objects.filter(
-                                    content_type__app_label="categories")
-                                g = Group.objects.create(
-                                    name=self.SHIFT_LEADER_GROUP_NAME)
-                                for permission in user_permissions:
-                                    g.permissions.add(permission)
-                                for permission in certhelper_permissions:
-                                    g.permissions.add(permission)
-                                for permission in categories_permissions:
-                                    g.permissions.add(permission)
-                                g.save()
-                                logger.error("Group {} has been created".format(
-                                    self.SHIFT_LEADER_GROUP_NAME))
-                                self.user.groups.add(g)
-                                logger.info("User {} has been added to Group {}".format(
-                                    self.user, self.SHIFT_LEADER_GROUP_NAME))
+        privilege = get_highest_privilege_from_egroup_list(
+            egroups, self.criteria_groups_dict)
 
-                            logger.info("User {} is now staff".format(self.user))
-                    else:
-                        logger.debug(
-                            "Privilege not updated because it is already higher user_privilege={}, "
-                            "self.user_privilege={}".format(user_privilege,
-                                                            self.user_privilege))
-        except AssertionError:
-            logger.error("No e-groups found")
-        except Exception as e:
-            logger.error("Failed to upgrade user privilege")
-            logger.exception(e)
+        if self.user_privilege < privilege:
+            self.user_privilege = privilege
+            logger.info("User {} has been granted {} status".format(
+                self.user, self.get_user_privilege_display())
+            )
+
+            if self.user_privilege >= self.SHIFTLEADER:
+                self.user.is_staff = True
+                logger.info("User {} is now staff".format(self.user))
+                shift_leader_group = get_or_create_shift_leader_group(
+                    self.SHIFT_LEADER_GROUP_NAME)
+                self.user.groups.add(shift_leader_group)
+                logger.info("User {} has been added "
+                            "to the shift leader group".format(self.user))
+
+            if self.user_privilege >= self.ADMIN:
+                self.user.is_superuser = True
+                logger.info("User {} is now superuser".format(self.user))
+        return self
 
     @property
     def is_guest(self):

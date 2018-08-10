@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
 
 from certhelper.utilities.logger import get_configured_logger
@@ -153,6 +154,49 @@ def uniquely_sorted(list_of_elements):
     new_list = list(set(extract_numbers_from_list(list_of_elements)))
     new_list.sort()
     return new_list
+
+
+def extract_egroups(json_data):
+    """
+    Returns the E-Groups in a JSON Dictionary
+    """
+    return json_data.get("groups")
+
+
+def get_highest_privilege_from_egroup_list(egroups, criteria_dict):
+    """
+    Compares every egroup in egroups with the criteria_dict
+    and returns the highest criteria found
+    """
+    highest_privilege = 0
+    for privilege, criteria_list in criteria_dict.items():
+        if any(egroup in criteria_list for egroup in egroups):
+            if privilege > highest_privilege:
+                highest_privilege = privilege
+    return highest_privilege
+
+
+def get_or_create_shift_leader_group(group_name):
+    try:
+        g = Group.objects.get(name=group_name)
+    except Group.DoesNotExist:
+        user_permissions = Permission.objects.filter(
+            content_type__model="user")
+        certhelper_permissions = Permission.objects.filter(
+            content_type__app_label="certhelper")
+        categories_permissions = Permission.objects.filter(
+            content_type__app_label="categories")
+        g = Group.objects.create(
+            name=group_name)
+        for permission in user_permissions:
+            g.permissions.add(permission)
+        for permission in certhelper_permissions:
+            g.permissions.add(permission)
+        for permission in categories_permissions:
+            g.permissions.add(permission)
+        g.save()
+    return g
+
 
 def create_userprofile(user):
     from certhelper.models import UserProfile

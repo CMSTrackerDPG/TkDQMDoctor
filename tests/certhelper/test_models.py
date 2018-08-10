@@ -13,22 +13,22 @@ class TestUserProfile:
         user = mixer.blend(User)
         assert user.userprofile
 
-    def test_upgrade_user_privilege_if_changed(self):
+    def test_update_privilege_if_changed(self):
         user = mixer.blend(User)
         userprofile = user.userprofile
         assert userprofile.user_privilege == 0
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
         assert userprofile.user_privilege == 0
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 10
         userprofile.extra_data.get("groups").append("cms-tracker-offline-shiftleader")
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 20
         userprofile.extra_data.get("groups").append("tkdqmdoctor-experts")
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 30
         userprofile.extra_data.get("groups").append("tkdqmdoctor-admins")
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 50
 
     def test_upgrade_to_shiftleader(self):
@@ -36,7 +36,7 @@ class TestUserProfile:
         userprofile = user.userprofile
         assert userprofile.user_privilege == 0
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 20
 
     def test_downgrade_not_possible(self):
@@ -44,7 +44,7 @@ class TestUserProfile:
         userprofile = user.userprofile
 
         userprofile.extra_data = {"groups": ["tkdqmdoctor-admins"]}
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 50
 
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
@@ -53,7 +53,7 @@ class TestUserProfile:
         user = mixer.blend(User)
         userprofile = user.userprofile
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 20
 
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
@@ -74,7 +74,7 @@ class TestUserProfile:
         assert user.is_superuser is False
 
         userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 10
         assert not userprofile.is_guest
         assert userprofile.is_shifter
@@ -87,7 +87,7 @@ class TestUserProfile:
         assert user.is_superuser is False
 
         userprofile.extra_data.get("groups").append("cms-tracker-offline-shiftleader")
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 20
         assert not userprofile.is_guest
         assert not userprofile.is_shifter
@@ -100,7 +100,7 @@ class TestUserProfile:
         assert user.is_superuser is False
 
         userprofile.extra_data.get("groups").append("tkdqmdoctor-experts")
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 30
         assert not userprofile.is_guest
         assert not userprofile.is_shifter
@@ -113,7 +113,7 @@ class TestUserProfile:
         assert user.is_superuser is False
 
         userprofile.extra_data.get("groups").append("tkdqmdoctor-admins")
-        userprofile.upgrade_user_privilege()
+        userprofile.update_privilege()
         assert userprofile.user_privilege == 50
         assert not userprofile.is_guest
         assert not userprofile.is_shifter
