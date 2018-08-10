@@ -58,16 +58,21 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             output_field=CharField())
         )
 
-    def filter_flag_changed(self):
+    def filter_flag_changed(self, until=None):
         """
         Filters the queryset to all runs where the flag has changed
         """
         from certhelper.models import RunInfo
         # Group by unique run_number, status pairs
         # if a run_number appears more than once, it means that the flag changed
+
+        runs = RunInfo.objects.all()
+        if until:
+            runs = runs.filter(date__lte=until)
+
         run_number_list = [run["run_number"]
                            for run
-                           in RunInfo.objects.all() \
+                           in runs \
                                .annotate_status() \
                                .order_by("run_number") \
                                .values("run_number", "status") \
