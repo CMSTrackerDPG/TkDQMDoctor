@@ -1,5 +1,6 @@
 import datetime
 
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
 
@@ -209,3 +210,24 @@ def create_userprofile(user):
         logger.info("New UserProfile with id {} for User {} has been created"
                     .format(userprofile.id, user))
     return userprofile
+
+
+def update_userprofile(user):
+    from certhelper.models import UserProfile
+    if user.pk:  # Only already existing users
+        try:
+            socialaccount = SocialAccount.objects.get(user=user)
+            try:
+                userprofile = user.userprofile
+            except UserProfile.DoesNotExist:
+                create_userprofile(user)
+
+            if userprofile.extra_data != socialaccount.extra_data:
+                userprofile.extra_data = socialaccount.extra_data
+                userprofile = userprofile.update_privilege()
+                user.userprofile = userprofile
+                logger.info("Extra data have been updated for {}".format(user))
+        except SocialAccount.DoesNotExist:
+            logger.warning("No SocialAccount exists for User {}".format(user))
+    else:
+        logger.info("Cannot update UserProfile for non existing User {}".format(user))

@@ -1,4 +1,5 @@
 import pytest
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from mixer.backend.django import mixer
@@ -124,6 +125,166 @@ class TestUserProfile:
         assert userprofile.has_shift_leader_rights
         assert user.is_staff is True
         assert user.is_superuser is True
+
+    def test_new_user_has_no_rights(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        assert user.is_staff is False
+        assert user.is_superuser is False
+
+        assert userprofile.is_shiftleader is False
+        assert userprofile.is_admin is False
+        assert userprofile.is_expert is False
+        assert userprofile.is_shifter is False
+        assert userprofile.is_guest
+
+    def test_update_privilege(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        assert user.userprofile.is_guest
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
+        userprofile.update_privilege()
+
+        assert not user.userprofile.is_guest
+        assert user.userprofile.is_shiftleader
+
+        old_user = User.objects.get()
+        old_userprofile = old_user.userprofile
+        assert old_user.userprofile.is_guest
+        assert not old_user.userprofile.is_shiftleader
+
+        # UserProfile should not be saved unless explicitly wished
+        assert old_user.is_staff is False
+        assert old_user.is_superuser is False
+        assert old_userprofile.is_shiftleader is False
+        assert old_userprofile.is_admin is False
+        assert old_userprofile.is_expert is False
+        assert old_userprofile.is_shifter is False
+        assert old_userprofile.is_guest is True
+
+        user.save()
+        user = User.objects.get()
+        assert not user.userprofile.is_guest
+        assert user.userprofile.is_shiftleader
+
+        userprofile = user.userprofile
+        assert user.is_staff is True
+        assert user.is_superuser is False
+
+        assert userprofile.is_shiftleader is True
+        assert userprofile.is_admin is False
+        assert userprofile.is_expert is False
+        assert userprofile.is_shifter is False
+        assert userprofile.is_guest is False
+
+    def test_update_privilege_to_shifter(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
+        userprofile.update_privilege()
+        user.save()
+
+        user = User.objects.get()
+        userprofile = user.userprofile
+        assert user.is_staff is False
+        assert user.is_superuser is False
+
+        assert userprofile.is_shiftleader is False
+        assert userprofile.is_admin is False
+        assert userprofile.is_expert is False
+        assert userprofile.is_shifter is True
+        assert userprofile.is_guest is False
+
+    def test_update_privilege_to_shift_leader(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
+        userprofile.update_privilege()
+        user.save()
+
+        user = User.objects.get()
+        userprofile = user.userprofile
+        assert user.is_staff is True
+        assert user.is_superuser is False
+
+        assert userprofile.is_shiftleader is True
+        assert userprofile.is_admin is False
+        assert userprofile.is_expert is False
+        assert userprofile.is_shifter is False
+        assert userprofile.is_guest is False
+
+    def test_update_privilege_to_expert(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-experts"]}
+        userprofile.update_privilege()
+        user.save()
+
+        user = User.objects.get()
+        userprofile = user.userprofile
+        assert user.is_staff is True
+        assert user.is_superuser is False
+
+        assert userprofile.is_shiftleader is False
+        assert userprofile.is_admin is False
+        assert userprofile.is_expert is True
+        assert userprofile.is_shifter is False
+        assert userprofile.is_guest is False
+
+    def test_update_privilege_to_admin(self):
+        user = mixer.blend(User)
+        userprofile = user.userprofile
+
+        userprofile.extra_data = {"groups": ["tkdqmdoctor-admins"]}
+        userprofile.update_privilege()
+        user.save()
+
+        user = User.objects.get()
+        userprofile = user.userprofile
+        assert user.is_staff is True
+        assert user.is_superuser is True
+
+        assert userprofile.is_shiftleader is False
+        assert userprofile.is_admin is True
+        assert userprofile.is_expert is False
+        assert userprofile.is_shifter is False
+        assert userprofile.is_guest is False
+
+    def test_update_privilege_on_save(self):
+        user = mixer.blend(User)
+        assert not user.is_staff
+        assert not user.is_superuser
+        assert user.userprofile.is_guest
+
+        extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
+        account = mixer.blend(SocialAccount, user=user, extra_data=extra_data)
+        user.save()
+        assert not user.userprofile.is_guest
+        assert user.userprofile.is_shiftleader
+        assert user.is_staff
+        assert not user.is_superuser
+        account.extra_data = {"groups": ["tkdqmdoctor-experts"]}
+        account.save()
+
+        user.save()
+        assert not user.userprofile.is_guest
+        assert not user.userprofile.is_shiftleader
+        assert user.userprofile.is_expert
+        assert user.is_staff
+        assert not user.is_superuser
+
+        updated_user = User.objects.get()
+        assert not updated_user.userprofile.is_guest
+        assert not updated_user.userprofile.is_shiftleader
+        assert updated_user.userprofile.is_expert
+        assert user.is_staff
+        assert not user.is_superuser
 
 
 class TestRuninfo:

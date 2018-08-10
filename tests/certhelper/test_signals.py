@@ -15,33 +15,6 @@ def test_create_user_profile():
         UserProfile.objects.create(user=user)
 
 
-def test_update_user_privilege_by_e_groups():
-    update_newly_added_user_privilege_by_e_groups(None, None)
-    update_user_privilege_by_e_groups(request=None, user=None)
-
-    assert len(UserProfile.objects.all()) == 0
-    assert len(User.objects.all()) == 0
-
-    class Object(object):
-        """Dummy class to simulate a SocialLogin"""
-        pass
-
-    socialaccount = mixer.blend(SocialAccount)
-    sociallogin = Object()
-    sociallogin.account = socialaccount
-    sociallogin.user = socialaccount.user
-    socialaccount.user.save()
-
-    update_newly_added_user_privilege_by_e_groups(None, sociallogin)
-    assert len(UserProfile.objects.all()) == 1
-    assert len(User.objects.all()) == 1
-
-    update_user_privilege_by_e_groups(None, socialaccount.user)
-    sociallogin.user.save()
-    assert len(UserProfile.objects.all()) == 1
-    assert len(User.objects.all()) == 1
-
-
 def test_logs():
     """
     Just run them once, nothing really to test here
@@ -54,3 +27,32 @@ def test_logs():
     log_social_account_added(None, None)
     log_social_account_updated(None, None)
     log_social_account_removed(None, None)
+
+
+def test_userprofile_automatically_created():
+    user = mixer.blend(User)
+    assert user.userprofile
+
+
+def test_update_users_userprofile_on_save():
+    user = mixer.blend(User)
+    assert not user.is_staff
+    assert not user.is_superuser
+    assert user.userprofile.is_guest
+    user.save()
+    assert user.userprofile.is_guest
+    extra_data = {"groups": ["tkdqmdoctor-admins"]}
+    mixer.blend(SocialAccount, user=user, extra_data=extra_data)
+    assert user.userprofile.is_guest
+    assert not user.is_staff
+    assert not user.is_superuser
+
+    user.save()
+    assert not user.userprofile.is_guest
+    assert user.is_staff
+    assert user.is_superuser
+
+    user = User.objects.get()
+    assert not user.userprofile.is_guest
+    assert user.is_staff
+    assert user.is_superuser

@@ -29,7 +29,7 @@ def shifter(django_user_model):
     user = django_user_model.objects.create(username=SHIFTER1_USERNAME)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
-    user.userprofile.upgrade_user_privilege()
+    user.userprofile.update_privilege()
     user.save()
     return user
 
@@ -39,7 +39,7 @@ def second_shifter(django_user_model):
     user = django_user_model.objects.create(username=SHIFTER2_USERNAME)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-shifters"]}
-    user.userprofile.upgrade_user_privilege()
+    user.userprofile.update_privilege()
     user.save()
     return user
 
@@ -49,7 +49,7 @@ def shiftleader(django_user_model):
     user = django_user_model.objects.create(username=SHIFTLEADER_USERNAME)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
-    user.userprofile.upgrade_user_privilege()
+    user.userprofile.update_privilege()
     user.save()
     return user
 
@@ -59,7 +59,7 @@ def expert(django_user_model):
     user = django_user_model.objects.create(username=EXPERT_USERNAME)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-experts"]}
-    user.userprofile.upgrade_user_privilege()
+    user.userprofile.update_privilege()
     user.save()
     return user
 
@@ -69,7 +69,7 @@ def admin(django_user_model):
     user = django_user_model.objects.create(username=ADMIN_USERNAME)
     user.set_password(PASSWORD)
     user.userprofile.extra_data = {"groups": ["tkdqmdoctor-admins"]}
-    user.userprofile.upgrade_user_privilege()
+    user.userprofile.update_privilege()
     user.save()
     return user
 
