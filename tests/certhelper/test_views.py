@@ -121,14 +121,12 @@ class TestUpdateRun:
         run = mixer.blend("certhelper.RunInfo")
         req = RequestFactory().get("/")
         req.user = mixer.blend(User)
-        mixer.blend("certhelper.UserProfile", user=req.user)
         resp = UpdateRun.as_view()(req, pk=run.pk)
         assert resp.status_code == 302, "different user should not have enough rights"
         req.user = run.userid
         resp = UpdateRun.as_view()(req, pk=run.pk)
         assert resp.status_code == 200, "same user should be permitted to edit"
         req.user = mixer.blend(User)
-        mixer.blend("certhelper.UserProfile", user=req.user)
         resp = UpdateRun.as_view()(req, pk=run.pk)
         assert resp.status_code == 302, "should not have enough rights"
         req.user.is_superuser = True

@@ -9,9 +9,6 @@ pytestmark = pytest.mark.django_db
 
 def test_create_user_profile():
     user = mixer.blend(User)
-    with pytest.raises(UserProfile.DoesNotExist, message="Should not create UserProfile per default"):
-        user.userprofile
-    mixer.blend("certhelper.UserProfile", user=user)
     user.userprofile.extra_data = {"hi": "test"}
     assert user.userprofile
     with pytest.raises(IntegrityError, message="Only one UserProfile per User allowed"):

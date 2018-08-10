@@ -2,6 +2,10 @@ import datetime
 
 from django.utils import timezone
 
+from certhelper.utilities.logger import get_configured_logger
+
+logger = get_configured_logger(loggername=__name__, filename="utilities.log")
+
 
 def is_valid_date(date_text):
     try:
@@ -149,3 +153,15 @@ def uniquely_sorted(list_of_elements):
     new_list = list(set(extract_numbers_from_list(list_of_elements)))
     new_list.sort()
     return new_list
+
+def create_userprofile(user):
+    from certhelper.models import UserProfile
+    try:
+        userprofile = UserProfile.objects.get(user=user)
+        logger.info("UserProfile with id {} for User {} already exists"
+                    .format(userprofile.id, user))
+    except UserProfile.DoesNotExist:
+        userprofile = UserProfile.objects.create(user=user)
+        logger.info("New UserProfile with id {} for User {} has been created"
+                    .format(userprofile.id, user))
+    return userprofile

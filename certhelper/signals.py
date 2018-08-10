@@ -9,24 +9,30 @@ from django.dispatch import receiver
 
 from certhelper.models import UserProfile
 from certhelper.utilities.logger import get_configured_logger
+from certhelper.utilities.utilities import create_userprofile
 
 logger = get_configured_logger(loggername=__name__, filename="signals.log")
 
 
-@receiver(post_save, sender=UserProfile)
-def userprofile_post_save(sender, instance, created, **kwargs):
-    if created:
-        logger.info("New UserProfile with id {} for User {} has been created".format(instance.id, instance.user))
-    else:
-        logger.info("UserProfile with id {} for User {} has been saved".format(instance.id, instance.user))
-
-
 @receiver(post_save, sender=User)
-def user_post_save(sender, instance, created, **kwargs):
+def save_or_create_userprofile(sender, instance, created, raw, **kwargs):
+    """
+    Automatically creates a UserProfile when a new User is created and
+    automatically saves the Users UserProfile when the save method is called.
+    """
     if created:
-        logger.info("New User {} with id {} has been created".format(instance, instance.id))
+        if not raw:  # Do not create UserProfile when using manage.py loaddata
+            create_userprofile(instance)
+        logger.info("New User {} has been created".format(instance))
     else:
-        logger.info("User {} with id {} has been saved".format(instance, instance.id))
+        try:
+            instance.userprofile.save()
+            logger.info("UserProfile with id {} for User {} has been saved"
+                        .format(instance.userprofile.id, instance))
+        except UserProfile.DoesNotExist:
+            logger.error("User {} does not have a UserProfile".format(instance))
+            create_userprofile(instance)
+        logger.info("User {} has been saved".format(instance))
 
 
 @receiver(django.contrib.auth.signals.user_logged_in)
