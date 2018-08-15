@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 
 def try_to_login_user(browser, username, password):
     browser.find_element_by_link_text("Login").click()
+    browser.find_element_by_id("id_use_local_btn").click()
     browser.find_element_by_id("id_login").clear()
     browser.find_element_by_id("id_login").send_keys(username)
     browser.find_element_by_id("id_password").clear()

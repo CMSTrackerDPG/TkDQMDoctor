@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load account socialaccount %}
 {% load bootstrap3 %}
+{% load static %}
 
 {% bootstrap_css %}
 {% bootstrap_javascript jquery=1 %}
@@ -47,14 +48,73 @@
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
+
+    div.or {
+        position: relative;
+        font-size: 1.5em;
+        color: #aaa;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+    }
+    hr.or {
+        background-color: #cdcdcd;
+        height: 1px;
+        margin-bottom: 25px;
+        margin-top: 25px;
+    }
+
+    span.or {
+        display: block;
+        position: absolute;
+        left: 50%;
+        top: -0.6em;
+        margin-left: -1.5em;
+        background-color: white;
+        width: 3em;
+        text-align: center;
+    }
+
+    .vcenter {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    #local-login {
+        visibility: hidden;
+    }
+
+    .use-local-account-div{
+        text-align: center;
+    }
 </style>
+
 
 <div class="container">
     <form class="form-signin" method="post">
-        <a type="button" class="btn btn-primary btn-lg btn-block" href="{% provider_login_url "cern" %}">Login with CERN</a>
-        <hr style="width: 100%; color: black; height: 1px; background-color:black;" />
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        <button id="id_login_submit" class="btn btn-lg btn-primary center-block" type="submit">Sign in</button>
+        <a type="button" class="btn btn-primary btn-lg btn-block" href="{% provider_login_url "cern" %}">
+            <div class="row">
+                <div class="col-sm-3"><img src="{% static "certhelper/img/Cern_Logo.svg" %}" alt="Place Holder" height="80" width="80"/></div>
+                <div class="col-sm-9 vcenter"><br/>Login with CERN</div>
+            </div>
+
+        </a>
+        <hr class="or">
+        <!--<hr class="or"style="width: 100%; color: black; height: 1px; background-color:black;"! />-->
+        <div class="use-local-account-div"><button type="button" class="btn btn-link" id="id_use_local_btn">Use local account instead</button></div>
+        <div id="local-login">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button id="id_login_submit" class="btn btn-lg btn-primary center-block" type="submit">Sign in</button>
+        </div>
     </form>
 </div>
+
+<script>
+    $( "#id_use_local_btn" ).click(function() {
+        $( ".use-local-account-div" ).css('visibility', 'hidden');
+        $( "#local-login" ).css('visibility', 'visible');
+    });
+</script>
+
