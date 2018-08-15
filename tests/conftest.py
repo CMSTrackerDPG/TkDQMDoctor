@@ -78,6 +78,7 @@ def admin(django_user_model):
 def firefox():
     """returns a Firefox browser webdriver instance"""
     options = webdriver.FirefoxOptions()
+    options.set_preference('intl.accept_languages', 'en,en_US')
     options.add_argument("--headless")
     firefox_webdriver = webdriver.Firefox(firefox_options=options)
     yield firefox_webdriver
