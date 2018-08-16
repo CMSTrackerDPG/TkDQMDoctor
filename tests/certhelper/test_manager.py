@@ -252,21 +252,39 @@ class TestRunInfoManager:
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
         )
 
-        assert check["good"] == [1, 3, 11]
-        assert check["bad"] == [6]
         assert check["missing"] == [0, 8, 15]
-        assert check["prompt_missing"] == [2, 7, 10, 12, 13]
-        assert check["changed_good"] == [5]
-        assert check["changed_bad"] == [4, 14]
+
+        collisions = check["collisions"]
+        cosmics = check["cosmics"]
+
+        assert collisions["good"] == [1, 3]
+        assert collisions["bad"] == [6]
+        assert collisions["prompt_missing"] == [2, 7]
+        assert collisions["changed_good"] == [5]
+        assert collisions["changed_bad"] == [4]
+
+        assert cosmics["good"] == [11]
+        assert cosmics["bad"] == []
+        assert cosmics["prompt_missing"] == [10, 12, 13]
+        assert cosmics["changed_good"] == []
+        assert cosmics["changed_bad"] == [14]
 
         check = RunInfo.objects.check_if_certified(
             [0, "1", "2", 3, "4", 5, "6", "hase", "7", 8,
              "10", 11, "12", "13", "14", "15", "abc"]
         )
 
-        assert check["good"] == [1, 3, 11]
-        assert check["bad"] == [6]
-        assert check["missing"] == [0, 8, 15]
-        assert check["prompt_missing"] == [2, 7, 10, 12, 13]
-        assert check["changed_good"] == [5]
-        assert check["changed_bad"] == [4, 14]
+        collisions = check["collisions"]
+        cosmics = check["cosmics"]
+
+        assert collisions["good"] == [1, 3]
+        assert collisions["bad"] == [6]
+        assert collisions["prompt_missing"] == [2, 7]
+        assert collisions["changed_good"] == [5]
+        assert collisions["changed_bad"] == [4]
+
+        assert cosmics["good"] == [11]
+        assert cosmics["bad"] == []
+        assert cosmics["prompt_missing"] == [10, 12, 13]
+        assert cosmics["changed_good"] == []
+        assert cosmics["changed_bad"] == [14]

@@ -7,7 +7,8 @@
 }
 
 .prompt-missing-runs {
-    color: orangered;
+    color: purple;
+    text-decoration: underline;
 }
 
 .missing-runs {
