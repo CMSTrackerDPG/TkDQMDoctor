@@ -3,20 +3,23 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from tests.credentials import SHIFTLEADER_USERNAME, PASSWORD
 from tests.utils.selenium_utilities import try_to_login_user, \
-    add_some_reference_runs, wait_for_cell, set_shift_leader_filter_date
+    add_some_reference_runs, set_shift_leader_filter_date
 from tests.utils.utilities import create_recent_run, create_runs
+from tests.utils.wait import wait_for_cell, wait_until
 
 
 class TestShiftLeader:
     def test_can_create_reference_runs(self, live_server, firefox, shiftleader):
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Admin Settings")
         add_some_reference_runs(firefox)
         firefox.find_element_by_partial_link_text("Logout").click()
 
     def test_can_create_checklists(self, live_server, firefox, shiftleader, wait):
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Admin Settings")
         firefox.find_element_by_link_text("Admin Settings").click()
         firefox.find_element_by_css_selector(
             "tr.model-checklist > td > a.addlink").click()
@@ -29,6 +32,7 @@ class TestShiftLeader:
             "First Item Group")
         firefox.find_element_by_name("_save").click()
         firefox.find_element_by_link_text("VIEW SITE").click()
+        wait_until(firefox.find_element_by_link_text, "Add Run")
         firefox.find_element_by_link_text("Add Run").click()
         wait.until(
             EC.presence_of_element_located(
@@ -42,14 +46,18 @@ class TestShiftLeader:
     def test_can_go_to_shift_leader_page(self, live_server, firefox, shiftleader, wait):
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
         firefox.find_element_by_link_text("Shift Leader").click()
+        wait_until(firefox.find_element_by_link_text, "List of Certified Runs")
         assert "Shift Leader View" == firefox.find_element_by_tag_name("h1").text
 
     def test_delete_certification(self, live_server, firefox, shiftleader, wait):
         create_recent_run("123555")
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
         firefox.find_element_by_link_text("Shift Leader").click()
+        wait_until(firefox.find_element_by_link_text, "Deleted Certifications")
         firefox.find_element_by_link_text("Deleted Certifications").click()
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, "delete_forever")))
         deleted_table = firefox.find_element_by_css_selector(
@@ -83,6 +91,7 @@ class TestShiftLeader:
                                            wait):
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
         firefox.find_element_by_link_text("Shift Leader").click()
         wait.until(EC.presence_of_element_located((By.ID, "slr-weekly-cert")))
         weekly_report = firefox.find_element_by_id("slr-weekly-cert").text
@@ -94,6 +103,7 @@ class TestShiftLeader:
                                         wait, runs_for_slr):
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
         firefox.find_element_by_link_text("Shift Leader").click()
 
         set_shift_leader_filter_date(firefox, "2018", "May", "14", "2018", "May", "20")
@@ -117,6 +127,7 @@ class TestShiftLeader:
                                             wait, runs_for_slr):
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
         firefox.find_element_by_link_text("Shift Leader").click()
 
         set_shift_leader_filter_date(firefox, "2018", "May", "14", "2018", "May", "20")
@@ -147,6 +158,7 @@ class TestShiftLeader:
 
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
         firefox.find_element_by_link_text("Shift Leader").click()
 
         set_shift_leader_filter_date(firefox, "2018", "May", "14", "2018", "May", "20")

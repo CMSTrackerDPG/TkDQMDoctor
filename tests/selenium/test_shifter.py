@@ -4,16 +4,16 @@ from selenium.webdriver.support.select import Select
 
 from tests.credentials import *
 from tests.utils.selenium_utilities import try_to_login_user, \
-    check_all_checklists, fill_and_submit_add_run_form, \
-    wait_for_cell
+    check_all_checklists, fill_and_submit_add_run_form
+from tests.utils.wait import wait_until, wait_for_cell
 
 
 class TestShifter:
     def test_can_create_type(self, firefox, live_server, shifter, wait):
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
-        firefox.find_element_by_link_text("Add Run").click()
-        firefox.find_element_by_id("id_add_type").click()
+        wait_until(firefox.find_element_by_link_text, "Add Run").click()
+        wait_until(firefox.find_element_by_id, "id_add_type").click()
         Select(firefox.find_element_by_id("id_reco")).select_by_visible_text("Express")
         Select(firefox.find_element_by_id("id_runtype")).select_by_visible_text(
             "Cosmics")
@@ -38,7 +38,7 @@ class TestShifter:
                                   wait):
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
-        firefox.find_element_by_link_text("Add Run").click()
+        wait_until(firefox.find_element_by_link_text, "Add Run").click()
         check_all_checklists(firefox, wait)
 
     def test_create_new_certification(
@@ -46,7 +46,7 @@ class TestShifter:
             some_checklists, wait):
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
-        firefox.find_element_by_link_text("Add Run").click()
+        wait_until(firefox.find_element_by_link_text, "Add Run").click()
         check_all_checklists(firefox, wait)
         fill_and_submit_add_run_form(firefox, wait)
 
@@ -57,7 +57,7 @@ class TestShifter:
             some_checklists, wait):
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
-        firefox.find_element_by_link_text("Add Run").click()
+        wait_until(firefox.find_element_by_link_text, "Add Run").click()
         fill_and_submit_add_run_form(firefox, wait)
 
         headline = firefox.find_element_by_tag_name("h1").text
@@ -71,6 +71,7 @@ class TestShifter:
             some_checklists, wait):
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Add Run")
         firefox.find_element_by_link_text("Add Run").click()
         check_all_checklists(firefox, wait)
         fill_and_submit_add_run_form(firefox, wait)
