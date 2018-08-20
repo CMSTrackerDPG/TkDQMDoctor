@@ -373,6 +373,20 @@ def some_checklists():
         for i in range(random.randint(0, 15)):
             mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup)
 
+@pytest.fixture
+def shiftleader_checklist():
+    checklist = mixer.blend("certhelper.Checklist", identifier="shiftleader")
+
+    mixer.blend("certhelper.ChecklistItemGroup", checklist=checklist)
+
+    for checklistgroup in ChecklistItemGroup.objects.all():
+        for i in range(random.randint(0, 15)):
+            mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup)
+
+    mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup,
+                text="Make sure to do this and that.")
+
+
 
 @pytest.fixture
 def runs_for_slr():

@@ -184,3 +184,27 @@ class TestShiftLeader:
         assert "Cosmics" in list_of_runs_div
         assert "Monday: 30, 31, 35, 36" in list_of_runs_div
 
+    def test_shift_leader_checklist(self, live_server, firefox, shiftleader, wait,
+                                    shiftleader_checklist):
+        firefox.get('{}'.format(live_server.url))
+        try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
+        firefox.find_element_by_link_text("Shift Leader").click()
+        wait.until(EC.presence_of_element_located((By.ID, "slr-checklist")))
+        firefox.find_element_by_link_text("Checklist").click()
+
+        checklist_text = wait_until(firefox.find_element_by_id, "slr-checklist").text
+        assert "Make sure to do this and that." in checklist_text
+
+    def test_shift_leader_no_checklist(self, live_server, firefox, shiftleader, wait):
+        firefox.get('{}'.format(live_server.url))
+        try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Shift Leader")
+        firefox.find_element_by_link_text("Shift Leader").click()
+        wait.until(EC.presence_of_element_located((By.ID, "slr-checklist")))
+        firefox.find_element_by_link_text("Checklist").click()
+
+        checklist_text = wait_until(firefox.find_element_by_id, "slr-checklist").text
+        print(checklist_text)
+        assert "Make sure to do this and that." not in checklist_text
+        assert "No shift leader checklist found." in checklist_text

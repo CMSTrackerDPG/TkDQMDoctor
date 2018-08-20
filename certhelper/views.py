@@ -351,6 +351,12 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
         context['slreport'] = NewShiftLeaderReport(self.filterset.qs)
         context['deleted_runs'] = DeletedRunInfoTable(
             RunInfo.all_objects.dead().order_by('-run_number'))
+        try:
+            context['slchecklist'] = Checklist.objects.get(identifier='shiftleader')
+        except Checklist.DoesNotExist:
+            # shift leader checklist has not been created yet.
+            pass
+
         return context
 
 
