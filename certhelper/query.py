@@ -46,7 +46,7 @@ class SoftDeletionQuerySet(QuerySet):
 
 class RunInfoQuerySet(SoftDeletionQuerySet):
     def annotate_status(self):
-        good_criteria = ['Good', 'Lowstat']
+        good_criteria = ('Good', 'Lowstat')
 
         return self.annotate(status=Case(
             When(
@@ -70,6 +70,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         if until:
             runs = runs.filter(date__lte=until)
 
+
+
         run_number_list = [run["run_number"]
                            for run
                            in runs \
@@ -86,7 +88,7 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         return self.filter(run_number__in=changed_flag_runs)
 
     def good(self):
-        good_criteria = ['Good', 'Lowstat']
+        good_criteria = ('Good', 'Lowstat')
 
         return self.filter(sistrip__in=good_criteria).filter(
             tracking__in=good_criteria).filter(

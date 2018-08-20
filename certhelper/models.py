@@ -318,7 +318,7 @@ class RunInfo(SoftDeletionModel):
     @property
     def is_good(self):
         assert self.type.runtype in ['Cosmics', 'Collisions']
-        good_criteria = ['Good', 'Lowstat']
+        good_criteria = ('Good', 'Lowstat')
         candidates = [self.sistrip, self.tracking]
         if self.type.runtype == 'Collisions':
             candidates.append(self.pixel)
