@@ -43,7 +43,7 @@ class RunInfoManager(SoftDeletionManager):
     def check_if_certified(self, list_of_run_numbers):
         list_of_run_numbers = uniquely_sorted(list_of_run_numbers)
 
-        runs = RunInfoQuerySet(self.model)
+        runs = RunInfoQuerySet(self.model).filter(deleted_at=None)
         runs = runs.filter(run_number__in=list_of_run_numbers).annotate_status()
 
         def do_check(runs):
