@@ -1,15 +1,16 @@
 import time
 
-from selenium.common.exceptions import WebDriverException, \
-    ElementClickInterceptedException, NoSuchElementException
-from selenium.webdriver.support.select import Select
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
+
+from tests.utils.wait import wait_until
 
 
 def try_to_login_user(browser, username, password):
     browser.find_element_by_link_text("Login").click()
-    browser.find_element_by_id("id_use_local_btn").click()
+    wait_until(browser.find_element_by_id, "id_use_local_btn").click()
     browser.find_element_by_id("id_login").clear()
     browser.find_element_by_id("id_login").send_keys(username)
     browser.find_element_by_id("id_password").clear()
@@ -19,7 +20,7 @@ def try_to_login_user(browser, username, password):
 
 def add_some_reference_runs(browser):
     browser.find_element_by_link_text("Admin Settings").click()
-    browser.find_element_by_css_selector(
+    wait_until(browser.find_element_by_css_selector,
         "tr.model-referencerun > td > a.addlink").click()
     browser.find_element_by_id("id_reference_run").clear()
     browser.find_element_by_id("id_reference_run").send_keys("1")
@@ -32,9 +33,9 @@ def add_some_reference_runs(browser):
     browser.find_element_by_id("id_dataset").clear()
     browser.find_element_by_id("id_dataset").send_keys("/some/dataset")
     browser.find_element_by_name("_save").click()
-    browser.find_element_by_link_text("ADD REFERENCE RUN").click()
+    wait_until(browser.find_element_by_link_text, "ADD REFERENCE RUN").click()
 
-    browser.find_element_by_id("id_reference_run").clear()
+    wait_until(browser.find_element_by_id, "id_reference_run").clear()
     browser.find_element_by_id("id_reference_run").send_keys("2")
     Select(browser.find_element_by_id("id_reco")).select_by_visible_text("Prompt")
     Select(browser.find_element_by_id("id_runtype")).select_by_visible_text(
@@ -52,7 +53,7 @@ def add_some_reference_runs(browser):
     browser.find_element_by_id("id_dataset").send_keys("/bla/blubb")
     browser.find_element_by_name("_save").click()
 
-    browser.find_element_by_link_text("VIEW SITE").click()
+    wait_until(browser.find_element_by_link_text, "VIEW SITE").click()
 
 
 def check_checklist(browser, wait, name):
