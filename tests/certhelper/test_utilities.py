@@ -56,13 +56,12 @@ class TestUtilities:
         assert get_full_name(user4) == "abc def4"
 
     def test_is_valid_id(self):
-        assert False is is_valid_id(1, RunInfo)
-        mixer.blend("certhelper.RunInfo")
-        assert True is is_valid_id(1, RunInfo)
-        assert False is is_valid_id(2, RunInfo)
+        run = mixer.blend("certhelper.RunInfo")
+        assert True is is_valid_id(run.pk, RunInfo)
+        assert False is is_valid_id(run.pk + 1, RunInfo)
         assert False is is_valid_id("3", RunInfo)
         assert False is is_valid_id("a", RunInfo)
-        assert True is is_valid_id("1", RunInfo)
+        assert True is is_valid_id(str(run.pk), RunInfo)
 
     def test_get_this_week_filter_parameter(self):
         # TODO better test

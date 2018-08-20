@@ -291,7 +291,6 @@ class TestRuninfo:
     def test_init(self):
         run = mixer.blend('certhelper.RunInfo', run_number=42, number_of_ls=13, int_luminosity=7138641)
         assert run.__class__.__name__ == "RunInfo"
-        assert run.pk == 1
         assert run.run_number == 42
         assert run.number_of_ls == 13
         assert run.int_luminosity == 7138641

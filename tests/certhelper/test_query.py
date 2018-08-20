@@ -1,8 +1,9 @@
 import pytest
+from django.db.models import Count
 from mixer.backend.django import mixer
 
 from certhelper.models import RunInfo, ReferenceRun
-from certhelper.utilities.utilities import to_date, to_weekdayname
+from certhelper.utilities.utilities import to_date, to_weekdayname, uniquely_sorted
 from tests.utils.utilities import create_runs
 
 pytestmark = pytest.mark.django_db
@@ -84,6 +85,31 @@ class TestRunInfoQuerySet:
 
         runs = runs.annotate_status().filter_flag_changed().order_by("run_number")
 
+        assert True
+
+    def test_filter_flag_changed(self, some_certified_runs):
+        runs = RunInfo.objects.all()
+
+        runs = runs \
+               .annotate_status() \
+               .order_by("run_number") \
+               .values("run_number", "status")
+
+        print(runs)
+
+        runs = runs.annotate(times_certified=Count("run_number"))
+
+        print(runs)
+
+
+        run_number_list = [run["run_number"]
+                           for run
+                           in runs]
+
+        #runs_flag_changed = runs.filter_flag_changed()
+
+        #run_numbers = uniquely_sorted(runs_flag_changed.run_numbers())
+        #assert [4, 5, 14] == run_numbers
         assert True
 
     def test_collisions(self, some_certified_runs):
