@@ -191,3 +191,4 @@ develop.env
 production.env
 
 staticfiles
+wsgi/static
