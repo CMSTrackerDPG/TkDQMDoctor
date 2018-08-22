@@ -99,12 +99,12 @@ WSGI_APPLICATION = 'dqmsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': config('DJANGO_DATABASE_ENGINE'),
-        'NAME': config('DJANGO_DATABASE_NAME'),
-        'USER': config('DJANGO_DATABASE_USER'),
-        'PASSWORD': config('DJANGO_DATABASE_PASSWORD'),
-        'HOST': config('DJANGO_DATABASE_HOST'),
-        'PORT': config('DJANGO_DATABASE_PORT', cast=int),
+        'ENGINE': config('DJANGO_DATABASE_ENGINE', default=''),
+        'NAME': config('DJANGO_DATABASE_NAME', default=''),
+        'USER': config('DJANGO_DATABASE_USER', default=''),
+        'PASSWORD': config('DJANGO_DATABASE_PASSWORD', default=''),
+        'HOST': config('DJANGO_DATABASE_HOST', default=''),
+        'PORT': config('DJANGO_DATABASE_PORT', default=''),
     },
 }
 
