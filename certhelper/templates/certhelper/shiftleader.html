@@ -77,6 +77,27 @@
     <script src="{% static "certhelper/components/restore_selected_tabs.js" %}"></script>
     <script src="{% static "certhelper/components/filter.js" %}"></script>
     <script>
+        {% if global_preferences.shiftleader__popup_enabled %}
+            const popupTimeInMilliseconds = 1000 * {{ global_preferences.shiftleader__popup_time_period }};
+            setTimeout(periodicallyPopupShiftleaderNotification,  popupTimeInMilliseconds);
+            /*
+            Pops up a alert box with text set in the global_preferences.shiftleader__popup_text.
+            Will be called periodically (every shiftleader__popup_interval seconds) if the
+            global_preferences.shiftleader__popup_enabled is set to true.
+
+            This should help shift leader to remind them every now and them to do certain
+            tasks (like daily checks).
+
+            Leave this function here, since outsourcing it to a dedicated .js file would
+            cause caching and you are not enable to have access to the global_preference
+            */
+            function periodicallyPopupShiftleaderNotification(){
+                alert("{{ global_preferences.shiftleader__popup_text }}");
+                setTimeout(periodicallyPopupShiftleaderNotification,  popupTimeInMilliseconds);
+            }
+        {% endif %}
+    </script>
+    <script>
         $(document).ready(function () {
             $("#sl-filter-form").submit(function () {
                 var form = $(this);

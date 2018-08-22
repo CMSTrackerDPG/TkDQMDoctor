@@ -1,7 +1,11 @@
+import time
+
+import pytest
+from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from tests.credentials import SHIFTLEADER_USERNAME, PASSWORD
+from tests.credentials import SHIFTLEADER_USERNAME, PASSWORD, ADMIN_USERNAME
 from tests.utils.selenium_utilities import try_to_login_user, \
     add_some_reference_runs, set_shift_leader_filter_date
 from tests.utils.utilities import create_recent_run, create_runs
@@ -205,6 +209,61 @@ class TestShiftLeader:
         firefox.find_element_by_link_text("Checklist").click()
 
         checklist_text = wait_until(firefox.find_element_by_id, "slr-checklist").text
-        print(checklist_text)
         assert "Make sure to do this and that." not in checklist_text
         assert "No shift leader checklist found." in checklist_text
+
+    def test_shift_leader_popup(self, live_server, firefox, admin, wait):
+        firefox.get('{}'.format(live_server.url))
+        try_to_login_user(firefox, ADMIN_USERNAME, PASSWORD)
+        wait_until(firefox.find_element_by_link_text, "Admin Settings").click()
+        wait_until(firefox.find_element_by_link_text, "Global preferences").click()
+        wait_until(firefox.find_element_by_link_text,
+                   "shiftleader__popup_enabled").click()
+        wait_until(firefox.find_element_by_id, "id_raw_value").click()
+        firefox.find_element_by_name("_save").click()
+
+        wait_until(firefox.find_element_by_link_text,
+                   "shiftleader__popup_time_period").click()
+        wait_until(firefox.find_element_by_id, "id_raw_value").clear()
+        wait_until(firefox.find_element_by_id, "id_raw_value").send_keys("1")
+        firefox.find_element_by_name("_save").click()
+
+        wait_until(firefox.find_element_by_link_text, "VIEW SITE").click()
+        wait_until(firefox.find_element_by_link_text, "Shift Leader").click()
+        wait_until(firefox.find_element_by_tag_name, "h1")
+        time.sleep(2)
+        assert firefox.switch_to_alert().text == "Please perform the daily checks"
+        firefox.switch_to_alert().accept()
+        wait_until(firefox.find_element_by_link_text, "List of Certified Runs").click()
+
+        wait_until(firefox.find_element_by_link_text, "Admin Settings").click()
+        wait_until(firefox.find_element_by_link_text, "Global preferences").click()
+        wait_until(firefox.find_element_by_link_text, "shiftleader__popup_text").click()
+        wait_until(firefox.find_element_by_id, "id_raw_value").clear()
+        wait_until(firefox.find_element_by_id, "id_raw_value") \
+            .send_keys("Dont forget to do this and that.")
+        firefox.find_element_by_name("_save").click()
+
+        wait_until(firefox.find_element_by_link_text, "VIEW SITE").click()
+        wait_until(firefox.find_element_by_link_text, "Shift Leader").click()
+        wait_until(firefox.find_element_by_tag_name, "h1")
+        time.sleep(2)
+        assert firefox.switch_to_alert().text == "Dont forget to do this and that."
+        firefox.switch_to_alert().accept()
+        wait_until(firefox.find_element_by_link_text, "List of Certified Runs").click()
+
+        wait_until(firefox.find_element_by_link_text, "Admin Settings").click()
+        wait_until(firefox.find_element_by_link_text, "Global preferences").click()
+        wait_until(firefox.find_element_by_link_text,
+                   "shiftleader__popup_enabled").click()
+        wait_until(firefox.find_element_by_id, "id_raw_value").click()
+        firefox.find_element_by_name("_save").click()
+
+        wait_until(firefox.find_element_by_link_text, "VIEW SITE").click()
+        wait_until(firefox.find_element_by_link_text, "Shift Leader").click()
+        wait_until(firefox.find_element_by_tag_name, "h1")
+        time.sleep(3)
+        with pytest.raises(NoAlertPresentException):
+            firefox.switch_to_alert().accept()
+        wait_until(firefox.find_element_by_link_text, "List of Certified Runs").click()
+        wait_until(firefox.find_element_by_link_text, "Add Run").click()
