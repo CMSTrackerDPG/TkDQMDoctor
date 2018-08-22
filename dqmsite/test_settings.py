@@ -6,3 +6,7 @@ DATABASES = {
         'NAME': ':memory:',
     }
 }
+
+DYNAMIC_PREFERENCES = {
+    'ENABLE_CACHE': False,
+}

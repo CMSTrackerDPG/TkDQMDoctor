@@ -8,3 +8,7 @@ DATABASES = {
         'HOST': 'localhost'
     }
 }
+
+DYNAMIC_PREFERENCES = {
+    'ENABLE_CACHE': False,
+}
