@@ -2,7 +2,7 @@
 
 {% block style %}
     {% load static %}
-    <link rel="stylesheet" href="{% static "certhelper/components/shiftleader.css" %}" type="text/css">
+    <link rel="stylesheet" href="{% static "certhelper/css/shiftleader.css" %}" type="text/css">
 {% endblock style %}
 {% block content %}
     {% load render_table from django_tables2 %}
@@ -73,9 +73,9 @@
 
 {% block script %}
     {% load static %}
-    <script src="{% static "certhelper/components/shiftleader.js" %}"></script>
-    <script src="{% static "certhelper/components/restore_selected_tabs.js" %}"></script>
-    <script src="{% static "certhelper/components/filter.js" %}"></script>
+    <script src="{% static "certhelper/js/shiftleader.js" %}"></script>
+    <script src="{% static "certhelper/js/restore_selected_tabs.js" %}"></script>
+    <script src="{% static "certhelper/js/filter.js" %}"></script>
     <script>
         {% if global_preferences.shiftleader__popup_enabled %}
             const popupTimeInMilliseconds = 1000 * {{ global_preferences.shiftleader__popup_time_period }};
