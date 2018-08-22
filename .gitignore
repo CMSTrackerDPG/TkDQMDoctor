@@ -189,3 +189,5 @@ db.sqlite*
 local.env
 develop.env
 production.env
+
+staticfiles
