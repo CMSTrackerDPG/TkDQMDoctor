@@ -13,26 +13,23 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from decouple import config
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    # safe value used for development when DJANGO_SECRET_KEY might not be set
-    '&abrvr_0h(940(q_6(=+@m9uzhc)n&qvou*g-7fzw8%oh9y^4k'
-)
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', True)
+DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
-    'dev-tkdqmdoctor.web.cern.ch',
     'tkdqmdoctor.web.cern.ch',
+    'dev-tkdqmdoctor.web.cern.ch',
     'test-tkdqmdoctor.web.cern.ch',
-    '128.141.84.249',
     '127.0.0.1',
     'localhost'
 ]
@@ -98,12 +95,12 @@ WSGI_APPLICATION = 'dqmsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('DJANGO_DATABASE_ENGINE'),
-        'NAME': os.environ.get('DJANGO_DATABASE_NAME'),
-        'USER': os.environ.get('DJANGO_DATABASE_USER'),
-        'PASSWORD': os.environ.get('DJANGO_DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DJANGO_DATABASE_HOST'),
-        'PORT': os.environ.get('DJANGO_DATABASE_PORT'),
+        'ENGINE': config('DJANGO_DATABASE_ENGINE'),
+        'NAME': config('DJANGO_DATABASE_NAME'),
+        'USER': config('DJANGO_DATABASE_USER'),
+        'PASSWORD': config('DJANGO_DATABASE_PASSWORD'),
+        'HOST': config('DJANGO_DATABASE_HOST'),
+        'PORT': config('DJANGO_DATABASE_PORT', cast=int),
     },
 }
 
@@ -156,3 +153,12 @@ LOGIN_REDIRECT_URL = '/'
 SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = 'false'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+ADMINS = [('Peter Stein', 'peter.stein@cern.ch')]
+
+EMAIL_HOST = config('DJANGO_EMAIL_HOST', default='localhost')
+EMAIL_PORT = config('DJANGO_EMAIL_PORT', default=25, cast=int)
+EMAIL_HOST_USER = config('DJANGO_EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('DJANGO_EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('DJANGO_EMAIL_USE_TLS', default=False, cast=bool)
+SERVER_EMAIL = config('DJANGO_SERVER_EMAIL', default='root@localhost')
