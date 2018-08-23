@@ -21,7 +21,7 @@ def try_to_login_user(browser, username, password):
 def add_some_reference_runs(browser):
     browser.find_element_by_link_text("Admin Settings").click()
     wait_until(browser.find_element_by_css_selector,
-        "tr.model-referencerun > td > a.addlink").click()
+               "tr.model-referencerun > td > a.addlink").click()
     browser.find_element_by_id("id_reference_run").clear()
     browser.find_element_by_id("id_reference_run").send_keys("1")
     Select(browser.find_element_by_id("id_reco")).select_by_visible_text("Express")
@@ -73,35 +73,36 @@ def check_all_checklists(browser, wait):
     check_checklist(browser, wait, "tracking")
 
 
-def fill_and_submit_add_run_form(browser, wait):
-    Select(browser.find_element_by_id("id_type")).select_by_index(1)
-    browser.find_element_by_id("id_type").click()
-
-    wait.until(EC.element_to_be_clickable((By.ID, "id_match_type")))
-    browser.find_element_by_id("id_match_type").click()
-
-    Select(browser.find_element_by_id("id_reference_run")).select_by_index(1)
-    browser.find_element_by_id("id_reference_run").click()
-
+def fill_form_with_data(browser, data=None):
+    if data is None:
+        data = {}
     browser.find_element_by_id("id_run_number").click()
     browser.find_element_by_id("id_run_number").clear()
-    browser.find_element_by_id("id_run_number").send_keys("456789")
+    browser.find_element_by_id("id_run_number").send_keys(
+        data.get("run_number", "456789"))
     Select(browser.find_element_by_id("id_trackermap")).select_by_visible_text(
-        "Exists")
-    browser.find_element_by_id("id_trackermap").click()
-    browser.find_element_by_id("id_number_of_ls").click()
+        data.get("trackermap", "Exists"))
     browser.find_element_by_id("id_number_of_ls").clear()
-    browser.find_element_by_id("id_number_of_ls").send_keys("42")
-    browser.find_element_by_id("id_int_luminosity").click()
+    browser.find_element_by_id("id_number_of_ls").send_keys(
+        data.get("number_of_ls", "42"))  #
     browser.find_element_by_id("id_int_luminosity").clear()
-    browser.find_element_by_id("id_int_luminosity").send_keys("1.337")
-    Select(browser.find_element_by_id("id_pixel")).select_by_visible_text("Good")
-    browser.find_element_by_id("id_pixel").click()
-    Select(browser.find_element_by_id("id_sistrip")).select_by_visible_text("Good")
-    browser.find_element_by_id("id_sistrip").click()
-    Select(browser.find_element_by_id("id_tracking")).select_by_visible_text("Good")
-    browser.find_element_by_id("id_tracking").click()
+    browser.find_element_by_id("id_int_luminosity").send_keys(
+        data.get("int_luminosity", "1.337"))
+    Select(browser.find_element_by_id("id_pixel")).select_by_visible_text(
+        data.get("pixel", "Good"))
+    Select(browser.find_element_by_id("id_sistrip")).select_by_visible_text(
+        data.get("sistrip", "Good"))
+    Select(browser.find_element_by_id("id_tracking")).select_by_visible_text(
+        data.get("tracking", "Good"))
+
+
+def fill_and_submit_add_run_form(browser):
+    wait_until(Select(browser.find_element_by_id("id_type")).select_by_index, 1)
+    wait_until(browser.find_element_by_id, "id_match_type").click()
+    wait_until(Select(browser.find_element_by_id("id_reference_run")).select_by_index, 1)
+    fill_form_with_data(browser)
     browser.find_element_by_id("id_submit_add_run").click()
+
 
 def click_checklist_checkbox(browser, checklist_id, MAX_WAIT=30):
     start_time = time.time()

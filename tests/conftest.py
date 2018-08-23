@@ -84,6 +84,14 @@ def firefox():
     yield firefox_webdriver
     firefox_webdriver.quit()
 
+@pytest.fixture
+def website(firefox, live_server):
+    """
+    Firefox instance with
+    :return:
+    """
+    firefox.get('%s' % live_server.url)
+    return firefox
 
 @pytest.fixture
 def authenticated_browser(firefox, client, live_server, superuser):
@@ -385,7 +393,6 @@ def shiftleader_checklist():
 
     mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup,
                 text="Make sure to do this and that.")
-
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ from selenium.webdriver.support.select import Select
 
 from tests.credentials import *
 from tests.utils.selenium_utilities import try_to_login_user, \
-    check_all_checklists, fill_and_submit_add_run_form
+    check_all_checklists, fill_and_submit_add_run_form, fill_form_with_data
 from tests.utils.wait import wait_until, wait_for_cell
 
 
@@ -48,7 +48,7 @@ class TestShifter:
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Add Run").click()
         check_all_checklists(firefox, wait)
-        fill_and_submit_add_run_form(firefox, wait)
+        fill_and_submit_add_run_form(firefox)
 
         wait_for_cell(firefox, "456789", MAX_WAIT=20)
 
@@ -58,7 +58,7 @@ class TestShifter:
         firefox.get('%s' % live_server.url)
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Add Run").click()
-        fill_and_submit_add_run_form(firefox, wait)
+        fill_and_submit_add_run_form(firefox)
 
         headline = firefox.find_element_by_tag_name("h1").text
         assert "Add new Run" in headline  # No Submit
@@ -74,11 +74,12 @@ class TestShifter:
         wait_until(firefox.find_element_by_link_text, "Add Run")
         firefox.find_element_by_link_text("Add Run").click()
         check_all_checklists(firefox, wait)
-        fill_and_submit_add_run_form(firefox, wait)
+        fill_and_submit_add_run_form(firefox)
 
         wait_for_cell(firefox, "456789")
 
-        firefox.find_elements_by_class_name("edit_run")[1].find_element_by_tag_name("a").click()
+        firefox.find_elements_by_class_name("edit_run")[1].find_element_by_tag_name(
+            "a").click()
 
         wait.until(EC.presence_of_element_located((By.ID, "id_run_number")))
         firefox.find_element_by_id("id_run_number").click()
