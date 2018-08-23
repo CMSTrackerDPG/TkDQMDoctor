@@ -74,9 +74,9 @@ def wait_for_text_in_tag(browser, text, tag_name, MAX_WAIT=30):
             cells = browser.find_elements_by_tag_name(tag_name)
             assert text in [cell.text for cell in cells]
             return
-        except(AssertionError, WebDriverException) as e:
+        except(AssertionError, WebDriverException):
             if time.time() - start_time > MAX_WAIT:
-                raise e
+                raise TimeoutError
             time.sleep(0.1)
 
 

@@ -11,8 +11,8 @@ pytestmark = pytest.mark.django_db
 
 class TestRunInfoQuerySet:
     def test_compare_list_if_certified(self):
-        t1 = mixer.blend("certhelper.Type")
-        t2 = mixer.blend("certhelper.Type")
+        t1 = mixer.blend("certhelper.Type", runtype="Cosmics")
+        t2 = mixer.blend("certhelper.Type", runtype="Collisions")
         mixer.blend("certhelper.RunInfo", run_number=1234, type=t1, pixel="Good",
                     sistrip="Good", tracking="Good")
         mixer.blend("certhelper.RunInfo", run_number=8765, pixel="Good", sistrip="Good",
