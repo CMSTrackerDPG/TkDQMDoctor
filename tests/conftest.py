@@ -381,6 +381,7 @@ def some_checklists():
         for i in range(random.randint(0, 15)):
             mixer.blend("certhelper.ChecklistItem", checklistgroup=checklistgroup)
 
+
 @pytest.fixture
 def shiftleader_checklist():
     checklist = mixer.blend("certhelper.Checklist", identifier="shiftleader")
@@ -452,3 +453,92 @@ def runs_with_three_refs():
     mixer.blend("certhelper.RunInfo", reference_run=ref_2)
     mixer.blend("certhelper.RunInfo", reference_run=ref_1)
     mixer.blend("certhelper.RunInfo", reference_run=ref_1)
+
+
+@pytest.fixture
+def legitimate_reference_runs():
+    """
+    Reference runs as they might be used in production
+    """
+    mixer.blend("certhelper.ReferenceRun",
+                reference_run=100,
+                reco="Express",
+                runtype="Collisions",
+                bfield="3.8 T",
+                beamtype="Proton-Proton",
+                beamenergy="13 TeV",
+                dataset="/StreamExpress/Run2018A-Express-v1/DQMIO")
+
+    mixer.blend("certhelper.ReferenceRun",
+                reference_run=101,
+                reco="Express",
+                runtype="Collisions",
+                bfield="3.8 T",
+                beamtype="Proton-Proton",
+                beamenergy="13 TeV",
+                dataset="/StreamExpress/Run2018A-Express-v1/DQMIO")
+
+    mixer.blend("certhelper.ReferenceRun",
+                reference_run=150,
+                reco="Prompt",
+                runtype="Collisions",
+                bfield="3.8 T",
+                beamtype="Proton-Proton",
+                beamenergy="13 TeV",
+                dataset="/ZeroBias/Run2018D-PromptReco-v2/DQMIO")
+
+    mixer.blend("certhelper.ReferenceRun",
+                reference_run=200,
+                reco="Express",
+                runtype="Cosmics",
+                bfield="3.8 T",
+                beamtype="Cosmics",
+                beamenergy="Cosmics",
+                dataset="/StreamExpressCosmics/Run2018D-Express-v1/DQMIO")
+
+    mixer.blend("certhelper.ReferenceRun",
+                reference_run=250,
+                reco="Prompt",
+                runtype="Cosmics",
+                bfield="3.8 T",
+                beamtype="Cosmics",
+                beamenergy="Cosmics",
+                dataset="/Cosmics/Run2018D-PromptReco-v2/DQMIO")
+
+
+@pytest.fixture
+def legitimate_types():
+    """
+    Types as they might be used in production
+    """
+    mixer.blend("certhelper.Type",
+                reco="Express",
+                runtype="Collisions",
+                bfield="3.8 T",
+                beamtype="Proton-Proton",
+                beamenergy="13 TeV",
+                dataset="/StreamExpress/Run2018A-Express-v1/DQMIO")
+
+    mixer.blend("certhelper.Type",
+                reco="Prompt",
+                runtype="Collisions",
+                bfield="3.8 T",
+                beamtype="Proton-Proton",
+                beamenergy="13 TeV",
+                dataset="/ZeroBias/Run2018D-PromptReco-v2/DQMIO")
+
+    mixer.blend("certhelper.Type",
+                reco="Express",
+                runtype="Cosmics",
+                bfield="3.8 T",
+                beamtype="Cosmics",
+                beamenergy="Cosmics",
+                dataset="/StreamExpressCosmics/Run2018D-Express-v1/DQMIO")
+
+    mixer.blend("certhelper.Type",
+                reco="Prompt",
+                runtype="Cosmics",
+                bfield="3.8 T",
+                beamtype="Cosmics",
+                beamenergy="Cosmics",
+                dataset="/Cosmics/Run2018D-PromptReco-v2/DQMIO")

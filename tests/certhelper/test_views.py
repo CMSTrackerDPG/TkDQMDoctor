@@ -61,9 +61,11 @@ def test_authentication():
 
 class TestCreateRun:
     def test_invalid(self):
+        the_type = mixer.blend("certhelper.Type")
+        the_reference_run = mixer.blend("certhelper.ReferenceRun", runtype=the_type.runtype)
         data = {
-            'type': mixer.blend("certhelper.Type").pk,
-            'reference_run': mixer.blend("certhelper.ReferenceRun").pk,
+            'type': the_type.pk,
+            'reference_run': the_reference_run.pk,
             'run_number': 123445
         }
 
@@ -80,9 +82,11 @@ class TestCreateRun:
         assert not RunInfo.objects.exists()
 
     def test_valid(self):
+        the_type = mixer.blend("certhelper.Type")
+        the_reference_run = mixer.blend("certhelper.ReferenceRun", runtype=the_type.runtype)
         data = {
-            'type': mixer.blend("certhelper.Type").pk,
-            'reference_run': mixer.blend("certhelper.ReferenceRun").pk,
+            'type': the_type.pk,
+            'reference_run': the_reference_run.pk,
             'run_number': 123445,
             'trackermap': "Exists",
             'number_of_ls': 12,
@@ -136,7 +140,7 @@ class TestUpdateRun:
 
     def test_post(self):
         assert not RunInfo.objects.all().exists()
-        run = mixer.blend("certhelper.RunInfo", run_number=654321)
+        run = mixer.blend("certhelper.RunInfo", run_number=654321, type__runtype="Collisions", reference_run__runtype="Collisions")
         assert RunInfo.objects.all().exists()
         data = {
             'type': run.type.pk,

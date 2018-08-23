@@ -150,7 +150,7 @@ class UserProfile(models.Model):
     @property
     def has_shifter_rights(self):
         return self.user_privilege in (
-        self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN) \
+            self.SHIFTER, self.SHIFTLEADER, self.EXPERT, self.ADMIN) \
                or self.user.is_staff or self.user.is_superuser
 
     @property
@@ -283,7 +283,8 @@ class RunInfo(SoftDeletionModel):
     all_objects = RunInfoManager(alive_only=False)
 
     GOOD_BAD_CHOICES = (
-    ('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'), ('Excluded', 'Excluded'))
+        ('Good', 'Good'), ('Bad', 'Bad'), ('Lowstat', 'Lowstat'),
+        ('Excluded', 'Excluded'))
     TRACKERMAP_CHOICES = (('Exists', 'Exists'), ('Missing', 'Missing'))
     userid = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
@@ -410,8 +411,8 @@ class RunInfo(SoftDeletionModel):
 
         qs = RunInfo.objects.filter(
             run_number=self.run_number,
-            type=self.type,
-            reference_run=self.reference_run
+            type__runtype=self.type.runtype,
+            type__reco=self.type.reco
         )
 
         # If noone else certified the run and I am not editing the Run
@@ -421,11 +422,10 @@ class RunInfo(SoftDeletionModel):
                 pass
             run = qs[0]
             raise ValidationError(
-                'This run ({}, {} {}, (ref: {})) was already certified by {} on {}'.format(
+                'This run ({}, {} {}) was already certified by {} on {}'.format(
                     run.run_number,
                     run.type.runtype,
                     run.type.reco,
-                    run.reference_run.reference_run,
                     get_full_name(run.userid),
                     run.date)
             )

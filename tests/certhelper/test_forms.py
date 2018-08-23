@@ -14,11 +14,11 @@ class TestRunInfoForm:
         assert form.is_valid() is False
         user = mixer.blend(User)
 
-        type = mixer.blend("certhelper.Type")
-        reference_run = mixer.blend("certhelper.ReferenceRun")
+        the_type = mixer.blend("certhelper.Type")
+        reference_run = mixer.blend("certhelper.ReferenceRun", runtype=the_type.runtype)
 
         data = {
-            'type': type.pk,
+            'type': the_type.pk,
             'reference_run': reference_run.pk,
             'run_number': 123456,
             'trackermap': "Exists",

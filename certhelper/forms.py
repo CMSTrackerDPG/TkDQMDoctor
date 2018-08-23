@@ -157,6 +157,13 @@ class RunInfoForm(ModelForm):
             self.add_error(None, ValidationError(
                 "Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
+        type = cleaned_data.get('type')
+        reference_run = cleaned_data.get('reference_run')
+
+        if type and reference_run:
+            if type.runtype != reference_run.runtype:
+                self.add_error(None, ValidationError("Reference run is incompatible selected Type. ({} != {})".format(type.runtype, reference_run.runtype)))
+
         return cleaned_data
 
 

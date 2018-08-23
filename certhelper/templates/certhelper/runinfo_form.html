@@ -106,7 +106,7 @@
                 {% render_label_and_field_for form.reference_run %}
                 <div class="col-sm-3"></div>
                 <div class="col-sm-offset-3 col-sm-9 ">
-                    <small id="passwordHelpBlock" class="form-text text-muted">
+                    <small class="form-text text-muted">
                         Can be taken from the <a id="id_cmswbm_link" href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackerOfflineReferenceRuns" target="_blank">Tracker Offline Reference Runs List</a> twiki page
                     </small>
                 </div>
@@ -138,7 +138,7 @@
                 </div>
                 <div class="col-sm-3"></div>
                 <div class="col-sm-offset-3 col-sm-9 ">
-                    <small id="passwordHelpBlock" class="form-text text-muted">
+                    <small class="form-text text-muted">
                         Can be taken from <a id="id_cmswbm_link" href="https://cmswbm.cern.ch/cmsdb/servlet/RunSummary" target="_blank">WBM Run Summary</a> under "Run Live Lumi"
                     </small>
                 </div>
@@ -147,21 +147,18 @@
             <div class="form-group">
                 {% render_label_and_field_for form.pixel %}
                 {% render_checklist_checkbox form.checklists.pixel %}
-                {# {% render_checklist_for form.checklists.pixel %} #}
             </div>
 
             {# SiStrip #}
             <div class="form-group">
                 {% render_label_and_field_for form.sistrip %}
                 {% render_checklist_checkbox form.checklists.sistrip %}
-                {# {% render_checklist_for form.checklists.sistrip %} #}
             </div>
 
             {# Tracking #}
             <div class="form-group">
                 {% render_label_and_field_for form.tracking %}
                 {% render_checklist_checkbox form.checklists.tracking %}
-                {# {% render_checklist_for form.checklists.tracking %} #}
             </div>
 
             {# Categories of Problems #}
