@@ -156,10 +156,18 @@ class TestRunInfoQuerySet:
 
     def test_run_numbers(self):
         mixer.blend("certhelper.RunInfo", run_number=123456)
-        mixer.blend("certhelper.RunInfo", run_number=234567)
+        mixer.blend("certhelper.RunInfo", run_number=234567, type__reco="Express")
+        mixer.blend("certhelper.RunInfo", run_number=234567, type__reco="Prompt")
         mixer.blend("certhelper.RunInfo", run_number=345678)
 
         assert [123456, 234567, 345678] == RunInfo.objects.all().run_numbers()
+
+    def test_pks(self):
+        a = mixer.blend("certhelper.RunInfo").id
+        b = mixer.blend("certhelper.RunInfo").id
+        c = mixer.blend("certhelper.RunInfo").id
+
+        assert [a, b, c] == RunInfo.objects.all().pks()
 
     def test_int_luminosity(self):
         mixer.blend("certhelper.RunInfo", int_luminosity="13")

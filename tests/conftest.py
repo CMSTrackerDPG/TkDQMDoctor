@@ -84,6 +84,7 @@ def firefox():
     yield firefox_webdriver
     firefox_webdriver.quit()
 
+
 @pytest.fixture
 def website(firefox, live_server):
     """
@@ -92,6 +93,7 @@ def website(firefox, live_server):
     """
     firefox.get('%s' % live_server.url)
     return firefox
+
 
 @pytest.fixture
 def authenticated_browser(firefox, client, live_server, superuser):

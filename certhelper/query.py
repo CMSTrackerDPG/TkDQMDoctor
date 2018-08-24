@@ -6,6 +6,8 @@ from django.db.models import QuerySet, Q, Count, Sum, FloatField, When, Case, Va
 from django.db.models.functions import ExtractWeekDay
 from django.utils import timezone
 
+from certhelper.utilities.utilities import uniquely_sorted
+
 
 class SoftDeletionQuerySet(QuerySet):
     """
@@ -259,7 +261,17 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         return self.filter(type__reco="ReReco")
 
     def run_numbers(self):
-        return sorted(list(set([run.run_number for run in self])))
+        """
+        :return: sorted list of run numbers (without duplicates)
+        """
+        return uniquely_sorted(self.values_list('run_number', flat=True)
+                               .order_by('run_number'))
+
+    def pks(self):
+        """
+        :return: sorted list of primary keys
+        """
+        return list(self.values_list('id', flat=True).order_by('id'))
 
     def integrated_luminosity(self):
         if len(self) == 0:
