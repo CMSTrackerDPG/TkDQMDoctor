@@ -211,6 +211,13 @@ class TestShiftLeader:
         checklist_text = wait_until(firefox.find_element_by_id, "slr-checklist").text
         assert "Make sure to do this and that." not in checklist_text
         assert "No shift leader checklist found." in checklist_text
+        assert "Please create one in the Admin Settings." in checklist_text
+        assert 'Make sure to set the Checklist "Identifier" to "shiftleader"' in checklist_text
+
+        wait_until(firefox.find_element_by_id, "slr-checklist")\
+            .find_element_by_tag_name("a").click()
+        title = wait_until(firefox.find_element_by_id, "site-name").text
+        assert "Django administration" == title
 
     def test_shift_leader_popup(self, live_server, firefox, admin, wait):
         firefox.get('{}'.format(live_server.url))
