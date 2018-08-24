@@ -26,6 +26,8 @@ class TestShifter:
         firefox.find_element_by_id("id_dataset").send_keys("/some/dataset")
         firefox.find_element_by_id("id_submit_type").click()
 
+        wait_until(firefox.find_element_by_id, "id_submit_add_run")
+
         # Make sure the newly created Type appears in the dropdown list
         wait.until(
             EC.text_to_be_present_in_element(
@@ -50,6 +52,7 @@ class TestShifter:
         check_all_checklists(firefox, wait)
         fill_and_submit_add_run_form(firefox)
 
+        wait_until(firefox.find_element_by_link_text, "Add Run")
         wait_for_cell(firefox, "456789", MAX_WAIT=60)
 
     def test_create_new_certification_when_no_checklist_exists(
@@ -59,6 +62,7 @@ class TestShifter:
         wait_until(firefox.find_element_by_link_text, "Add Run").click()
         fill_and_submit_add_run_form(firefox)
 
+        wait_until(firefox.find_element_by_link_text, "Add Run")
         wait_for_cell(firefox, "456789", MAX_WAIT=60)
 
     def test_create_new_certification_without_checking_checklist(
@@ -68,9 +72,10 @@ class TestShifter:
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Add Run").click()
         fill_and_submit_add_run_form(firefox)
+        wait_until(firefox.find_element_by_id, "id_submit_add_run")  # no submit
 
         headline = firefox.find_element_by_tag_name("h1").text
-        assert "Add new Run" in headline  # No Submit
+        assert "Add new Run" in headline  # No submit happened
 
     def test_generate_summary(self):
         pass
@@ -89,6 +94,7 @@ class TestShifter:
         check_all_checklists(website, wait)
         fill_and_submit_add_run_form(website)
 
+        wait_until(website.find_element_by_link_text, "Add Run")
         wait_for_cell(website, "456789", MAX_WAIT=60)
 
         website.find_elements_by_class_name("edit_run")[1] \
@@ -101,6 +107,7 @@ class TestShifter:
 
         website.find_element_by_id("id_submit_add_run").click()
 
+        wait_until(website.find_element_by_link_text, "Add Run")
         wait_for_cell(website, "555789", MAX_WAIT=60)
 
     def test_incompatible_type(
@@ -130,8 +137,7 @@ class TestShifter:
 
         fill_form_with_data(website)
         website.find_element_by_id("id_submit_add_run").click()
-
-        alert_text = website.find_element_by_class_name("alert").text
+        alert_text = wait_until(website.find_element_by_class_name, "alert").text
         assert "Reference run is incompatible with selected Type" in alert_text
 
     def test_no_duplicate_certifications(
@@ -178,7 +184,7 @@ class TestShifter:
         fill_form_with_data(website)
         website.find_element_by_id("id_submit_add_run").click()
 
-        alert_text = website.find_element_by_class_name("alert").text
+        alert_text = wait_until(website.find_element_by_class_name, "alert").text
         assert "This run (456789, Collisions Express) was already " \
                "certified by shifter1 on " in alert_text
 
