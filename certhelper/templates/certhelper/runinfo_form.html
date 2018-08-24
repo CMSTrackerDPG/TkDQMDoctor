@@ -117,13 +117,13 @@
             <div class="form-group">
                 {% render_label_and_field_for form.run_number %}
                 <div id="id_run_number_helptext" class="col-sm-3 help-block"></div>
-                {% render_checklist_checkbox form.checklists.general %}
+                {% render_checklist_checkbox form.checklists.general not_required=checklist_not_required %}
             </div>
 
             {# Trackermap #}
             <div class="form-group">
                 {% render_label_and_field_for form.trackermap %}
-                {% render_checklist_checkbox form.checklists.trackermap %}
+                {% render_checklist_checkbox form.checklists.trackermap not_required=checklist_not_required %}
             </div>
 
             {# Number of LS #}
@@ -148,19 +148,19 @@
             {# Pixel #}
             <div class="form-group">
                 {% render_label_and_field_for form.pixel %}
-                {% render_checklist_checkbox form.checklists.pixel %}
+                {% render_checklist_checkbox form.checklists.pixel not_required=checklist_not_required%}
             </div>
 
             {# SiStrip #}
             <div class="form-group">
                 {% render_label_and_field_for form.sistrip %}
-                {% render_checklist_checkbox form.checklists.sistrip %}
+                {% render_checklist_checkbox form.checklists.sistrip not_required=checklist_not_required %}
             </div>
 
             {# Tracking #}
             <div class="form-group">
                 {% render_label_and_field_for form.tracking %}
-                {% render_checklist_checkbox form.checklists.tracking %}
+                {% render_checklist_checkbox form.checklists.tracking not_required=checklist_not_required %}
             </div>
 
             {# Categories of Problems #}

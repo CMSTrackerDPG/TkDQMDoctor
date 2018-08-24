@@ -8,7 +8,7 @@ register = template.Library()
 
 
 @register.inclusion_tag('certhelper/components/templatetags/checklist_checkbox.html')
-def render_checklist_checkbox(form_checklist, label=""):
+def render_checklist_checkbox(form_checklist, label="", not_required=False):
     """"
     renders a Checklist checkbox with a label
 
@@ -16,11 +16,19 @@ def render_checklist_checkbox(form_checklist, label=""):
     {% render_checklist_checkbox form.checklists.general %}
     """
     try:
-        checklist = form_checklist["checklist"]
-        checkbox = form_checklist["field"]
         if not label:
-            label = checklist.title + " Checklist"
-        return {'checklist': checklist, 'checkbox': checkbox, 'label': label}
+            label = form_checklist["checklist"].title + " Checklist"
+
+        context = {
+            'checklist': form_checklist["checklist"],
+            'checkbox': form_checklist["field"],
+            'label': label
+        }
+
+        if not not_required:
+            context['required'] = True
+
+        return context
     except TypeError:
         # Don't render if no checklist is provided
         return {}

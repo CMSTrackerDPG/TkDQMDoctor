@@ -93,8 +93,13 @@ class UpdateRun(generic.UpdateView):
     Updates a specific Run from the RunInfo table
     """
     model = RunInfo
-    form_class = RunInfoForm
+    form_class = RunInfoWithChecklistForm
     template_name = 'certhelper/runinfo_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['checklist_not_required'] = True
+        return context
 
     def same_user_or_shiftleader(self, user):
         """

@@ -1,9 +1,9 @@
 """
-These forms are used to display data contained in models 
+These forms are used to display data contained in models
 of the corresponding name found in
 TkDQMDoctor/dqmsite/certhelper/models.py
 
-i.e. 
+i.e.
 
 FORM               |  MODEL
 ====================================
@@ -28,7 +28,7 @@ Additional form information such as
             'int_luminosity': TextInput(attrs={ 'placeholder': "Unit: pb⁻¹ "})
         }
 is needed so that in HTML when the form is displayed additional information is displayed.
-In this instance it is used to display the placeholdertag in the int_luminosity textbox. 
+In this instance it is used to display the placeholdertag in the int_luminosity textbox.
 (greyed out text so that the user knows what SI-Unit to input)
 
 
@@ -157,12 +157,14 @@ class RunInfoForm(ModelForm):
             self.add_error(None, ValidationError(
                 "Tracking can not be GOOD if SiStrip is BAD. Please correct."))
 
-        type = cleaned_data.get('type')
+        run_type = cleaned_data.get('type')
         reference_run = cleaned_data.get('reference_run')
 
-        if type and reference_run:
-            if type.runtype != reference_run.runtype:
-                self.add_error(None, ValidationError("Reference run is incompatible with selected Type. ({} != {})".format(type.runtype, reference_run.runtype)))
+        if run_type and reference_run:
+            if run_type.runtype != reference_run.runtype:
+                self.add_error(None, ValidationError(
+                    "Reference run is incompatible with selected Type. ({} != {})"
+                        .format(run_type.runtype, reference_run.runtype)))
 
         return cleaned_data
 

@@ -2,7 +2,11 @@
 {% if checklist %}
     {% load widget_tweaks %}
     <div class="col-sm-offset-3 col-sm-9 checklist">
-        {% render_field checkbox required=required %}
+        {% if required %}
+            {% render_field checkbox required=required %}
+        {% else %}
+            {% render_field checkbox%}
+        {% endif %}
         <label for="id_checklist_{{ checklist.identifier }}" class="no-bold-label">
             <span class="glyphicon glyphicon-list-alt"></span> {{ checklist.title }} Checklist
 
