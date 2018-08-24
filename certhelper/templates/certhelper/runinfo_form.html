@@ -58,7 +58,8 @@
             {% endif %}
         </p>
 
-        <form class="well form-horizontal" method="POST" action=""> {% csrf_token %}
+        <form class="well form-horizontal" method="POST" action="" id="id_runinfo_form">
+            {% csrf_token %}
             {# TODO change title when editing Run #}
             <legend style="text-align: center;"><h1>Add new Run</h1></legend>
 
@@ -107,7 +108,7 @@
                 <div class="col-sm-3"></div>
                 <div class="col-sm-offset-3 col-sm-9 ">
                     <small class="form-text text-muted">
-                        Can be taken from the <a id="id_cmswbm_link" href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackerOfflineReferenceRuns" target="_blank">Tracker Offline Reference Runs List</a> twiki page
+                        Can be taken from the <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackerOfflineReferenceRuns" target="_blank">Tracker Offline Reference Runs List</a> twiki page
                     </small>
                 </div>
             </div>
@@ -115,6 +116,7 @@
             {# Run number #}
             <div class="form-group">
                 {% render_label_and_field_for form.run_number %}
+                <div id="id_run_number_helptext" class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.general %}
             </div>
 
@@ -136,7 +138,7 @@
                         <span class="input-group-addon">pb<sup>-1</sup></span>
                     </div>
                 </div>
-                <div class="col-sm-3"></div>
+                <div id="id_int_luminosity_helptext" class="col-sm-3 help-block">Please check</div>
                 <div class="col-sm-offset-3 col-sm-9 ">
                     <small class="form-text text-muted">
                         Can be taken from <a id="id_cmswbm_link" href="https://cmswbm.cern.ch/cmsdb/servlet/RunSummary" target="_blank">WBM Run Summary</a> under "Run Live Lumi"
@@ -229,7 +231,66 @@
              */
             let run_number = $('#id_run_number');
             run_number.on('input',function(){
-                $('#id_cmswbm_link').attr("href", "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary?RUN=" + run_number.val())
+                $('#id_cmswbm_link').attr("href", "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary?RUN=" + $(this).val());
+            });
+
+            /**
+             * Validate the run number
+             */
+            run_number.on('input',function(){
+                let form_group = $(this).closest(".form-group");
+                let reference_run_number = $("#id_reference_run option:selected").text().toLowerCase().split(' ')[0];
+                let help_text = $("#id_run_number_helptext");
+                if($(this).val() < 300000){
+                    form_group.removeClass("has-success");
+                    form_group.removeClass("has-warning");
+                    form_group.addClass("has-error");
+                    help_text.text("Run number is too low");
+                } else if($(this).val() > 999999){
+                    form_group.removeClass("has-success");
+                    form_group.removeClass("has-warning");
+                    form_group.addClass("has-error");
+                    help_text.text("Run number is too high");
+                } else if(Math.abs(reference_run_number -  $(this).val()) > 6000) {
+                    form_group.removeClass("has-success");
+                    form_group.removeClass("has-error");
+                    form_group.addClass("has-warning");
+                    help_text.text("Run number seems odd. Please check");
+                } else {
+                    form_group.removeClass("has-warning");
+                    form_group.removeClass("has-error");
+                    form_group.addClass("has-success");
+                    help_text.text("");
+                }
+            });
+
+            /**
+             * Validate the integrated luminosity
+             */
+            int_luminosity.on('input',function(){
+                let form_group = $(this).closest(".form-group");
+                let runtype = $("#id_type option:selected").text().toLowerCase().split(' ')[1];
+                let help_text = $("#id_int_luminosity_helptext");
+                if(runtype == "cosmics" && $(this).val() > 0){
+                    form_group.removeClass("has-success");
+                    form_group.removeClass("has-error");
+                    form_group.addClass("has-warning");
+                    help_text.text("You certify a cosmics run. Are you sure about this value?");
+                } else {
+                    form_group.removeClass("has-warning");
+                    form_group.removeClass("has-error");
+                    form_group.addClass("has-success");
+                    help_text.text("");
+                }
+            });
+
+            /**
+             * Remove green borders when jumping to the next field
+             */
+            $("#id_run_number, #id_int_luminosity").focusout(function(){
+                let form_group = $(this).closest(".form-group");
+                if(form_group.hasClass("has-success"))
+                    form_group.removeClass("has-success");
             });
         });
     </script>

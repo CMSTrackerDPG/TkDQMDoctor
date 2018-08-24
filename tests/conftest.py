@@ -461,7 +461,7 @@ def legitimate_reference_runs():
     Reference runs as they might be used in production
     """
     mixer.blend("certhelper.ReferenceRun",
-                reference_run=100,
+                reference_run=300100,
                 reco="Express",
                 runtype="Collisions",
                 bfield="3.8 T",
@@ -470,7 +470,7 @@ def legitimate_reference_runs():
                 dataset="/StreamExpress/Run2018A-Express-v1/DQMIO")
 
     mixer.blend("certhelper.ReferenceRun",
-                reference_run=101,
+                reference_run=300101,
                 reco="Express",
                 runtype="Collisions",
                 bfield="3.8 T",
@@ -479,7 +479,7 @@ def legitimate_reference_runs():
                 dataset="/StreamExpress/Run2018A-Express-v1/DQMIO")
 
     mixer.blend("certhelper.ReferenceRun",
-                reference_run=150,
+                reference_run=300150,
                 reco="Prompt",
                 runtype="Collisions",
                 bfield="3.8 T",
@@ -488,7 +488,7 @@ def legitimate_reference_runs():
                 dataset="/ZeroBias/Run2018D-PromptReco-v2/DQMIO")
 
     mixer.blend("certhelper.ReferenceRun",
-                reference_run=200,
+                reference_run=300200,
                 reco="Express",
                 runtype="Cosmics",
                 bfield="3.8 T",
@@ -497,7 +497,7 @@ def legitimate_reference_runs():
                 dataset="/StreamExpressCosmics/Run2018D-Express-v1/DQMIO")
 
     mixer.blend("certhelper.ReferenceRun",
-                reference_run=250,
+                reference_run=300250,
                 reco="Prompt",
                 runtype="Cosmics",
                 bfield="3.8 T",

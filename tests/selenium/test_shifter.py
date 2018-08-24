@@ -1,3 +1,5 @@
+import pytest
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -131,7 +133,7 @@ class TestShifter:
         wait_until(
             Select(
                 website.find_element_by_id("id_reference_run")).select_by_visible_text,
-            "100 Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "300100 Express Collisions 3.8 T Proton-Proton 13 TeV "
             "/StreamExpress/Run2018A-Express-v1/DQMIO"
         )
 
@@ -159,7 +161,7 @@ class TestShifter:
         wait_until(
             Select(
                 website.find_element_by_id("id_reference_run")).select_by_visible_text,
-            "100 Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "300100 Express Collisions 3.8 T Proton-Proton 13 TeV "
             "/StreamExpress/Run2018A-Express-v1/DQMIO"
         )
 
@@ -177,7 +179,7 @@ class TestShifter:
         wait_until(
             Select(
                 website.find_element_by_id("id_reference_run")).select_by_visible_text,
-            "101 Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "300101 Express Collisions 3.8 T Proton-Proton 13 TeV "
             "/StreamExpress/Run2018A-Express-v1/DQMIO"
         )
 
@@ -191,7 +193,7 @@ class TestShifter:
         wait_until(
             Select(
                 website.find_element_by_id("id_reference_run")).select_by_visible_text,
-            "100 Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "300100 Express Collisions 3.8 T Proton-Proton 13 TeV "
             "/StreamExpress/Run2018A-Express-v1/DQMIO"
         )
 
@@ -203,3 +205,168 @@ class TestShifter:
         website.find_element_by_id("id_run_number").send_keys(2)
         website.find_element_by_id("id_submit_add_run").click()
         wait_until(website.find_element_by_link_text, "Add Run")
+
+    def test_run_number_validation(
+            self,
+            website,
+            wait,
+            shifter,
+            legitimate_reference_runs,
+            legitimate_types):
+        try_to_login_user(website, SHIFTER1_USERNAME, PASSWORD)
+        wait_until(website.find_element_by_link_text, "Add Run").click()
+
+        wait_until(
+            Select(website.find_element_by_id("id_type")).select_by_visible_text,
+            "Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "/StreamExpress/Run2018A-Express-v1/DQMIO"
+        )
+
+        wait_until(
+            Select(
+                website.find_element_by_id("id_reference_run")).select_by_visible_text,
+            "300100 Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "/StreamExpress/Run2018A-Express-v1/DQMIO"
+        )
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-error")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-success")
+
+        website.find_element_by_id("id_run_number").clear()
+        website.find_element_by_id("id_run_number").send_keys("299999")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-success")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-error")\
+            .find_element_by_class_name("help-block").text
+        assert "Run number is too low" in help_text
+        website.find_element_by_id("id_run_number").clear()
+        website.find_element_by_id("id_run_number").send_keys("1000000")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-success")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-error")\
+            .find_element_by_class_name("help-block").text
+        assert "Run number is too high" in help_text
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-success")
+
+        website.find_element_by_id("id_run_number").clear()
+        website.find_element_by_id("id_run_number").send_keys("306101")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-error")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-success")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-warning")\
+            .find_element_by_class_name("help-block").text
+        assert "Run number seems odd" in help_text
+
+        website.find_element_by_id("id_run_number").clear()
+        website.find_element_by_id("id_run_number").send_keys("306100")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-error")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-success")\
+            .find_element_by_class_name("help-block").text
+        assert "" == help_text
+
+    def test_cosmics_int_luminosity_validation(
+            self,
+            website,
+            wait,
+            shifter,
+            legitimate_reference_runs,
+            legitimate_types):
+        try_to_login_user(website, SHIFTER1_USERNAME, PASSWORD)
+        wait_until(website.find_element_by_link_text, "Add Run").click()
+
+        wait_until(
+            Select(website.find_element_by_id("id_type")).select_by_visible_text,
+            "Express Cosmics 3.8 T Cosmics Cosmics "
+            "/StreamExpressCosmics/Run2018D-Express-v1/DQMIO"
+        )
+
+        wait_until(
+            Select(
+                website.find_element_by_id("id_reference_run")).select_by_visible_text,
+            "300200 Express Cosmics 3.8 T Cosmics Cosmics "
+            "/StreamExpressCosmics/Run2018D-Express-v1/DQMIO"
+        )
+
+        website.find_element_by_id("id_int_luminosity").clear()
+        website.find_element_by_id("id_int_luminosity").send_keys("1")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-error")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-success")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-warning")\
+            .find_element_by_class_name("help-block").text
+        assert "You certify a cosmics run. Are you sure about this value?" in help_text
+
+        website.find_element_by_id("id_int_luminosity").clear()
+        website.find_element_by_id("id_int_luminosity").send_keys("0")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-error")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-success")\
+            .find_element_by_class_name("help-block").text
+        assert "" == help_text
+
+    def test_collisions_int_luminosity_validation(
+            self,
+            website,
+            wait,
+            shifter,
+            legitimate_reference_runs,
+            legitimate_types):
+        try_to_login_user(website, SHIFTER1_USERNAME, PASSWORD)
+        wait_until(website.find_element_by_link_text, "Add Run").click()
+
+        wait_until(
+            Select(website.find_element_by_id("id_type")).select_by_visible_text,
+            "Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "/StreamExpress/Run2018A-Express-v1/DQMIO"
+        )
+
+        wait_until(
+            Select(
+                website.find_element_by_id("id_reference_run")).select_by_visible_text,
+            "300100 Express Collisions 3.8 T Proton-Proton 13 TeV "
+            "/StreamExpress/Run2018A-Express-v1/DQMIO"
+        )
+
+        website.find_element_by_id("id_int_luminosity").clear()
+        website.find_element_by_id("id_int_luminosity").send_keys("1")
+
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-error")
+        with pytest.raises(NoSuchElementException):
+            website.find_element_by_class_name("has-warning")
+
+        help_text = wait_until(website.find_element_by_class_name, "has-success")\
+            .find_element_by_class_name("help-block").text
+        assert "" == help_text
+
