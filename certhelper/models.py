@@ -82,6 +82,7 @@ class UserProfile(models.Model):
     """
     criteria_groups_dict = {
         SHIFTER: [
+            "CMS-Shiftlist_shifters_DQM_Offline",
             "tkdqmdoctor-shifters",
         ],
         SHIFTLEADER: [
@@ -90,6 +91,7 @@ class UserProfile(models.Model):
             "tkdqmdoctor-shiftleaders",
         ],
         EXPERT: [
+            "cms-dqm-certification-experts",
             "tkdqmdoctor-experts",
         ],
         ADMIN: [
