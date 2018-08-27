@@ -220,7 +220,7 @@ def update_userprofile(user):
             try:
                 userprofile = user.userprofile
             except UserProfile.DoesNotExist:
-                create_userprofile(user)
+                userprofile = create_userprofile(user)
 
             if userprofile.extra_data != socialaccount.extra_data:
                 userprofile.extra_data = socialaccount.extra_data
