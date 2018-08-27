@@ -1,8 +1,7 @@
 import pytest
-from django.db.models import Count
 from mixer.backend.django import mixer
 
-from certhelper.models import RunInfo, ReferenceRun
+from certhelper.models import RunInfo, ReferenceRun, Type
 from certhelper.utilities.utilities import to_date, to_weekdayname, uniquely_sorted
 from tests.utils.utilities import create_runs
 
@@ -260,11 +259,53 @@ class TestRunInfoQuerySet:
         assert 3 == refs[2]
 
     def test_reference_runs(self, runs_with_three_refs):
-        refs = RunInfo.objects.all().reference_runs()
+        refs = RunInfo.objects.all().reference_runs().order_by("reference_run")
         assert 3 == len(refs)
         assert ReferenceRun.objects.get(reference_run=1) == refs[0]
         assert ReferenceRun.objects.get(reference_run=2) == refs[1]
         assert ReferenceRun.objects.get(reference_run=3) == refs[2]
+
+    def test_types(self):
+        t1 = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Express")
+        t2 = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Prompt")
+        t3 = mixer.blend("certhelper.Type", runtype="Collisions", reco="Express")
+        t4 = mixer.blend("certhelper.Type", runtype="Collisions", reco="Prompt")
+
+        r1 = mixer.blend("certhelper.RunInfo", type=t2)
+        r2 = mixer.blend("certhelper.RunInfo", type=t2)
+        r3 = mixer.blend("certhelper.RunInfo", type=t2)
+        r4 = mixer.blend("certhelper.RunInfo", type=t2)
+        r5 = mixer.blend("certhelper.RunInfo", type=t1)
+        r6 = mixer.blend("certhelper.RunInfo", type=t2)
+        r7 = mixer.blend("certhelper.RunInfo", type=t4)
+        r8 = mixer.blend("certhelper.RunInfo", type=t2)
+        r9 = mixer.blend("certhelper.RunInfo", type=t1)
+        r10 = mixer.blend("certhelper.RunInfo", type=t2)
+
+        runs = RunInfo.objects.all()
+        runs.print()
+        types = runs.types()
+        assert 3 == len(types)
+        assert t1 == types[0]
+        assert t2 == types[1]
+        assert t4 == types[2]
+
+        per_type = runs.per_type()
+        assert r5 in per_type[0]
+        assert r9 in per_type[0]
+        assert t1 == per_type[0][0].type
+
+        assert r1 in per_type[1]
+        assert r2 in per_type[1]
+        assert r3 in per_type[1]
+        assert r4 in per_type[1]
+        assert r6 in per_type[1]
+        assert r8 in per_type[1]
+        assert r10 in per_type[1]
+        assert t2 == per_type[1][0].type
+
+        assert r7 in per_type[2]
+        assert t4 == per_type[2][0].type
 
     def test_per_day(self, runs_for_slr):
         runs = RunInfo.objects.all().per_day()
@@ -289,3 +330,11 @@ class TestRunInfoQuerySet:
         for run in runs[4]:
             assert to_date('2018-05-20') == run.date
             assert "Sunday" == to_weekdayname(run.date)
+
+    def test_print_verbose(self, shifter, runs_for_summary_report):
+        print()
+        for t in Type.objects.all():
+            print(t)
+        for t in ReferenceRun.objects.all():
+            print(t)
+        RunInfo.objects.all().order_by("run_number").print_verbose()

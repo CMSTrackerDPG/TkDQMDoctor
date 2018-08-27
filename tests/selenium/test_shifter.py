@@ -1,4 +1,5 @@
 import pytest
+from django.utils import timezone
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -79,8 +80,77 @@ class TestShifter:
         headline = firefox.find_element_by_tag_name("h1").text
         assert "Add new Run" in headline  # No submit happened
 
-    def test_generate_summary(self):
-        pass
+    def test_generate_summary(self, website, shifter, runs_for_summary_report):
+        try_to_login_user(website, SHIFTER1_USERNAME, PASSWORD)
+        wait_until(website.find_element_by_link_text, "Add Run")
+        website.find_element_by_link_text("Generate Summary").click()
+        info_text = website.find_element_by_class_name("alert-info").text
+
+        assert "Applied filters:" in info_text
+        today = timezone.now().strftime("%Y-%m-%d")
+        assert "Date: {}".format(today) in info_text
+
+        summary = website.find_element_by_id("summary")
+
+        assert "=============Reference Runs===============" in summary.text
+        assert "300250 Prompt Cosmics 3.8 T Cosmics Cosmics /Cosmics/Run2018D-PromptReco-v2/DQMIO" in summary.text
+        assert "300200 Express Cosmics 3.8 T Cosmics Cosmics /StreamExpressCosmics/Run2018D-Express-v1/DQMIO" in summary.text
+        assert "300150 Prompt Collisions 3.8 T Proton-Proton 13 TeV /ZeroBias/Run2018D-PromptReco-v2/DQMIO" in summary.text
+        assert "300101 Express Collisions 3.8 T Proton-Proton 13 TeV /StreamExpress/Run2018A-Express-v1/DQMIO" in summary.text
+
+        assert "=============Tracker Maps=================" in summary.text
+        assert "Type 1" in summary.text
+        assert "Missing: 300003 300004 300021" in summary.text
+        assert "Exists: 300009 300023" in summary.text
+
+        assert "Type 2" in summary.text
+        assert "Missing: 300006 300013 300015 300019 300022" in summary.text
+        assert "Exists: 300001 300002 300014 300016 300020" in summary.text
+
+        assert "Type 3" in summary.text
+        assert "Missing: 300003 300004 300021" in summary.text
+        assert "Exists: 300009 300023" in summary.text
+
+        assert "Type 4" in summary.text
+        assert "Missing: 300007 300008 300017 300024" in summary.text
+        assert "Exists: 300000 300012" in summary.text
+
+        assert "=============Certified Runs===============" in summary.text
+
+        assert "Type 1" in summary.text
+        assert "Bad: 300001 300005 300010 300011 300018" in summary.text
+
+        assert "Type 2" in summary.text
+        assert "Bad: 300001 300002 300006 300013 300014 300016 300019 300020 300022" in summary.text
+        assert "Good: 300015" in summary.text
+
+        assert "Type 3" in summary.text
+        assert "Good: 300003 300009" in summary.text
+        assert "Bad: 300004 300021 300023" in summary.text
+
+        assert "Type 4" in summary.text
+        assert "Bad: 300000 300008 300012 300017 300024" in summary.text
+        assert "Good: 300007" in summary.text
+
+        assert """
+=============Sum of Quantities============
++--------+-----------+------------------------+
+| Type 1 | Sum of LS | Sum of int. luminosity |
++--------+-----------+------------------------+
+| Bad    | 3424      | 3534                   |
++--------+-----------+------------------------+""" in summary.text
+
+        assert "| Type 2 | Sum of LS | Sum of int. luminosity |" in summary.text
+        assert "| Bad    | 4487      | 5316                   |" in summary.text
+        assert "| Good   | 265       | 432                    |" in summary.text
+
+        assert "| Type 3 | Sum of LS | Sum of int. luminosity |" in summary.text
+        assert "| Good   | 708       | 0                      " in summary.text
+        assert "| Bad    | 1015      | 0                      |" in summary.text
+
+        assert "| Type 4 | Sum of LS | Sum of int. luminosity |" in summary.text
+        assert "| Bad    | 2091      | 0                      |" in summary.text
+        assert "| Good   | 341       | 0                      |" in summary.text
 
     def test_can_update_certification(
             self,
@@ -244,7 +314,7 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-success")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-error")\
+        help_text = wait_until(website.find_element_by_class_name, "has-error") \
             .find_element_by_class_name("help-block").text
         assert "Run number is too low" in help_text
         website.find_element_by_id("id_run_number").clear()
@@ -255,7 +325,7 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-success")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-error")\
+        help_text = wait_until(website.find_element_by_class_name, "has-error") \
             .find_element_by_class_name("help-block").text
         assert "Run number is too high" in help_text
 
@@ -272,7 +342,7 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-success")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-warning")\
+        help_text = wait_until(website.find_element_by_class_name, "has-warning") \
             .find_element_by_class_name("help-block").text
         assert "Run number seems odd" in help_text
 
@@ -284,7 +354,7 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-warning")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-success")\
+        help_text = wait_until(website.find_element_by_class_name, "has-success") \
             .find_element_by_class_name("help-block").text
         assert "" == help_text
 
@@ -319,7 +389,7 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-success")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-warning")\
+        help_text = wait_until(website.find_element_by_class_name, "has-warning") \
             .find_element_by_class_name("help-block").text
         assert "You certify a cosmics run. Are you sure about this value?" in help_text
 
@@ -331,7 +401,7 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-error")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-success")\
+        help_text = wait_until(website.find_element_by_class_name, "has-success") \
             .find_element_by_class_name("help-block").text
         assert "" == help_text
 
@@ -366,7 +436,6 @@ class TestShifter:
         with pytest.raises(NoSuchElementException):
             website.find_element_by_class_name("has-warning")
 
-        help_text = wait_until(website.find_element_by_class_name, "has-success")\
+        help_text = wait_until(website.find_element_by_class_name, "has-success") \
             .find_element_by_class_name("help-block").text
         assert "" == help_text
-

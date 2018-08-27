@@ -53,3 +53,16 @@ def create_recent_run(run_number=None):
     else:
         mixer.blend("certhelper.RunInfo", run_number=run_number, date=today)
 
+
+def print_mixer_code(runs):
+    """
+    Prints out mixer.blend code to create the objects in the QuerySet
+    """
+    for run in runs:
+        print("mixer.blend('certhelper.RunInfo', "
+              "run_number='{}', type={} {}, reference_run={} {}, trackermap='{}', "
+              "number_of_ls='{}', int_luminosity='{}', pixel='{}', sistrip='{}', "
+              "tracking='{}', date='{}', comment=\"\"\"{}\"\"\")\n".format(
+            run.run_number, run.type.runtype, run.type.reco, run.reference_run.runtype, run.reference_run.reco, run.trackermap, run.number_of_ls, run.int_luminosity,
+            run.pixel, run.sistrip, run.tracking, run.date, run.comment))
+

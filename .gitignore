@@ -192,3 +192,4 @@ production.env
 
 staticfiles
 wsgi/static
+notes/

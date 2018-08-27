@@ -3,6 +3,7 @@ import datetime
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
+from terminaltables import AsciiTable
 
 from certhelper.utilities.logger import get_configured_logger
 
@@ -231,3 +232,78 @@ def update_userprofile(user):
             logger.warning("No SocialAccount exists for User {}".format(user))
     else:
         logger.info("Cannot update UserProfile for non existing User {}".format(user))
+
+
+def get_ascii_table(column_description, data):
+    table = AsciiTable([column_description] + data)
+    table.inner_row_border = True
+    return table.table
+
+
+def get_runs_from_request_filters(request, alert_errors, alert_infos, alert_filters):
+    from certhelper.models import RunInfo, Type
+
+    runs = RunInfo.objects.filter(userid=request.user)
+
+    date_filter_value = request.GET.get('date', None)
+
+    date_from = request.GET.get('date_range_0', None)
+    date_to = request.GET.get('date_range_1', None)
+    runs_from = request.GET.get('runs_0', None)
+    runs_to = request.GET.get('runs_1', None)
+    type_id = request.GET.get('type', None)
+
+    if date_filter_value:
+        if is_valid_date(date_filter_value):
+            runs = runs.filter(date=date_filter_value)
+            alert_filters.append("Date: " + str(date_filter_value))
+
+        else:
+            alert_errors.append("Invalid Date: " + str(date_filter_value))
+            return RunInfo.objects.none()
+
+    if date_from:
+        if is_valid_date(date_from):
+            runs = runs.filter(date__gte=date_from)
+            alert_filters.append("Date from: " + str(date_from))
+        else:
+            alert_errors.append("Invalid Date: " + str(date_from))
+            return RunInfo.objects.none()
+
+    if date_to:
+        if is_valid_date(date_to):
+            runs = runs.filter(date__lte=date_to)
+            alert_filters.append("Date to: " + str(date_to))
+        else:
+            alert_errors.append("Invalid Date: " + str(date_to))
+            return RunInfo.objects.none()
+
+    if runs_from:
+        try:
+            runs = runs.filter(run_number__gte=runs_from)
+            alert_filters.append("Runs from: " + str(runs_from))
+        except:
+            alert_errors.append("Invalid Run Number: " + str(runs_from))
+            return RunInfo.objects.none()
+
+    if runs_to:
+        try:
+            runs = runs.filter(run_number__lte=runs_to)
+            alert_filters.append("Runs to: " + str(runs_to))
+        except:
+            alert_errors.append("Invalid Run Number: " + str(runs_to))
+            return RunInfo.objects.none()
+
+    if type_id:
+        if is_valid_id(type_id, Type):
+            runs = runs.filter(type=type_id)
+            alert_filters.append("Type: " + str(type_id))
+        else:
+            alert_errors.append("Invalid Type: " + str(type_id))
+            return RunInfo.objects.none()
+
+    if not date_filter_value and not type_id and not date_from and not date_to and not runs_from and not runs_to:
+        alert_infos.append(
+            "No filters applied. Showing every run you have ever certified!")
+
+    return runs

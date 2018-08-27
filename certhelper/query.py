@@ -72,8 +72,6 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         if until:
             runs = runs.filter(date__lte=until)
 
-
-
         run_number_list = [run["run_number"]
                            for run
                            in runs \
@@ -188,8 +186,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             i for i in list_of_run_numbers
             if type(i) == int or i.isdigit()]
 
-        changed_flag_runs = runs\
-            .filter(run_number__in=cleaned_run_number_list)\
+        changed_flag_runs = runs \
+            .filter(run_number__in=cleaned_run_number_list) \
             .filter_flag_changed()
 
         for run_number in list_of_run_numbers:
@@ -264,8 +262,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         """
         :return: sorted list of run numbers (without duplicates)
         """
-        return uniquely_sorted(self.values_list('run_number', flat=True)
-                               .order_by('run_number'))
+        return list(self.values_list('run_number', flat=True)
+                    .order_by('run_number').distinct())
 
     def pks(self):
         """
@@ -277,6 +275,11 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         if len(self) == 0:
             return 0
         return float(self.aggregate(Sum('int_luminosity'))["int_luminosity__sum"])
+
+    def lumisections(self):
+        if len(self) == 0:
+            return 0
+        return self.aggregate(Sum('number_of_ls'))["number_of_ls__sum"]
 
     def total_number(self):
         return len(self)
@@ -296,11 +299,15 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
     def reference_runs(self):
         from .models import ReferenceRun
         return ReferenceRun.objects \
-            .filter(reference_run__in=self.reference_run_numbers()) \
-            .order_by("reference_run")
+            .filter(reference_run__in=self.reference_run_numbers())
+
+    def types(self):
+        from .models import Type
+        type_ids = self.values_list('type', flat=True).order_by('type').distinct()
+        return Type.objects.all().filter(id__in=type_ids).order_by('id')
 
     def per_day(self):
-        """
+        """values_list
         Returns a list of querysets where one queryset is a specific day
         """
         per_day_list = []
@@ -308,6 +315,12 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             per_day_list.append(self.filter(date=day))
 
         return per_day_list
+
+    def per_type(self):
+        """
+        :return: list of querysets with one type per queryset
+        """
+        return [self.filter(type=t) for t in self.types()]
 
     def print(self):
         """
@@ -323,3 +336,44 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
                                                             run.int_luminosity,
                                                             run.date, run.status))
 
+    def print_verbose(self):
+        """
+        Prints out QuerySet to have an easy Overview
+        """
+        print("{:<10} {:<10} {:<10} {:<30} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} "
+              "{:<10} {:<10}".format
+              ("run number", "run type", "reco", "reference run", "trackermap",
+               "lumisec", "int lumi", "pixel", "sistrip", "tracking", "date", "user"))
+
+        for run in self.annotate_status()[:50]:
+            print("{:<10} {:<10} {:<10} {:<30} {:<10} {:<10} {:<10} {:<10} {:<10} "
+                  "{:<10} {} {}".format(
+                run.run_number, run.type.runtype, run.type.reco, "{} {} ({})".format(
+                    run.reference_run.runtype,
+                    run.reference_run.reco,
+                    run.reference_run.reference_run),
+                run.trackermap, run.number_of_ls, run.int_luminosity,
+                run.pixel, run.sistrip, run.tracking, run.date, run.userid))
+
+    def print_types(self):
+        for run_type in self.types():
+            print("{:10} {:10} {:10} {:10} {:10} {:10}".format(
+                run_type.runtype,
+                run_type.reco,
+                run_type.bfield,
+                run_type.beamtype,
+                run_type.beamenergy,
+                run_type.dataset)
+            )
+
+    def print_reference_runs(self):
+        for ref in self.reference_runs():
+            print("{:10} {:10} {:10} {:10} {:10} {:10} {:10}".format(
+                ref.reference_run,
+                ref.runtype,
+                ref.reco,
+                ref.bfield,
+                ref.beamtype,
+                ref.beamenergy,
+                ref.dataset)
+            )

@@ -15,12 +15,11 @@ from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
-from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport, \
-    NewShiftLeaderReport
-from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, \
-    is_valid_id, request_contains_filter_parameter, get_this_week_filter_parameter, \
-    get_today_filter_parameter
+from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
+from certhelper.utilities.SummaryReport import SummaryReport
+from certhelper.utilities.utilities import get_filters_from_request_GET, \
+    request_contains_filter_parameter, get_this_week_filter_parameter, \
+    get_today_filter_parameter, get_runs_from_request_filters
 from .forms import *
 from .tables import *
 
@@ -146,108 +145,29 @@ class CreateType(generic.CreateView):
     success_url = '/create'
 
 
-# TODO clean up this mess
 @login_required
 def summaryView(request):
     """ Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
     where it is then displayed.
     """
-    runs = RunInfo.objects.filter(userid=request.user)
-
-    date_filter_value = request.GET.get('date', None)
-
-    date_from = request.GET.get('date_range_0', None)
-    date_to = request.GET.get('date_range_1', None)
-    runs_from = request.GET.get('runs_0', None)
-    runs_to = request.GET.get('runs_1', None)
-    type_id = request.GET.get('type', None)
 
     alert_errors = []
     alert_infos = []
     alert_filters = []
 
-    if date_filter_value:
-        if is_valid_date(date_filter_value):
-            runs = runs.filter(date=date_filter_value)
-            alert_filters.append("Date: " + str(date_filter_value))
+    runs = get_runs_from_request_filters(request, alert_errors, alert_infos,
+                                         alert_filters)
 
-        else:
-            alert_errors.append("Invalid Date: " + str(date_filter_value))
-            runs = RunInfo.objects.none()
+    summary = SummaryReport(runs)
 
-    if date_from:
-        if is_valid_date(date_from):
-            runs = runs.filter(date__gte=date_from)
-            alert_filters.append("Date from: " + str(date_from))
-        else:
-            alert_errors.append("Invalid Date: " + str(date_from))
-            runs = RunInfo.objects.none()
-
-    if date_to:
-        if is_valid_date(date_to):
-            runs = runs.filter(date__lte=date_to)
-            alert_filters.append("Date to: " + str(date_to))
-        else:
-            alert_errors.append("Invalid Date: " + str(date_to))
-            runs = RunInfo.objects.none()
-
-    if runs_from:
-        try:
-            runs = runs.filter(run_number__gte=runs_from)
-            alert_filters.append("Runs from: " + str(runs_from))
-        except:
-            alert_errors.append("Invalid Run Number: " + str(runs_from))
-            runs = RunInfo.objects.none()
-
-    if runs_to:
-        try:
-            runs = runs.filter(run_number__lte=runs_to)
-            alert_filters.append("Runs to: " + str(runs_to))
-        except:
-            alert_errors.append("Invalid Run Number: " + str(runs_to))
-            runs = RunInfo.objects.none()
-
-    if type_id:
-        if is_valid_id(type_id, Type):
-            runs = runs.filter(type=type_id)
-            alert_filters.append("Type: " + str(type_id))
-        else:
-            alert_errors.append("Invalid Type: " + str(type_id))
-            runs = RunInfo.objects.none()
-
-    if not date_filter_value and not type_id and not date_from and not date_to and not runs_from and not runs_to:
-        alert_infos.append(
-            "No filters applied. Showing every run you have ever certified!")
-    context = {}
-
-    reference_run_ids = runs.values_list('reference_run').distinct()
-    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
-
-    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
-
-    runinfotypelists = []  # create one runinfotypelist per type
-
-    for run in runs:
-        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
-            runinfotypelists.append(
-                RunInfoTypeList(run.type, len(runinfotypelists) + 1))
-        runinfotypelists[-1].add_run(run)
-
-    context['runs'] = []
-    context['tk_maps'] = []
-    context['certified_runs'] = []
-    context['sums'] = []
-
-    for runinfotypelist in runinfotypelists:
-        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
-        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
-        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
-        context['sums'].append(runinfotypelist.get_sums_ascii_table())
-
-    context['alert_errors'] = alert_errors
-    context['alert_infos'] = alert_infos
-    context['alert_filters'] = alert_filters
+    context = {"refs": summary.reference_runs(),
+               "runs": summary.runs_checked_per_type(),
+               "tk_maps": summary.tracker_maps_per_type(),
+               "certified_runs": summary.certified_runs_per_type(),
+               "sums": summary.sum_of_quantities_per_type(),
+               'alert_errors': alert_errors, 'alert_infos': alert_infos,
+               'alert_filters': alert_filters}
 
     return render(request, 'certhelper/summary.html', context)
 
@@ -296,38 +216,6 @@ def load_subsubcategories(request):
                   {'categories': subsubcategories})
 
 
-# TODO make this faster, unneccessary databaes queries slows down page load when no filters are applied
-def generate_summary(queryset):
-    runs = queryset
-    context = {}
-
-    reference_run_ids = runs.values_list('reference_run').distinct()
-    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
-
-    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
-
-    runinfotypelists = []  # create one runinfotypelist per type
-
-    for run in runs:
-        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
-            runinfotypelists.append(
-                RunInfoTypeList(run.type, len(runinfotypelists) + 1))
-        runinfotypelists[-1].add_run(run)
-
-    context['runs'] = []
-    context['tk_maps'] = []
-    context['certified_runs'] = []
-    context['sums'] = []
-
-    for runinfotypelist in runinfotypelists:
-        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
-        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
-        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
-        context['sums'].append(runinfotypelist.get_sums_ascii_table())
-
-    return context
-
-
 @staff_member_required
 def shiftleader_view(request):
     """
@@ -352,7 +240,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['summary'] = generate_summary(self.filterset.qs)
+        context['summary'] = SummaryReport(self.filterset.qs)
         context['slreport'] = NewShiftLeaderReport(self.filterset.qs)
         context['deleted_runs'] = DeletedRunInfoTable(
             RunInfo.all_objects.dead().order_by('-run_number'))
