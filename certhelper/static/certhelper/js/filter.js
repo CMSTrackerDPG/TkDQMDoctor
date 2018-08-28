@@ -3,12 +3,10 @@ function disable_date_dropdown_lists() {
     // to simplify url get parameters
 
     $( "select[name^='date__lte_']" ).each(function(){
-        console.log("disabling " + this.name);
         $(this).attr("disabled", "disabled");
     });
 
     $( "select[name^='date__gte_']" ).each(function(){
-        console.log("disabling " + this.name);
         $(this).attr("disabled", "disabled");
     });
 }
@@ -60,33 +58,83 @@ function disable_empty_filter_fields(form){
     }).attr("disabled", "disabled");
 }
 
+/**
+ * Offset the given date by the number of given days
+ *
+ * returns a Date object
+ *
+ * Example:
+ * offset_date("2018-05-13", 2) -> "2018-05-15"
+ * offset_date("2018-05-1", -3) -> "2018-04-28"
+ */
+function offset_date(date, day_offset){
+    let new_date = new Date(date);
+    new_date.setDate(date.getDate() + day_offset);
+    return new_date
+}
+
+/**
+ * Returns the weeks monday of a given date
+ *
+ * Example:
+ * get_monday("2018-08-28") -> "2018-08-27"
+ */
+function get_monday(date) {
+    let monday = new Date(date);
+
+    // in Date() week begins with sunday
+    const day = date.getDay() + 6 % 7;  // make monday the start of week, not sunday
+
+    monday.setDate(date.getDate() - day + 1);
+    return monday
+}
+
+/**
+ * Returns the weeks sunday of a given date
+ *
+ * Example:
+ * get_sunday("2018-08-28") -> "2018-09-02"
+ */
+function get_sunday(date) {
+    let sunday = get_monday(date);
+    sunday.setDate(sunday.getDate() + 6);
+    return sunday
+}
 
 function set_date_range_filter_to_this_week(){
     const today = new Date(); // current date
-    let monday = new Date(today);
-    let sunday = new Date(today);
-
-    monday.setDate(today.getDate() - today.getDay() + 1);
-    sunday.setDate(monday.getDate() + 6);
-
-    console.log("monday + " + monday);
-    console.log("sunday + " + sunday);
-
+    const monday = get_monday(today);
+    const sunday = get_sunday(today);
 
     set_date_range_filter_to(monday, sunday);
 }
 
 function set_date_range_filter_to_last_week(){
     const today = new Date();
-    let about_a_week_ago = new Date(today);
-    about_a_week_ago.setDate(today.getDate() - 7);
+    const about_a_week_ago = offset_date(today, -7);
 
-    let monday = new Date(about_a_week_ago);
+    const monday = get_monday(about_a_week_ago);
+    const sunday = get_sunday(about_a_week_ago);
 
-    monday.setDate(about_a_week_ago.getDate() - about_a_week_ago.getDay() + 1);
+    set_date_range_filter_to(monday, sunday);
+}
 
-    let sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
+function set_week_to_previous(){
+    const selected_date = get_set_filter_date_from();
+    const about_a_week_ago = offset_date(selected_date, -7);
+
+    const monday = get_monday(about_a_week_ago);
+    const sunday = get_sunday(about_a_week_ago);
+
+    set_date_range_filter_to(monday, sunday);
+}
+
+function set_week_to_next(){
+    const selected_date = get_set_filter_date_to();
+    const about_a_week_after = offset_date(selected_date, 6);
+
+    const monday = get_monday(about_a_week_after);
+    const sunday = get_sunday(about_a_week_after);
 
     set_date_range_filter_to(monday, sunday);
 }
@@ -94,6 +142,28 @@ function set_date_range_filter_to_last_week(){
 function set_date_range_filter_to_today(){
     const today = new Date();
     set_date_range_filter_to(today, today);
+}
+
+/**
+ * @returns Date "from:" date that was set in the filter panel
+ */
+function get_set_filter_date_from(){
+    const day = $("#id_date__gte_day").val();
+    const month = $("#id_date__gte_month").val();
+    const year = $("#id_date__gte_year").val()
+
+    return new Date(year + "-" + month + "-" + day);
+}
+
+/**
+ * @returns Date "to:" date that was set in the filter panel
+ */
+function get_set_filter_date_to(){
+    const day = $("#id_date__lte_day").val();
+    const month = $("#id_date__lte_month").val();
+    const year = $("#id_date__lte_year").val();
+
+    return new Date(year + "-" + month + "-" + day);
 }
 
 function set_date_range_filter_to(date_from, date_to){
