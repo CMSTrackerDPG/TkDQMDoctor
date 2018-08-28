@@ -266,10 +266,10 @@ class TestRunInfoQuerySet:
         assert ReferenceRun.objects.get(reference_run=3) == refs[2]
 
     def test_types(self):
-        t1 = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Express")
-        t2 = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Prompt")
-        t3 = mixer.blend("certhelper.Type", runtype="Collisions", reco="Express")
-        t4 = mixer.blend("certhelper.Type", runtype="Collisions", reco="Prompt")
+        t1 = mixer.blend("certhelper.Type", runtype="Collisions", reco="Express")
+        t2 = mixer.blend("certhelper.Type", runtype="Collisions", reco="Prompt")
+        t3 = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Express")
+        t4 = mixer.blend("certhelper.Type", runtype="Cosmics", reco="Prompt")
 
         r1 = mixer.blend("certhelper.RunInfo", type=t2)
         r2 = mixer.blend("certhelper.RunInfo", type=t2)
@@ -283,12 +283,11 @@ class TestRunInfoQuerySet:
         r10 = mixer.blend("certhelper.RunInfo", type=t2)
 
         runs = RunInfo.objects.all()
-        runs.print()
         types = runs.types()
         assert 3 == len(types)
-        assert t1 == types[0]
-        assert t2 == types[1]
-        assert t4 == types[2]
+        assert t1 in types
+        assert t2 in types
+        assert t4 in types
 
         per_type = runs.per_type()
         assert r5 in per_type[0]
