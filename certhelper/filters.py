@@ -38,14 +38,19 @@ class RunInfoFilter(django_filters.FilterSet):
             'maxlength': 10,
         })
     )
-    type = django_filters.ModelChoiceFilter(queryset=Type.objects.all(), widget=forms.Select(attrs={
-        'class': 'form-control',
-        'style': 'width: 500px;',
-    }))
+    type = django_filters.ModelChoiceFilter(queryset=Type.objects.all(),
+                                            widget=forms.Select(attrs={
+                                                'class': 'form-control',
+                                                'style': 'width: 500px;',
+                                            }))
 
     class Meta:
         model = RunInfo
         fields = ['type', 'date', 'problem_categories']
+
+
+class InFilter(django_filters.filters.BaseInFilter, django_filters.filters.CharFilter):
+    pass
 
 
 class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
@@ -60,10 +65,13 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
         })
     )
 
-    type = django_filters.ModelChoiceFilter(queryset=Type.objects.all(), widget=forms.Select(attrs={
-        'class': 'form-control',
-        'style': 'width: 600px;',
-    }))
+    type = django_filters.ModelChoiceFilter(queryset=Type.objects.all(),
+                                            widget=forms.Select(attrs={
+                                                'class': 'form-control',
+                                                'style': 'width: 600px;',
+                                            }))
+
+    run_number__in = InFilter(field_name='run_number', lookup_expr='in')
 
     class Meta:
         model = RunInfo

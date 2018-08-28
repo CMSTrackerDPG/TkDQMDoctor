@@ -28,7 +28,7 @@ function simplify_date_filter_parameters(form){
     disable_date_dropdown_lists();
 
     let date_gte;
-    if (gte_day !== "0") {
+    if (gte_day !== "0" && gte_day !== null && gte_day !== "") {
         date_gte = gte_year + "-" + gte_month + "-" + gte_day;
         console.log("date from: " + date_gte);
         $('<input />').attr('type', 'hidden')
@@ -37,7 +37,7 @@ function simplify_date_filter_parameters(form){
             .appendTo(form);
     }
     let date_lte;
-    if (lte_day !== "0") {
+    if (lte_day !== "0" && lte_day !== null && lte_day !== "") {
         date_lte = lte_year + "-" + lte_month + "-" + lte_day;
         console.log("date until: " + date_lte);
         $('<input />').attr('type', 'hidden')
@@ -47,14 +47,25 @@ function simplify_date_filter_parameters(form){
     }
 }
 
+function ignore_unwanted_filters(form){
+    let checked_element = $(".ignore-other-filter-checkbox:checked");
+    if(checked_element.length > 0){
+        checked_element = checked_element.attr('id').replace('id-ignore-', '');
+        console.log("checked: " + checked_element);
+
+        form.find(":input").filter(function () {
+            return !(this.id.indexOf(checked_element) !== -1);
+        }).val("");
+    }
+}
+
 function disable_empty_filter_fields(form){
     // disables every input field in a form
     // such that it does not appear as a
     // GET parameter in the url
 
     form.find(":input").filter(function () {
-        console.log("disabling " + this.name + ": " + this.value);
-        return !this.value || this.value == "0";
+        return !this.value || this.value === "0";
     }).attr("disabled", "disabled");
 }
 
@@ -83,9 +94,9 @@ function get_monday(date) {
     let monday = new Date(date);
 
     // in Date() week begins with sunday
-    const day = date.getDay() + 6 % 7;  // make monday the start of week, not sunday
+    const day = (date.getDay() - 1) % 7;  // make monday the start of week, not sunday
 
-    monday.setDate(date.getDate() - day + 1);
+    monday.setDate(date.getDate() - day);
     return monday
 }
 
@@ -174,4 +185,11 @@ function set_date_range_filter_to(date_from, date_to){
     $("#id_date__lte_day").val(date_to.getDate());
     $("#id_date__lte_month").val(date_to.getMonth() + 1);
     $("#id_date__lte_year").val(date_to.getFullYear());
+}
+
+function uncheck_all_ignore_other_filter_checkboxes(){
+    $(".ignore-other-filter-checkbox").each(function(){
+        var checkbox = $(this);
+        checkbox.prop("checked", false);
+    });
 }

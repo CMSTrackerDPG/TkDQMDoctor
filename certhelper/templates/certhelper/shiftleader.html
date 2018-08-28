@@ -101,10 +101,35 @@
         $(document).ready(function () {
             $("#sl-filter-form").submit(function () {
                 var form = $(this);
-                disable_empty_filter_fields(form); // simpliflies URL alot by removing unused fields
+                ignore_unwanted_filters(form);
                 simplify_date_filter_parameters(form); // shortens date GET parameters in URL
+                disable_empty_filter_fields(form); // simpliflies URL alot by removing unused fields
                 return true; // ensure form still submits
             });
+
+            $(".ignore-other-filter-checkbox").change(function(){
+                if ($(this).is(":checked")){
+                    uncheck_all_ignore_other_filter_checkboxes();
+                    $(this).prop("checked", true);
+                }
+
+            });
+
+            $("#id_run_number__in").css("width", "525px");
+
+            $("#id_run_number__in").change(function(){
+                console.log("changing" + $(this).val());
+                let run_numbers_list = $(this).val();
+                console.log("new" + run_numbers_list);
+                run_numbers_list = run_numbers_list.replace(/[^0-9]/gmi, " ");
+                run_numbers_list = run_numbers_list.replace(/\s+/g,' ');
+                run_numbers_list = run_numbers_list.replace(/\s+/g,', ');
+
+                console.log("new" + run_numbers_list);
+                $(this).val(run_numbers_list);
+                console.log("changed" + $(this).val());
+            });
+
         });
     </script>
 {% endblock script %}

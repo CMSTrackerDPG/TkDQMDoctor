@@ -83,7 +83,16 @@ def is_valid_id(primary_key, Classname):
 
 
 def request_contains_filter_parameter(request):
-    for candidate in ["options", "category", "runs", "type", "date", "userid"]:
+    for candidate in [
+        "options",
+        "category",
+        "runs",
+        "type",
+        "date",
+        "userid",
+        "run_number",
+        "problem_categories"
+    ]:
         for word in request.GET:
             if candidate in word:
                 return True
