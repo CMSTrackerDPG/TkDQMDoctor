@@ -247,7 +247,7 @@ class Type(SoftDeletionModel):
     dataset = models.CharField(max_length=150)
 
     class Meta:
-        ordering = ('runtype', 'reco', '-id')
+        ordering = ('runtype', 'reco', 'bfield', 'beamtype', 'beamenergy', '-dataset')
         unique_together = ["reco", "runtype", "bfield", "beamtype", "beamenergy",
                            "dataset"]
 
@@ -270,7 +270,7 @@ class ReferenceRun(SoftDeletionModel):
     class Meta:
         unique_together = ["reference_run", "reco", "runtype", "bfield", "beamtype",
                            "beamenergy", "dataset"]
-        ordering = ('-reference_run',)
+        ordering = ('-reference_run', 'runtype', 'reco')
 
     def __str__(self):
         return str(self.reference_run) + " " + str(self.reco) + " " + str(

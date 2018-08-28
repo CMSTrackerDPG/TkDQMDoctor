@@ -298,13 +298,13 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
     def reference_runs(self):
         from .models import ReferenceRun
-        return ReferenceRun.objects \
-            .filter(reference_run__in=self.reference_run_numbers())
+        ref_ids = self.values_list('reference_run', flat=True).order_by('reference_run')
+        return ReferenceRun.objects.filter(id__in=ref_ids)
 
     def types(self):
         from .models import Type
-        type_ids = self.values_list('type', flat=True).order_by('type').distinct()
-        return Type.objects.all().filter(id__in=type_ids).order_by('id')
+        type_ids = self.values_list('type', flat=True).order_by('type')
+        return Type.objects.filter(id__in=type_ids)
 
     def per_day(self):
         """values_list
