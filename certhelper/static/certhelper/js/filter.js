@@ -117,7 +117,7 @@ function set_date_range_filter_to_this_week(){
     const monday = get_monday(today);
     const sunday = get_sunday(today);
 
-    set_date_range_filter_to(monday, sunday);
+    set_date_range_filter(monday, sunday);
 }
 
 function set_date_range_filter_to_last_week(){
@@ -127,7 +127,7 @@ function set_date_range_filter_to_last_week(){
     const monday = get_monday(about_a_week_ago);
     const sunday = get_sunday(about_a_week_ago);
 
-    set_date_range_filter_to(monday, sunday);
+    set_date_range_filter(monday, sunday);
 }
 
 function set_week_to_previous(){
@@ -137,7 +137,7 @@ function set_week_to_previous(){
     const monday = get_monday(about_a_week_ago);
     const sunday = get_sunday(about_a_week_ago);
 
-    set_date_range_filter_to(monday, sunday);
+    set_date_range_filter(monday, sunday);
 }
 
 function set_week_to_next(){
@@ -147,12 +147,12 @@ function set_week_to_next(){
     const monday = get_monday(about_a_week_after);
     const sunday = get_sunday(about_a_week_after);
 
-    set_date_range_filter_to(monday, sunday);
+    set_date_range_filter(monday, sunday);
 }
 
 function set_date_range_filter_to_today(){
     const today = new Date();
-    set_date_range_filter_to(today, today);
+    set_date_range_filter(today, today);
 }
 
 /**
@@ -177,7 +177,7 @@ function get_set_filter_date_to(){
     return new Date(year + "-" + month + "-" + day);
 }
 
-function set_date_range_filter_to(date_from, date_to){
+function set_date_range_filter(date_from, date_to){
     $("#id_date__gte_day").val(date_from.getDate());
     $("#id_date__gte_month").val(date_from.getMonth() + 1);
     $("#id_date__gte_year").val(date_from.getFullYear());
@@ -185,6 +185,8 @@ function set_date_range_filter_to(date_from, date_to){
     $("#id_date__lte_day").val(date_to.getDate());
     $("#id_date__lte_month").val(date_to.getMonth() + 1);
     $("#id_date__lte_year").val(date_to.getFullYear());
+
+    update_filter_week_display();
 }
 
 function uncheck_all_ignore_other_filter_checkboxes(){
@@ -193,3 +195,38 @@ function uncheck_all_ignore_other_filter_checkboxes(){
         checkbox.prop("checked", false);
     });
 }
+
+/**
+ * Source: https://weeknumber.net/how-to/javascript
+ *
+ * @returns {number} the ISO week of the date.
+ */
+Date.prototype.getWeek = function() {
+  var date = new Date(this.getTime());
+   date.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year.
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  // January 4 is always in week 1.
+  var week1 = new Date(date.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+                        - 3 + (week1.getDay() + 6) % 7) / 7);
+};
+
+function update_filter_week_display(){
+    const date_from = get_set_filter_date_from();
+    const date_to = get_set_filter_date_to();
+    const week_from = date_from.getWeek();
+    const week_to = date_to.getWeek();
+
+    if(week_from === week_to){
+        $("#id_filter_week_display").html("Week " + week_from);
+    } else {
+        $("#id_filter_week_display").html("");
+    }
+}
+
+$("#id_date__gte_year, #id_date__gte_month, #id_date__gte_day, #id_date__lte_year, #id_date__lte_month, #id_date__lte_day").change(function () {
+   update_filter_week_display();
+});
+update_filter_week_display(); // on page load
