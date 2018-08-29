@@ -1,0 +1,11 @@
+.good-component {
+    text-align: center;
+    background-color: #4CAF50;
+    color: white;
+}
+
+.bad-component {
+    text-align: center;
+    background-color: #ff0000;
+    color: white;
+}

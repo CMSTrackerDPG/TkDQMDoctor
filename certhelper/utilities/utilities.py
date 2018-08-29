@@ -3,6 +3,7 @@ import datetime
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from terminaltables import AsciiTable
 
 from certhelper.utilities.logger import get_configured_logger
@@ -316,3 +317,28 @@ def get_runs_from_request_filters(request, alert_errors, alert_infos, alert_filt
             "No filters applied. Showing every run you have ever certified!")
 
     return runs
+
+
+def render_component(component, component_lowstat):
+    """
+    Renders the component (Pixel/ SiStrip/ Tracking) for the RuninfoTable
+
+    If lowstat is checked then "Lowstat" is displayed instead of Good/Bad/Excluded
+    If the Component is good, then the color will be green, otherwise red.
+
+    This should lead to a similar behavior as in the RunRegistry
+    """
+    css_class = None
+    if component == "Good" or component == "Lowstat":
+        css_class = "good-component"
+    elif component == "Bad" or component == "Excluded":
+        css_class = "bad-component"
+
+    component_value = component
+
+    if component_lowstat is True:
+        component_value = "Lowstat"
+
+    if css_class:
+        return mark_safe('<div class="{}">{}</div>'.format(css_class, component_value))
+    return component_lowstat

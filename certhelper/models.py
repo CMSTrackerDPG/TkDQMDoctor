@@ -296,8 +296,11 @@ class RunInfo(SoftDeletionModel):
     number_of_ls = models.PositiveIntegerField()
     int_luminosity = models.DecimalField(max_digits=20, decimal_places=2)
     pixel = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
+    pixel_lowstat = models.BooleanField(default=False)
     sistrip = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
+    sistrip_lowstat = models.BooleanField(default=False)
     tracking = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
+    tracking_lowstat = models.BooleanField(default=False)
     comment = models.TextField(blank=True)
     date = models.DateField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True,

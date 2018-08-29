@@ -96,17 +96,23 @@ def fill_form_with_data(browser, data=None):
         data.get("tracking", "Good"))
 
 
-def fill_and_submit_add_run_form(browser):
+def select_types_and_reference_runs_in_form(browser):
     wait_until(Select(browser.find_element_by_id("id_type")).select_by_index, 1)
     time.sleep(0.1)
-    options = browser.find_elements_by_css_selector("select#id_reference_run > option:not([disabled])")
+    options = browser.find_elements_by_css_selector(
+        "select#id_reference_run > option:not([disabled])")
     the_value = None
     for option in options:
         the_value = option.get_attribute("value")
         if the_value != "":
             break
 
-    wait_until(Select(browser.find_element_by_id("id_reference_run")).select_by_value, the_value)
+    wait_until(Select(browser.find_element_by_id("id_reference_run")).select_by_value,
+               the_value)
+
+
+def fill_and_submit_add_run_form(browser):
+    select_types_and_reference_runs_in_form(browser)
     fill_form_with_data(browser)
     browser.find_element_by_id("id_submit_add_run").click()
 

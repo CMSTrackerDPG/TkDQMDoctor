@@ -20,6 +20,8 @@
 {% endblock %}
 
 {% block style %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "certhelper/css/runinfo_table.css" %}" type="text/css">
     <style>
         .top-buffer {
             margin-top: 20px;

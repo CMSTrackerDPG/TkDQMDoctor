@@ -1,5 +1,6 @@
 import django_tables2 as tables
 
+from certhelper.utilities.utilities import render_component
 from .models import RunInfo, ReferenceRun
 
 
@@ -26,6 +27,15 @@ class RunInfoTable(tables.Table):
                   'date')
         attrs = {'class': 'table table-hover table-bordered'}
 
+    def render_pixel(self, record):
+        return render_component(record.pixel, record.pixel_lowstat)
+
+    def render_sistrip(self, record):
+        return render_component(record.sistrip, record.sistrip_lowstat)
+
+    def render_tracking(self, record):
+        return render_component(record.tracking, record.tracking_lowstat)
+
 
 class READONLYRunInfoTable(tables.Table):
     class Meta:
@@ -44,11 +54,21 @@ class READONLYRunInfoTable(tables.Table):
                   'date')
         attrs = {'class': 'table table-hover table-bordered'}
 
+    def render_pixel(self, record):
+        return render_component(record.pixel, record.pixel_lowstat)
+
+    def render_sistrip(self, record):
+        return render_component(record.sistrip, record.sistrip_lowstat)
+
+    def render_tracking(self, record):
+        return render_component(record.tracking, record.tracking_lowstat)
+
 
 class ReferenceRunTable(tables.Table):
     class Meta:
         model = ReferenceRun
-        fields = ['id', 'reference_run', 'reco', 'runtype', 'bfield', 'beamtype', 'beamenergy', 'dataset', ]
+        fields = ['id', 'reference_run', 'reco', 'runtype', 'bfield', 'beamtype',
+                  'beamenergy', 'dataset', ]
         attrs = {'class': 'table table-hover table-bordered'}
 
 

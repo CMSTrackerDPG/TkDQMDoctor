@@ -7,7 +7,8 @@ from selenium.webdriver.support.select import Select
 
 from tests.credentials import *
 from tests.utils.selenium_utilities import try_to_login_user, \
-    check_all_checklists, fill_and_submit_add_run_form, fill_form_with_data
+    check_all_checklists, fill_and_submit_add_run_form, fill_form_with_data, \
+    select_types_and_reference_runs_in_form
 from tests.utils.wait import wait_until, wait_for_cell
 
 
@@ -439,3 +440,53 @@ class TestShifter:
         help_text = wait_until(website.find_element_by_class_name, "has-success") \
             .find_element_by_class_name("help-block").text
         assert "" == help_text
+
+    def test_create_certification_lowstat(
+            self, website, shifter, some_certified_runs, wait):
+        try_to_login_user(website, SHIFTER1_USERNAME, PASSWORD)
+        wait_until(website.find_element_by_link_text, "Add Run").click()
+        select_types_and_reference_runs_in_form(website)
+        website.find_element_by_id("id_pixel_lowstat").click()
+        website.find_element_by_id("id_sistrip_lowstat").click()
+        website.find_element_by_id("id_tracking_lowstat").click()
+        fill_form_with_data(website, {"pixel": "Bad", "sistrip": "Good", "tracking": "Excluded"})
+        website.find_element_by_id("id_submit_add_run").click()
+        wait_for_cell(website, "456789", MAX_WAIT=60)
+
+        pixel = website.find_element_by_css_selector("td.pixel").get_attribute('innerHTML')
+        sistrip = website.find_element_by_css_selector("td.sistrip").get_attribute('innerHTML')
+        tracking = website.find_element_by_css_selector("td.tracking").get_attribute('innerHTML')
+
+        assert "bad-component" in pixel
+        assert "Lowstat" in pixel
+        assert "good-component" in sistrip
+        assert "Lowstat" in sistrip
+        assert "bad-component" in tracking
+        assert "Excluded" in tracking
+
+        website.find_elements_by_class_name("edit_run")[1] \
+            .find_element_by_tag_name("a").click()
+
+        assert website.find_element_by_id("id_pixel_lowstat").is_selected()
+        assert website.find_element_by_id("id_sistrip_lowstat").is_selected()
+        assert not website.find_element_by_id("id_tracking_lowstat").is_selected()
+
+        website.find_element_by_id("id_pixel_lowstat").click()
+        website.find_element_by_id("id_sistrip_lowstat").click()
+
+        website.find_element_by_id("id_submit_add_run").click()
+        wait_for_cell(website, "456789", MAX_WAIT=60)
+
+        pixel = website.find_element_by_css_selector("td.pixel").get_attribute('innerHTML')
+        sistrip = website.find_element_by_css_selector("td.sistrip").get_attribute('innerHTML')
+        tracking = website.find_element_by_css_selector("td.tracking").get_attribute('innerHTML')
+
+        assert "bad-component" in pixel
+        assert "Bad" in pixel
+        assert "Lowstat" not in pixel
+        assert "good-component" in sistrip
+        assert "Good" in sistrip
+        assert "Lowstat" not in pixel
+        assert "bad-component" in tracking
+        assert "Excluded" in tracking
+

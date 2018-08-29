@@ -141,22 +141,62 @@
                     </small>
                 </div>
             </div>
+
             {# Pixel #}
             <div class="form-group">
-                {% render_label_and_field_for form.pixel %}
+                <label class="col-sm-3 control-label">{{ form.pixel.label }}</label>
+                <div class="col-sm-6">
+                    <div class="row bootstrap3-multi-input">
+                        <div class="col-xs-10">
+                            {% render_field form.pixel class="form-control" %}
+                        </div>
+                        <div class="col-xs-2 checkbox">
+                            <label>
+                                {% render_field form.pixel_lowstat class="form-check-input" %}
+                                Lowstat
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 {% render_checklist_checkbox form.checklists.pixel not_required=checklist_not_required%}
             </div>
 
             {# SiStrip #}
             <div class="form-group">
-                {% render_label_and_field_for form.sistrip %}
-                {% render_checklist_checkbox form.checklists.sistrip not_required=checklist_not_required %}
+                <label class="col-sm-3 control-label">{{ form.sistrip.label }}</label>
+                <div class="col-sm-6">
+                    <div class="row bootstrap3-multi-input">
+                        <div class="col-xs-10">
+                            {% render_field form.sistrip class="form-control" %}
+                        </div>
+                        <div class="col-xs-2 checkbox">
+                            <label>
+                                {% render_field form.sistrip_lowstat class="form-check-input" %}
+                                Lowstat
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {% render_checklist_checkbox form.checklists.sistrip not_required=checklist_not_required%}
             </div>
 
             {# Tracking #}
             <div class="form-group">
-                {% render_label_and_field_for form.tracking %}
-                {% render_checklist_checkbox form.checklists.tracking not_required=checklist_not_required %}
+                <label class="col-sm-3 control-label">{{ form.tracking.label }}</label>
+                <div class="col-sm-6">
+                    <div class="row bootstrap3-multi-input">
+                        <div class="col-xs-10">
+                            {% render_field form.tracking class="form-control" %}
+                        </div>
+                        <div class="col-xs-2 checkbox">
+                            <label>
+                                {% render_field form.tracking_lowstat class="form-check-input" %}
+                                Lowstat
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {% render_checklist_checkbox form.checklists.tracking not_required=checklist_not_required%}
             </div>
 
             {# Categories of Problems #}
@@ -281,13 +321,53 @@
             });
 
             /**
-             * Remove green borders when jumping to the next field
+             * Remove green borders (from validation) when jumping to the next field
              */
             $("#id_run_number, #id_int_luminosity").focusout(function(){
                 let form_group = $(this).closest(".form-group");
                 if(form_group.hasClass("has-success"))
                     form_group.removeClass("has-success");
             });
+
+            /**
+             * Use the lowstat checkbox instead of the dropdown option
+             * Lowstat choice is still available because of historic reasons.
+             * This might be removed in future.
+             */
+            $('option[value="Lowstat"]').each(function () {
+                if(!$(this).is(":selected")){
+                    // Remove if not selected, to not break old certifications
+                    $(this).remove();
+                }
+            });
+
+            const components = "[name='pixel'], [name='sistrip'], [name='tracking']";
+            /**
+             * Disable lowstat checkbox when 'Excluded' is selected
+             */
+            $(components).change(function(){
+                const component_id = $(this).attr('id');
+                disable_lowstat_for_excluded_components(component_id);
+            });
+
+            /**
+             * Disable lowstat checkboxes on page load where necessary
+             */
+            $(components).each(function(){
+                const component_id = $(this).attr('id');
+                disable_lowstat_for_excluded_components(component_id);
+            });
+
+            function disable_lowstat_for_excluded_components(component_id){
+                const selector = "#" + component_id + " option:checked";
+                const option = $(selector).val();
+                const lowstat_selector = "#" + component_id + "_lowstat";
+                if(option === "Excluded"){
+                    $(lowstat_selector).prop('disabled', true);
+                } else {
+                    $(lowstat_selector).prop('disabled', false);
+                }
+            }
         });
     </script>
 {% endblock script %}
