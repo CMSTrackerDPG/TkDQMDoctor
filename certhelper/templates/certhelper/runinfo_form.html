@@ -283,15 +283,17 @@
             function validate_run_number(){
                 const run_number_text = run_number.val();
                 const reference_run_number = get_selected_reference_run_number();
-                if(run_number_text < 300000){
-                    display_validation_error("run_number", "Run number is too low");
-                } else if(run_number_text > 999999){
-                    display_validation_error("run_number", "Run number is too high");
-                } else if(Math.abs(reference_run_number - run_number_text) > 6000) {
-                    const warning_text = "Run number seems odd. Please check";
-                    display_validation_warning("run_number", warning_text);
-                } else {
-                    display_validation_success("run_number", "");
+                if(run_number_text !== ""){
+                    if(run_number_text < 300000){
+                        display_validation_error("run_number", "Run number is too low");
+                    } else if(run_number_text > 999999){
+                        display_validation_error("run_number", "Run number is too high");
+                    } else if(Math.abs(reference_run_number - run_number_text) > 6000) {
+                        const warning_text = "Run number seems odd. Please check";
+                        display_validation_warning("run_number", warning_text);
+                    } else {
+                        display_validation_success("run_number", "");
+                    }
                 }
             }
 

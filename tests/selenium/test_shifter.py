@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from django.utils import timezone
 from selenium.common.exceptions import NoSuchElementException
@@ -461,7 +463,7 @@ class TestShifter:
         assert "Lowstat" in pixel
         assert "good-component" in sistrip
         assert "Lowstat" in sistrip
-        assert "bad-component" in tracking
+        assert "excluded-component" in tracking
         assert "Excluded" in tracking
 
         website.find_elements_by_class_name("edit_run")[1] \
@@ -487,6 +489,6 @@ class TestShifter:
         assert "good-component" in sistrip
         assert "Good" in sistrip
         assert "Lowstat" not in pixel
-        assert "bad-component" in tracking
+        assert "excluded-component" in tracking
         assert "Excluded" in tracking
 
