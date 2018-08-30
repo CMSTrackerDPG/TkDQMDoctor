@@ -8,6 +8,12 @@
 .bad-component {
     width: 64px;
     text-align: center;
-    background-color: #ff0000;
+    background-color: red;
+    color: white;
+}
+
+.excluded-component {
+    text-align: center;
+    background-color: #6E6E6E;
     color: white;
 }

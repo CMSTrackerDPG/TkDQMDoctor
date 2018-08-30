@@ -331,14 +331,22 @@ def render_component(component, component_lowstat):
     css_class = None
     if component == "Good" or component == "Lowstat":
         css_class = "good-component"
-    elif component == "Bad" or component == "Excluded":
+    elif component == "Bad":
         css_class = "bad-component"
+    elif component == "Excluded":
+        css_class = "excluded-component"
 
     component_value = component
 
-    if component_lowstat is True:
+    if component_lowstat is True and component != "Excluded":
         component_value = "Lowstat"
 
     if css_class:
         return mark_safe('<div class="{}">{}</div>'.format(css_class, component_value))
     return component_lowstat
+
+
+def render_trackermap(trackermap):
+    if trackermap == "Missing":
+        return mark_safe('<div class="bad-component">{}</div>'.format(trackermap))
+    return trackermap

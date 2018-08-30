@@ -1,6 +1,6 @@
 import django_tables2 as tables
 
-from certhelper.utilities.utilities import render_component
+from certhelper.utilities.utilities import render_component, render_trackermap
 from .models import RunInfo, ReferenceRun
 
 
@@ -36,6 +36,9 @@ class RunInfoTable(tables.Table):
     def render_tracking(self, record):
         return render_component(record.tracking, record.tracking_lowstat)
 
+    def render_trackermap(self, value):
+        return render_trackermap(value)
+
 
 class READONLYRunInfoTable(tables.Table):
     class Meta:
@@ -62,6 +65,9 @@ class READONLYRunInfoTable(tables.Table):
 
     def render_tracking(self, record):
         return render_component(record.tracking, record.tracking_lowstat)
+
+    def render_trackermap(self, value):
+        return render_trackermap(value)
 
 
 class ReferenceRunTable(tables.Table):
