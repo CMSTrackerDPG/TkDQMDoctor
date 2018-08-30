@@ -158,6 +158,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="id_pixel_helptext" class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.pixel not_required=checklist_not_required%}
             </div>
 
@@ -177,6 +178,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="id_sistrip_helptext" class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.sistrip not_required=checklist_not_required%}
             </div>
 
@@ -196,6 +198,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="id_tracking_helptext" class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.tracking not_required=checklist_not_required%}
             </div>
 
@@ -274,59 +277,47 @@
              * Validate the run number
              */
             run_number.on('input',function(){
-                let form_group = $(this).closest(".form-group");
-                let reference_run_number = $("#id_reference_run option:selected").text().toLowerCase().split(' ')[0];
-                let help_text = $("#id_run_number_helptext");
-                if($(this).val() < 300000){
-                    form_group.removeClass("has-success");
-                    form_group.removeClass("has-warning");
-                    form_group.addClass("has-error");
-                    help_text.text("Run number is too low");
-                } else if($(this).val() > 999999){
-                    form_group.removeClass("has-success");
-                    form_group.removeClass("has-warning");
-                    form_group.addClass("has-error");
-                    help_text.text("Run number is too high");
-                } else if(Math.abs(reference_run_number -  $(this).val()) > 6000) {
-                    form_group.removeClass("has-success");
-                    form_group.removeClass("has-error");
-                    form_group.addClass("has-warning");
-                    help_text.text("Run number seems odd. Please check");
-                } else {
-                    form_group.removeClass("has-warning");
-                    form_group.removeClass("has-error");
-                    form_group.addClass("has-success");
-                    help_text.text("");
-                }
+                validate_run_number();
             });
+
+            function validate_run_number(){
+                const run_number_text = run_number.val();
+                const reference_run_number = get_selected_reference_run_number();
+                if(run_number_text < 300000){
+                    display_validation_error("run_number", "Run number is too low");
+                } else if(run_number_text > 999999){
+                    display_validation_error("run_number", "Run number is too high");
+                } else if(Math.abs(reference_run_number - run_number_text) > 6000) {
+                    const warning_text = "Run number seems odd. Please check";
+                    display_validation_warning("run_number", warning_text);
+                } else {
+                    display_validation_success("run_number", "");
+                }
+            }
 
             /**
              * Validate the integrated luminosity
              */
             int_luminosity.on('input',function(){
-                let form_group = $(this).closest(".form-group");
-                let runtype = $("#id_type option:selected").text().toLowerCase().split(' ')[1];
-                let help_text = $("#id_int_luminosity_helptext");
-                if(runtype == "cosmics" && $(this).val() > 0){
-                    form_group.removeClass("has-success");
-                    form_group.removeClass("has-error");
-                    form_group.addClass("has-warning");
-                    help_text.text("You certify a cosmics run. Are you sure about this value?");
-                } else {
-                    form_group.removeClass("has-warning");
-                    form_group.removeClass("has-error");
-                    form_group.addClass("has-success");
-                    help_text.text("");
-                }
+                validate_int_luminosity();
             });
+
+            function validate_int_luminosity(){
+                const int_lumi = int_luminosity.val();
+                let runtype = get_selected_runtype();
+                if(runtype === "Cosmics" && int_lumi > 0){
+                    const warning_text = "You certify a cosmics run. Are you sure about this value?";
+                    display_validation_warning("int_luminosity", warning_text);
+                } else {
+                    display_validation_success("int_luminosity", "");
+                }
+            }
 
             /**
              * Remove green borders (from validation) when jumping to the next field
              */
-            $("#id_run_number, #id_int_luminosity").focusout(function(){
-                let form_group = $(this).closest(".form-group");
-                if(form_group.hasClass("has-success"))
-                    form_group.removeClass("has-success");
+            $("form :input").focusout(function(){
+                $(".has-success").removeClass("has-success");
             });
 
             /**
@@ -348,7 +339,19 @@
             $(components).change(function(){
                 const component_id = $(this).attr('id');
                 disable_lowstat_for_excluded_components(component_id);
+                validate_tracking_component()
             });
+
+            $("#id_type").change(function(){
+                validate_tracking_component();
+                validate_int_luminosity()
+            });
+
+            $("#id_reference_run").change(function(){
+                validate_run_number();
+            });
+
+
 
             /**
              * Disable lowstat checkboxes on page load where necessary
@@ -366,6 +369,79 @@
                     $(lowstat_selector).prop('disabled', true);
                 } else {
                     $(lowstat_selector).prop('disabled', false);
+                }
+            }
+
+            function get_selected_type(){
+                return $("#id_type").find(":selected")
+            }
+
+            function get_selected_runtype(){
+                return get_selected_type().text().split(' ')[1]
+            }
+
+            function get_selected_reco(){
+                return get_selected_type().text().split(' ')[0]
+            }
+
+            function get_selected_reference_run_number(){
+                return $("#id_reference_run option:selected").text().split(' ')[0];
+            }
+
+            function get_selected_component_text(component_id){
+                return  $("#" + component_id).find(":selected").text()
+            }
+
+            function clear_validation(field_name){
+                let form_group = $("#id_" + field_name).closest(".form-group");
+                form_group.removeClass("has-success");
+                form_group.removeClass("has-warning");
+                form_group.removeClass("has-error");
+                form_group.find(".help-block").text("");
+            }
+
+            function set_help_block_text_and_class(field_name, error_text, css_class){
+                let form_group = $("#id_" + field_name).closest(".form-group");
+                let help_block = form_group.find(".help-block");
+                form_group.removeClass("has-success");
+                form_group.removeClass("has-warning");
+                form_group.removeClass("has-error");
+                form_group.addClass(css_class);
+                help_block.text(error_text);
+            }
+
+            function display_validation_error(field_name, error_text){
+                set_help_block_text_and_class(field_name, error_text, "has-error")
+            }
+
+            function display_validation_warning(field_name, error_text){
+                set_help_block_text_and_class(field_name, error_text, "has-warning")
+            }
+
+            function display_validation_success(field_name, error_text){
+                set_help_block_text_and_class(field_name, error_text, "has-success")
+            }
+
+            function validate_tracking_component(){
+                const pixel = get_selected_component_text("id_pixel");
+                const sistrip = get_selected_component_text("id_sistrip");
+                const tracking = get_selected_component_text("id_tracking");
+                const runtype = get_selected_runtype();
+
+                if(sistrip === "Bad" && tracking === "Good"){
+                    const error_text = "Tracking cant be good if SiStrip is Bad.";
+                    display_validation_error("tracking", error_text)
+                } else if(sistrip === "Excluded" && tracking === "Good"){
+                    const error_text = "Tracking cant be good if SiStrip is Excluded.";
+                    display_validation_error("tracking", error_text)
+                } else if (runtype === "Collisions" && pixel === "Bad" && tracking === "Good"){
+                    const error_text = "In Collisions Tracking cant be good if Pixel is Bad.";
+                    display_validation_error("tracking", error_text)
+                } else if (runtype === "Collisions" && pixel === "Excluded" && tracking === "Good"){
+                    const error_text = "In Collisions Tracking cant be good if Pixel is Excluded.";
+                    display_validation_error("tracking", error_text)
+                } else {
+                    clear_validation("tracking")
                 }
             }
         });
