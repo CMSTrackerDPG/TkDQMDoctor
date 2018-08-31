@@ -337,3 +337,16 @@ class TestRunInfoQuerySet:
         for t in ReferenceRun.objects.all():
             print(t)
         RunInfo.objects.all().order_by("run_number").print_verbose()
+
+    def test_trackermap_missing(self):
+        mixer.blend("certhelper.RunInfo", trackermap="Exists")
+        mixer.blend("certhelper.RunInfo", trackermap="Exists")
+        mixer.blend("certhelper.RunInfo", trackermap="Missing")
+        mixer.blend("certhelper.RunInfo", trackermap="Exists")
+        mixer.blend("certhelper.RunInfo", trackermap="Exists")
+        mixer.blend("certhelper.RunInfo", trackermap="Missing")
+
+        runs = RunInfo.objects.all()
+
+        assert len(runs)
+        assert len(runs.trackermap_missing()) == 2

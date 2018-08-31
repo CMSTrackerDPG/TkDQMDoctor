@@ -72,3 +72,20 @@ def join_bad_runs(list_of_run_numbers):
         rendered_string += '</span>'
         return mark_safe(rendered_string)
     return ""
+
+
+@register.filter
+def as_date(yyyy_mm_dd):
+    """
+    :param yyyy_mm_dd: date string
+    :return: date object
+    """
+    return datetime.datetime.strptime(yyyy_mm_dd, '%Y-%m-%d').date()
+
+
+@register.filter
+def user(value, arg):
+    """
+    filetrs the runinfo
+    """
+    return value.filter(userid=arg)

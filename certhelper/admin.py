@@ -31,7 +31,9 @@ class RunInfoAdmin(admin.ModelAdmin):
         ("User", {'fields': ['userid']}),
         ("Information", {'fields': ['type', 'reference_run', 'run_number', 'trackermap',
                                     'number_of_ls', 'int_luminosity']}),
-        ("Health", {'fields': ['pixel', 'sistrip', 'tracking']}),
+        ("Components", {'fields': [
+            'pixel', 'pixel_lowstat', 'sistrip', 'sistrip_lowstat',
+            'tracking', 'tracking_lowstat']}),
         ("Problem Categories", {
             'fields': ['problem_categories', 'category', 'subcategory',
                        'subsubcategory']}),

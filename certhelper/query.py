@@ -1,12 +1,11 @@
 import collections
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.models import QuerySet, Q, Count, Sum, FloatField, When, Case, Value, \
-    CharField
+    CharField, Min, Max
 from django.db.models.functions import ExtractWeekDay
 from django.utils import timezone
-
-from certhelper.utilities.utilities import uniquely_sorted
 
 
 class SoftDeletionQuerySet(QuerySet):
@@ -321,6 +320,30 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         :return: list of querysets with one type per queryset
         """
         return [self.filter(type=t) for t in self.types()]
+
+    def trackermap_missing(self):
+        return self.filter(trackermap="Missing")
+
+    def shifters(self):
+        """
+        :return: list of users (shifters) in the queryset
+        """
+        user_ids = list(self.values_list('userid', flat=True)
+                    .order_by('userid').distinct())
+
+        return User.objects.filter(id__in=user_ids)
+
+    def week_number(self):
+        """
+        :return: string of the week number(s) the runs were certified in
+        """
+        if not self.exists():
+            return ""
+        min_week = self.aggregate(Min('date'))['date__min'].isocalendar()[1]
+        max_week = self.aggregate(Max('date'))['date__max'].isocalendar()[1]
+        if min_week != max_week:
+            return "{}-{}".format(min_week, max_week)
+        return min_week
 
     def print(self):
         """
