@@ -9,7 +9,9 @@ class RunInfoTable(tables.Table):
     edit_run = tables.TemplateColumn(
         '<div align="center"><a href="{% url \'certhelper:update\' record.id%}">'
         '<span class="glyphicon glyphicon-pencil"></a></div>',
-        orderable=False)
+        orderable=False, verbose_name="Edit")
+
+    userid = tables.Column(verbose_name="Shifter")
 
     class Meta:
         model = RunInfo
@@ -82,7 +84,7 @@ class ShiftleaderRunInfoTable(RunInfoTable):
     delete_run = tables.TemplateColumn(
         '<div align="center"><a href="{% url \'certhelper:delete\' record.id%}">'
         '<span class="glyphicon glyphicon-trash"></a></div>',
-        orderable=False)
+        orderable=False, verbose_name="Delete")
 
     class Meta:
         attrs = {'class': 'table table-hover table-bordered'}
