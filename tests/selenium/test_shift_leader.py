@@ -93,6 +93,7 @@ class TestShiftLeader:
 
     def test_can_view_weekly_certification(self, live_server, firefox, shiftleader,
                                            wait):
+        create_recent_run()
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Shift Leader")
@@ -190,6 +191,7 @@ class TestShiftLeader:
 
     def test_shift_leader_checklist(self, live_server, firefox, shiftleader, wait,
                                     shiftleader_checklist):
+        create_recent_run()
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Shift Leader")
@@ -201,6 +203,7 @@ class TestShiftLeader:
         assert "Make sure to do this and that." in checklist_text
 
     def test_shift_leader_no_checklist(self, live_server, firefox, shiftleader, wait):
+        create_recent_run()
         firefox.get('{}'.format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Shift Leader")
