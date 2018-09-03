@@ -80,7 +80,13 @@ def as_date(yyyy_mm_dd):
     :param yyyy_mm_dd: date string
     :return: date object
     """
-    return datetime.datetime.strptime(yyyy_mm_dd, '%Y-%m-%d').date()
+
+    try:
+        return datetime.datetime.strptime(yyyy_mm_dd, '%Y-%m-%d').date()
+    except ValueError as e:
+        if yyyy_mm_dd == "":
+            return ""
+        return e
 
 
 @register.filter

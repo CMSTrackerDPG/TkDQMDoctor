@@ -67,11 +67,21 @@
             </div>
 
             <div id="shiftleader-report" class="tab-pane fade in active">
-                <h3>Shift Leader Report</h3>
-                {% if slreport %}
-                    {% include "certhelper/components/shift-leader-report.html" %}
+                {% if filter.qs %}
+                    <div class="page-header">
+                        {% load myfilters %}
+                        {% load l10n %}
+                        <h3>Shift Leader Report - Week {{ filter.qs.week_number }} <small>{{ filter.qs.days|first|as_date|localize }} - {{ filter.qs.days|last|as_date|localize }}</small></h3>
+                    </div>
+                    {% if slreport %}
+                        {% include "certhelper/components/shift-leader-report.html" %}
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">No Shiftleader Report found.</div>
+                    {% endif %}
                 {% else %}
-                    <div class="alert alert-danger" role="alert">No Shiftleader Report found.</div>
+                    <div class="alert alert-danger" role="alert">
+                        No runs have been certified in the specified filter criteria.
+                    </div>
                 {% endif %}
             </div>
         </div>
