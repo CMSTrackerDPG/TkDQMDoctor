@@ -57,7 +57,16 @@
         <form class="well form-horizontal" method="POST" action="" id="id_runinfo_form">
             {% csrf_token %}
             {# TODO change title when editing Run #}
-            <legend style="text-align: center;"><h1>Add new Run</h1></legend>
+
+            <legend style="text-align: center;">
+                <h1>
+                    {% if object %}
+                        Update Run
+                    {% else %}
+                        Add new Run
+                    {% endif %}
+                </h1>
+            </legend>
 
             {# Run type #}
             <div class="form-group">
@@ -212,7 +221,20 @@
             {% bootstrap_field form.date field_class="col-sm-6" label_class="col-sm-3"%}
 
             {# Buttons #}
-            {% include 'certhelper/components/runinfo_form/form_buttons.html' %}
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-6 text-center">
+                    <button type="submit" id="id_submit_add_run" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        {% if object %}
+                            Update
+                        {% else %}
+                            Create
+                        {% endif %}</button>
+                    <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'">
+                        <span class="glyphicon glyphicon-remove"></span> Abort
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
 
