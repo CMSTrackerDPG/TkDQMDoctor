@@ -491,4 +491,3 @@ class TestShifter:
         assert "Lowstat" not in pixel
         assert "excluded-component" in tracking
         assert "Excluded" in tracking
-

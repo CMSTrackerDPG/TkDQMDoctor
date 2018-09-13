@@ -348,6 +348,7 @@ class RunInfo(SoftDeletionModel):
 
     @property
     def flag_has_changed(self):
+        # TODO check if this method can be deleted
         """
         Checks whether or not the flag from Express to Prompt has changed.
 

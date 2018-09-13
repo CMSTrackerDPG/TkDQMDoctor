@@ -36,6 +36,19 @@ function get_number_of_ls(){
     return $('#id_number_of_ls').val();
 }
 
+function get_pixel(){
+    return  $("#id_tracking").find(":selected").val()
+}
+
+function get_sistrip(){
+    return  $("#id_tracking").find(":selected").val()
+}
+
+function get_tracking(){
+    return  $("#id_tracking").find(":selected").val()
+}
+
+
 function get_selected_component_text(component){
     return  $("#id_" + component).find(":selected").text()
 }
@@ -96,42 +109,50 @@ function validate_int_luminosity(){
 }
 
 function validate_number_of_ls() {
-    clear_validation("number_of_ls");
-    validate_form_field_asynchronously("number_of_ls");
+    if(get_number_of_ls()){
+        clear_validation("number_of_ls");
+        validate_form_field_asynchronously("number_of_ls");
+    }
 }
 
 function validate_pixel(){
-    clear_validation("pixel");
-    validate_form_field_asynchronously("pixel");
+    if(get_pixel()){
+        clear_validation("pixel");
+        validate_form_field_asynchronously("pixel");
+    }
 }
 
 function validate_sistrip(){
-    clear_validation("sistrip");
-    validate_form_field_asynchronously("sistrip");
+    if(get_sistrip()){
+        clear_validation("sistrip");
+        validate_form_field_asynchronously("sistrip");
+    }
 }
 
 function validate_tracking(){
-    const pixel = get_selected_component_text("pixel");
-    const sistrip = get_selected_component_text("sistrip");
-    const tracking = get_selected_component_text("tracking");
-    const runtype = get_selected_runtype();
+    if(get_tracking()){
+        const pixel = get_selected_component_text("pixel");
+        const sistrip = get_selected_component_text("sistrip");
+        const tracking = get_selected_component_text("tracking");
+        const runtype = get_selected_runtype();
 
-    let error_text = "";
-    if(sistrip === "Bad" && tracking === "Good"){
-        error_text = "Tracking cant be good if SiStrip is Bad.";
-    } else if(sistrip === "Excluded" && tracking === "Good"){
-        error_text = "Tracking cant be good if SiStrip is Excluded.";
-    } else if (runtype === "Collisions" && pixel === "Bad" && tracking === "Good"){
-        error_text = "In Collisions Tracking cant be good if Pixel is Bad.";
-    } else if (runtype === "Collisions" && pixel === "Excluded" && tracking === "Good"){
-        error_text = "In Collisions Tracking cant be good if Pixel is Excluded.";
-    } else {
-        clear_validation("tracking");
-        validate_form_field_asynchronously("tracking");
+        let error_text = "";
+        if(sistrip === "Bad" && tracking === "Good"){
+            error_text = "Tracking cant be good if SiStrip is Bad.";
+        } else if(sistrip === "Excluded" && tracking === "Good"){
+            error_text = "Tracking cant be good if SiStrip is Excluded.";
+        } else if (runtype === "Collisions" && pixel === "Bad" && tracking === "Good"){
+            error_text = "In Collisions Tracking cant be good if Pixel is Bad.";
+        } else if (runtype === "Collisions" && pixel === "Excluded" && tracking === "Good"){
+            error_text = "In Collisions Tracking cant be good if Pixel is Excluded.";
+        } else {
+            clear_validation("tracking");
+            validate_form_field_asynchronously("tracking");
+        }
+
+        if(error_text)
+            display_validation_error("tracking", error_text);
     }
-
-    if(error_text)
-        display_validation_error("tracking", error_text);
 }
 
 /**

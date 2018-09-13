@@ -150,6 +150,8 @@ class RunInfoForm(ModelForm):
         self.fields["problem_categories"].widget = CheckboxSelectMultiple()
         self.fields["problem_categories"].queryset = Category.objects.all()
 
+    # TODO clean_type: make sure that per run number only one express/ prompt can exist
+
     def clean(self):
         cleaned_data = super(RunInfoForm, self).clean()
 
