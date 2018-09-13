@@ -90,7 +90,8 @@ class TestRunInfoManager:
         for condition in conditions:
             runs.append(mixer.blend(
                 'certhelper.RunInfo',
-                type=mixer.blend('certhelper.Type', runtype=condition[0], reco=condition[1]),
+                type=mixer.blend('certhelper.Type', runtype=condition[0],
+                                 reco=condition[1]),
                 int_luminosity=condition[2],
                 number_of_ls=condition[3]
             )
@@ -98,7 +99,8 @@ class TestRunInfoManager:
 
         summary = RunInfo.objects.all().summary()
 
-        a = [x for x in summary if x['type__runtype'] == 'Collisions' and x['type__reco'] == 'Express']
+        a = [x for x in summary if
+             x['type__runtype'] == 'Collisions' and x['type__reco'] == 'Express']
 
         assert len(a) == 1
         a = a[0]
@@ -114,7 +116,8 @@ class TestRunInfoManager:
         assert a["int_luminosity"] == 0.12
         assert a["number_of_ls"] == 2224
 
-        a = [x for x in summary if x['type__runtype'] == 'Collisions' and x['type__reco'] == 'Prompt']
+        a = [x for x in summary if
+             x['type__runtype'] == 'Collisions' and x['type__reco'] == 'Prompt']
 
         assert len(a) == 1
         a = a[0]
@@ -122,7 +125,8 @@ class TestRunInfoManager:
         assert a["int_luminosity"] == 123133.55
         assert a["number_of_ls"] == 10026
 
-        a = [x for x in summary if x['type__runtype'] == 'Cosmics' and x['type__reco'] == 'Prompt']
+        a = [x for x in summary if
+             x['type__runtype'] == 'Cosmics' and x['type__reco'] == 'Prompt']
 
         assert len(a) == 1
         a = a[0]
@@ -165,7 +169,8 @@ class TestRunInfoManager:
         for condition in conditions:
             runs.append(mixer.blend(
                 'certhelper.RunInfo',
-                type=mixer.blend('certhelper.Type', runtype=condition[0], reco=condition[1]),
+                type=mixer.blend('certhelper.Type', runtype=condition[0],
+                                 reco=condition[1]),
                 int_luminosity=condition[2],
                 number_of_ls=condition[3],
                 date=condition[4]
@@ -181,9 +186,11 @@ class TestRunInfoManager:
         assert len(item) == 1
 
         assert len(get_from_summary(summary, date="2018-05-14")) == 4
-        assert len(get_from_summary(summary, runtype="Collisions", date="2018-05-14")) == 2
+        assert len(
+            get_from_summary(summary, runtype="Collisions", date="2018-05-14")) == 2
         assert len(get_from_summary(summary, reco="Express", date="2018-05-14")) == 2
-        assert len(get_from_summary(summary, "Collisions", "Express", "2018-05-14")) == 1
+        assert len(
+            get_from_summary(summary, "Collisions", "Express", "2018-05-14")) == 1
         assert len(get_from_summary(summary, date="2018-05-15")) == 1
         assert len(get_from_summary(summary, date="2018-05-16")) == 0
         assert len(get_from_summary(summary, date="2018-05-17")) == 1
@@ -191,7 +198,8 @@ class TestRunInfoManager:
         assert len(get_from_summary(summary, date="2018-05-19")) == 0
         assert len(get_from_summary(summary, date="2018-05-20")) == 3
 
-        assert get_from_summary(summary, date="2018-05-18")[0]["int_luminosity"] == 154667.12
+        assert get_from_summary(summary, date="2018-05-18")[0][
+                   "int_luminosity"] == 154667.12
         assert get_from_summary(summary, date="2018-05-18")[0]["number_of_ls"] == 144
         assert get_from_summary(summary, date="2018-05-14")[2]["int_luminosity"] == 0.12
 
@@ -270,3 +278,82 @@ class TestRunInfoManager:
         assert cosmics["prompt_missing"] == [10, 12, 13]
         assert cosmics["changed_good"] == []
         assert cosmics["changed_bad"] == [14]
+
+    def test_check_integrity_of_run(self):
+        """
+        Checks if the given run has any inconsistencies with already certified runs.
+        :return:
+        """
+        express_type = mixer.blend(
+            "certhelper.Type",
+            reco="Express",
+            beamtype='HeavyIon-Proton'
+        )
+
+        prompt_type = mixer.blend(
+            "certhelper.Type",
+            reco="Prompt",
+            runtype=express_type.runtype,
+            bfield=express_type.bfield,
+            beamtype=express_type.beamtype,
+            beamenergy=express_type.beamenergy
+        )
+
+        express_ref = mixer.blend("certhelper.ReferenceRun", reco="Express")
+        prompt_ref = mixer.blend("certhelper.ReferenceRun", reco="Prompt")
+
+        express_run = mixer.blend(
+            'certhelper.RunInfo',
+            type=express_type,
+            reference_run=express_ref)
+
+        # necessary because int_luminosity is buggy for some reason:
+        # -4.654900146333296E+17 != -465490014633329600.00
+        express_run.refresh_from_db()
+
+        prompt_run = RunInfo.objects.get()
+        prompt_run.pk = None
+        prompt_run.type = prompt_type
+        prompt_run.reference_run = prompt_ref
+
+        assert {} == RunInfo.objects.check_integrity_of_run(prompt_run)
+
+        prompt_run.type.beamtype = 'Proton-Proton'
+
+
+        assert not prompt_run.pk
+        assert "beamtype" in RunInfo.objects.check_integrity_of_run(prompt_run)
+
+        prompt_run.save()
+        assert express_run.pk + 1 == prompt_run.pk
+
+        assert "beamtype" in RunInfo.objects.check_integrity_of_run(prompt_run)
+
+        express_run.pixel = "Good"
+        express_run.save()
+        prompt_run.pixel = "Lowstat"
+        assert "beamtype" in RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert "pixel" in RunInfo.objects.check_integrity_of_run(prompt_run)
+
+        prompt_run.type.beamtype = 'HeavyIon-Proton'
+        express_run.pixel = "Lowstat"
+        check = RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert "pixel" in check
+        assert "Good" == check["pixel"]
+        assert "Good" != prompt_run.pixel
+        express_run.save()
+        prompt_run.save()
+
+        assert {} == RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert {} == RunInfo.objects.check_integrity_of_run(express_run)
+
+        express_run.type.runtype = "Cosmics"
+        prompt_run.type.runtype = "Collisions"
+        express_run.type.save()
+
+        check = RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert {"runtype": "Cosmics"} == check
+        prompt_run.type.runtype = "Cosmics"
+
+        check = RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert {} == check

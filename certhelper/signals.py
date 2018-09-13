@@ -2,7 +2,8 @@ import allauth
 import django
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
-from allauth.socialaccount.signals import social_account_updated
+from allauth.socialaccount.signals import social_account_updated, \
+    social_account_added, social_account_removed, pre_social_login
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -35,7 +36,7 @@ def save_or_create_userprofile(sender, instance, created, raw, **kwargs):
         logger.info("User {} has been saved".format(instance))
 
 
-@receiver(allauth.socialaccount.signals.social_account_added)
+@receiver(social_account_added)
 def update_newly_added_user(request, sociallogin, **kwargs):
     logger.info("Updating UserProfile of newly added Social Account {}"
                 .format(sociallogin.user))
@@ -69,7 +70,7 @@ def log_user_logged_out(sender, user, request, **kwargs):
     logger.info("User {} has logged out".format(user))
 
 
-@receiver(allauth.socialaccount.signals.pre_social_login)
+@receiver(pre_social_login)
 def log_pre_social_login(request, sociallogin, **kwargs):
     try:
         logger.debug("Pre social login for User {}".format(sociallogin.user))
@@ -77,7 +78,7 @@ def log_pre_social_login(request, sociallogin, **kwargs):
         logger.debug("Pre social login for non-existing User")
 
 
-@receiver(allauth.socialaccount.signals.social_account_added)
+@receiver(social_account_added)
 def log_social_account_added(request, sociallogin, **kwargs):
     try:
         logger.info("Social Account {} has been added for User {}"
@@ -86,7 +87,7 @@ def log_social_account_added(request, sociallogin, **kwargs):
         logger.debug("Pre social login for non-existing User")
 
 
-@receiver(allauth.socialaccount.signals.social_account_updated)
+@receiver(social_account_updated)
 def log_social_account_updated(request, sociallogin, **kwargs):
     try:
         logger.debug("Social Account {} has been updated for User {}"
@@ -95,7 +96,7 @@ def log_social_account_updated(request, sociallogin, **kwargs):
         logger.error("Something unexpected happened")
 
 
-@receiver(allauth.socialaccount.signals.social_account_removed)
+@receiver(social_account_removed)
 def log_social_account_removed(request, socialaccount, **kwargs):
     try:
         logger.info("Social Account {} has been removed from User {}"

@@ -14,14 +14,24 @@ class SoftDeletionManager(models.Manager):
         """
         :return:
         * QuerySet with the list of all objects that are not marked as deleted
-        * QuerySet with all objects (including deleted) when alive_only argument is set to False on SoftDeletionManager
+        * QuerySet with all objects (including deleted) when alive_only argument is
+          set to False on SoftDeletionManager
         """
         if self.alive_only:
             return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
         return SoftDeletionQuerySet(self.model)
 
     def dead(self):
+        """
+        :return: QuerySet containing all instances that have been deleted
+        """
         return self.get_queryset().dead()
+
+    def alive(self):
+        """
+        :return: QuerySet containing all instances that have not been deleted
+        """
+        return self.get_queryset().alive()
 
     # TODO check if this is necessarry
     def hard_delete(self):
@@ -43,6 +53,7 @@ class RunInfoManager(SoftDeletionManager):
     def check_if_certified(self, list_of_run_numbers):
         list_of_run_numbers = uniquely_sorted(list_of_run_numbers)
 
+        # TODO use self.get_queryset() instead of RunInfoQuerySet(self.model).filter
         runs = RunInfoQuerySet(self.model).filter(deleted_at=None)
         runs = runs.filter(run_number__in=list_of_run_numbers).annotate_status()
 
@@ -63,15 +74,20 @@ class RunInfoManager(SoftDeletionManager):
             flags["good"] = good_runs.run_numbers()
             flags["bad"] = bad_runs.run_numbers()
 
-            non_missing_prompt_run_numbers = [run["run_number"] for run in prompt_runs \
-                .order_by("run_number") \
-                .values("run_number") \
-                .distinct()]
+            # TODO The backslash is redundant between brackets
+            non_missing_prompt_run_numbers = [
+                run["run_number"] for run in prompt_runs \
+                    .order_by("run_number") \
+                    .values("run_number") \
+                    .distinct()
+            ]
 
-            non_missing_run_numbers = [run["run_number"] for run in runs \
-                .order_by("run_number") \
-                .values("run_number") \
-                .distinct()]
+            non_missing_run_numbers = [
+                run["run_number"] for run in runs \
+                    .order_by("run_number") \
+                    .values("run_number") \
+                    .distinct()
+            ]
 
             flags["prompt_missing"] = list(
                 set(non_missing_run_numbers) - set(non_missing_prompt_run_numbers))
@@ -111,3 +127,73 @@ class RunInfoManager(SoftDeletionManager):
         )
 
         return check_dictionary
+
+    def check_integrity_of_run(self, run):
+        """
+        Checks if the given run is consistent with existing runs.
+
+        For example, if a collisions express run with the run number 333333 was
+        certified then the collisions prompt run with the same run number should have
+        the same runtype, bfield, energy, number_of_ls, int_lumi, ...
+
+        Also in most cases the components pixel, sistrip, tracking should match,
+        but can vary from time to time. If they vary then the shifter should double
+        check that this is what he intended.
+
+        :param run: RunInfo instance
+        :return: dictionary containing the mismatches and the counterpart value.
+        empty means no mismatch.
+        """
+
+        from .models import RunInfo, Type
+        try:
+            if run.type.reco == "reReco":
+                return {}
+        except Type.DoesNotExist:
+            # No Type selected yet
+            return {}
+
+        type_attributes_to_be_checked = [
+            "runtype", "bfield", "beamtype",  # "beamenergy",
+        ]
+        run_attributes_to_be_checked = [
+            "number_of_ls",
+            "int_luminosity",
+            "pixel",
+            "sistrip",
+            "tracking",
+            "pixel_lowstat",
+            "sistrip_lowstat",
+            "tracking_lowstat"
+        ]
+        mismatches = {}
+
+        try:
+            counterpart_reco = "Express" if run.type.reco == "Prompt" else "Prompt"
+
+            counterpart_run = self.get_queryset().get(
+                run_number=run.run_number,
+                type__reco=counterpart_reco
+            )
+
+            counterpart_type = counterpart_run.type
+            assert counterpart_run.type.reco != run.type.reco
+
+            mismatches.update({
+                attribute: getattr(counterpart_type, attribute)
+                for attribute in type_attributes_to_be_checked
+                if getattr(run.type, attribute) is not None and
+                   getattr(counterpart_type, attribute) != getattr(run.type, attribute)
+            })
+
+            mismatches.update({
+                attribute: getattr(counterpart_run, attribute)
+                for attribute in run_attributes_to_be_checked
+                if getattr(run, attribute) is not None and
+                   getattr(counterpart_run, attribute) != getattr(run, attribute)
+            })
+
+            return mismatches
+        except RunInfo.DoesNotExist:
+            # No counterpart means no mismatch
+            return {}

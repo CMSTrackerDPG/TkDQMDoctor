@@ -137,16 +137,12 @@
             $("#id_run_number__in").css("width", "525px");
 
             $("#id_run_number__in").change(function(){
-                console.log("changing" + $(this).val());
                 let run_numbers_list = $(this).val();
-                console.log("new" + run_numbers_list);
                 run_numbers_list = run_numbers_list.replace(/[^0-9]/gmi, " ");
                 run_numbers_list = run_numbers_list.replace(/\s+/g,' ');
                 run_numbers_list = run_numbers_list.replace(/\s+/g,', ');
 
-                console.log("new" + run_numbers_list);
                 $(this).val(run_numbers_list);
-                console.log("changed" + $(this).val());
             });
 
             colorize_components();

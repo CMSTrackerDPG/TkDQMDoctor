@@ -19,7 +19,7 @@ from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
 from certhelper.utilities.utilities import get_filters_from_request_GET, \
     request_contains_filter_parameter, get_this_week_filter_parameter, \
-    get_today_filter_parameter, get_runs_from_request_filters
+    get_today_filter_parameter, get_runs_from_request_filters, get_runinfo_from_request
 from .forms import *
 from .tables import *
 
@@ -179,7 +179,8 @@ def logout_view(request):
     """
     if request.user.is_authenticated:
         logout(request)
-        callback_url = 'https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl=http%3A//'
+        callback_url = 'https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl='
+        callback_url += 'http%3A//'
         callback_url += request.META['HTTP_HOST']
         callback_url += reverse('certhelper:logout_status')
         return HttpResponseRedirect(callback_url)
@@ -187,9 +188,7 @@ def logout_view(request):
 
 
 def logout_status(request):
-    logout_successful = False
-    if not request.user.is_authenticated:
-        logout_successful = True
+    logout_successful = not request.user.is_authenticated
     return render(request, 'certhelper/logout_status.html',
                   {'logout_successful': logout_successful})
 
@@ -313,3 +312,17 @@ class ChecklistTemplateView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["checklist_base_template_name"] = 'certhelper/checklists/base.html'
         return context
+
+
+def check_integrity_of_run(request):
+    """
+    Checks if a run with the same number but different type already exists and checks
+    if all the attributes (int. lumi, number of ls, pixel, sistrip, ...) match.
+
+    :param request:
+    :return: JsonResponse containing the attributes that do not match and their
+    expected value
+    """
+    run = get_runinfo_from_request(request)
+    data = RunInfo.objects.check_integrity_of_run(run)
+    return JsonResponse(data)

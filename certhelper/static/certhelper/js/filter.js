@@ -30,7 +30,6 @@ function simplify_date_filter_parameters(form){
     let date_gte;
     if (gte_day !== "0" && gte_day !== null && gte_day !== "") {
         date_gte = gte_year + "-" + gte_month + "-" + gte_day;
-        console.log("date from: " + date_gte);
         $('<input />').attr('type', 'hidden')
             .attr('name', "date__gte")
             .attr('value', date_gte)
@@ -39,7 +38,6 @@ function simplify_date_filter_parameters(form){
     let date_lte;
     if (lte_day !== "0" && lte_day !== null && lte_day !== "") {
         date_lte = lte_year + "-" + lte_month + "-" + lte_day;
-        console.log("date until: " + date_lte);
         $('<input />').attr('type', 'hidden')
             .attr('name', "date__lte")
             .attr('value', date_lte)
@@ -51,8 +49,6 @@ function ignore_unwanted_filters(form){
     let checked_element = $(".ignore-other-filter-checkbox:checked");
     if(checked_element.length > 0){
         checked_element = checked_element.attr('id').replace('id-ignore-', '');
-        console.log("checked: " + checked_element);
-
         form.find(":input").filter(function () {
             return !(this.id.indexOf(checked_element) !== -1);
         }).val("");

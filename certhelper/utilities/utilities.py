@@ -350,3 +350,49 @@ def render_trackermap(trackermap):
     if trackermap == "Missing":
         return mark_safe('<div class="bad-component">{}</div>'.format(trackermap))
     return trackermap
+
+
+def get_runinfo_from_request(request):
+    """
+    :return: RunInfo instance filled with attributes from the request
+    """
+    from certhelper.models import RunInfo, ReferenceRun, Type
+
+    type_id = request.GET.get('type', None)
+    type_ = Type.objects.get(pk=type_id) if type_id is not None and type_id != "" else None
+    reference_run_id = request.GET.get('reference_run', None)
+    reference_run = ReferenceRun.objects.get(pk=reference_run_id) if reference_run_id is not None and reference_run_id != "" else None
+    run_number = request.GET.get('run_number', None)
+    int_luminosity = request.GET.get('int_luminosity', None)
+    number_of_ls = request.GET.get('number_of_ls', None)
+    pixel = request.GET.get('pixel', None)
+    pixel_lowstat = request.GET.get('pixel_lowstat', False)
+    sistrip = request.GET.get('sistrip', None)
+    sistrip_lowstat = request.GET.get('sistrip_lowstat', False)
+    tracking = request.GET.get('tracking', None)
+    tracking_lowstat = request.GET.get('tracking_lowstat', False)
+
+    run = RunInfo(
+        type=type_,
+        reference_run=reference_run,
+        run_number=run_number,
+        pixel=pixel,
+        sistrip=sistrip,
+        tracking=tracking,
+    )
+    if int_luminosity is not None and int_luminosity != "":
+        run.int_luminosity = float(int_luminosity)
+
+    if number_of_ls is not None and number_of_ls != "":
+        run.number_of_ls = int(number_of_ls)
+
+    if pixel_lowstat is not None and pixel_lowstat != "":
+        run.pixel_lowstat = pixel_lowstat == "true"
+
+    if sistrip_lowstat is not None and sistrip_lowstat != "":
+        run.sistrip_lowstat = sistrip_lowstat == "true"
+
+    if tracking_lowstat is not None and tracking_lowstat != "":
+        run.tracking_lowstat = tracking_lowstat == "true"
+
+    return run

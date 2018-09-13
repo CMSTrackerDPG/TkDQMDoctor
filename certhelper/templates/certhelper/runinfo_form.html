@@ -90,6 +90,7 @@
                         </span>
                     </div>
                 </div>
+                <div class="col-sm-3 help-block"></div>
             </div>
 
             {# TODO add "Add Reference Run" button #}
@@ -110,7 +111,7 @@
             {# Reference run #}
             <div class="form-group">
                 {% render_label_and_field_for form.reference_run %}
-                <div class="col-sm-3"></div>
+                <div class="col-sm-3 help-block"></div>
                 <div class="col-sm-offset-3 col-sm-9 ">
                     <small class="form-text text-muted">
                         Can be taken from the <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackerOfflineReferenceRuns" target="_blank">Tracker Offline Reference Runs List</a> twiki page
@@ -121,18 +122,22 @@
             {# Run number #}
             <div class="form-group">
                 {% render_label_and_field_for form.run_number %}
-                <div id="id_run_number_helptext" class="col-sm-3 help-block"></div>
+                <div class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.general not_required=checklist_not_required %}
             </div>
 
             {# Trackermap #}
             <div class="form-group">
                 {% render_label_and_field_for form.trackermap %}
+                <div class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.trackermap not_required=checklist_not_required %}
             </div>
 
             {# Number of LS #}
-            {% bootstrap_field form.number_of_ls field_class="col-sm-6" label_class="col-sm-3"%}
+            <div class="form-group">
+                {% render_label_and_field_for form.number_of_ls %}
+                <div class="col-sm-3 help-block"></div>
+            </div>
 
             {# Int. luminosity #}
             <div class="form-group">
@@ -143,7 +148,7 @@
                         <span class="input-group-addon">pb<sup>-1</sup></span>
                     </div>
                 </div>
-                <div id="id_int_luminosity_helptext" class="col-sm-3 help-block"></div>
+                <div class="col-sm-3 help-block"></div>
                 <div class="col-sm-offset-3 col-sm-9 ">
                     <small class="form-text text-muted">
                         Can be taken from <a id="id_cmswbm_link" href="https://cmswbm.cern.ch/cmsdb/servlet/RunSummary" target="_blank">WBM Run Summary</a> under "Run Live Lumi"
@@ -167,7 +172,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="id_pixel_helptext" class="col-sm-3 help-block"></div>
+                <div class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.pixel not_required=checklist_not_required%}
             </div>
 
@@ -187,7 +192,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="id_sistrip_helptext" class="col-sm-3 help-block"></div>
+                <div class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.sistrip not_required=checklist_not_required%}
             </div>
 
@@ -207,7 +212,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="id_tracking_helptext" class="col-sm-3 help-block"></div>
+                <div class="col-sm-3 help-block"></div>
                 {% render_checklist_checkbox form.checklists.tracking not_required=checklist_not_required%}
             </div>
 
@@ -250,6 +255,9 @@
     <script src="{% static "certhelper/js/runinfo_form.js" %}"></script>
     <script>
         $(document).ready(function () {
+            let type_locator = $('#id_type');
+            let run_number_locator = $('#id_run_number');
+
             /**
              * Popup Checklist modal with items when trying to check a checklist checkbox
              */
@@ -272,88 +280,77 @@
             });
 
             /**
-             * Update Reference-run-dropdown-list on page load
-             */
-            updateReferenceRunList();
-
-            /**
-             * Round the number of decimal places for int luminosity
-             */
-            let int_luminosity = $('#id_int_luminosity');
-            int_luminosity.on('focusout',function(){
-                if(int_luminosity.val() !== "") {
-                    const rounded = parseFloat(int_luminosity.val()).toFixed(1);
-                    int_luminosity.val(rounded);
-                }
-            });
-
-            /**
-             * Update the cmsbwm link in the help text for the int luminosity
-             */
-            let run_number = $('#id_run_number');
-            run_number.on('input',function(){
-                $('#id_cmswbm_link').attr("href", "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary?RUN=" + $(this).val());
-            });
-
-            /**
-             * Validate the run number
-             */
-            run_number.on('input',function(){
-                validate_run_number();
-            });
-
-            function validate_run_number(){
-                const run_number_text = run_number.val();
-                const reference_run_number = get_selected_reference_run_number();
-                if(run_number_text !== ""){
-                    if(run_number_text < 300000){
-                        display_validation_error("run_number", "Run number is too low");
-                    } else if(run_number_text > 999999){
-                        display_validation_error("run_number", "Run number is too high");
-                    } else if(Math.abs(reference_run_number - run_number_text) > 6000) {
-                        const warning_text = "Run number seems odd. Please check";
-                        display_validation_warning("run_number", warning_text);
-                    } else {
-                        display_validation_success("run_number", "");
-                    }
-                }
-            }
-
-            /**
-             * Validate the integrated luminosity
-             */
-            int_luminosity.on('input',function(){
-                validate_int_luminosity();
-            });
-
-            function validate_int_luminosity(){
-                const int_lumi = int_luminosity.val();
-                let runtype = get_selected_runtype();
-                if(runtype === "Cosmics" && int_lumi > 0){
-                    const warning_text = "You certify a cosmics run. Are you sure about this value?";
-                    display_validation_warning("int_luminosity", warning_text);
-                } else {
-                    display_validation_success("int_luminosity", "");
-                }
-            }
-
-            /**
-             * Remove green borders (from validation) when jumping to the next field
-             */
-            $("form :input").focusout(function(){
-                $(".has-success").removeClass("has-success");
-            });
-
-            /**
              * Use the lowstat checkbox instead of the dropdown option
              * Lowstat choice is still available because of historic reasons.
              * This might be removed in future.
              */
             $('option[value="Lowstat"]').each(function () {
                 if(!$(this).is(":selected")){
-                    // Remove if not selected, to not break old certifications
+                    // Remove only if not selected, to not break old certifications
                     $(this).remove();
                 }
+            });
+
+            /**
+             * Update the cmsbwm link in the help text for the int luminosity
+             */
+            run_number_locator.on('input',function(){
+                $('#id_cmswbm_link').attr("href", "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary?RUN=" + $(this).val());
+            });
+
+            /**
+             * Validation
+             */
+            type_locator.change(function(){
+                validate_type();
+                validate_tracking();
+                if(get_int_luminosity())
+                    validate_int_luminosity()
+            });
+
+            $("#id_reference_run").change(function(){
+                validate_run_number();
+            });
+
+            run_number_locator.on('input', function(){
+                validate_run_number();
+            });
+
+            run_number_locator.change(function(){
+                validate_form();
+            });
+
+            let int_luminosity_locator = $('#id_int_luminosity');
+            int_luminosity_locator.on('input', function(){
+                validate_int_luminosity();
+            });
+
+            int_luminosity_locator.on('focusout', function(){
+                round_int_luminosity();
+            });
+
+
+            $("#id_number_of_ls").change(function(){
+                validate_number_of_ls();
+            });
+
+            $("#id_pixel, #id_pixel_lowstat").change(function(){
+                validate_pixel();
+            });
+
+            $("#id_sistrip, #id_sistrip_lowstat").change(function(){
+                validate_sistrip();
+            });
+
+            $("#id_tracking, #id_tracking_lowstat").change(function(){
+                validate_tracking();
+            });
+
+            /**
+             * Remove green borders (from validation) when jumping to the next field
+             */
+            $("form :input").focusout(function(){
+                remove_css_class_from_successfully_validated_fields();
             });
 
             const components = "[name='pixel'], [name='sistrip'], [name='tracking']";
@@ -363,19 +360,14 @@
             $(components).change(function(){
                 const component_id = $(this).attr('id');
                 disable_lowstat_for_excluded_components(component_id);
-                validate_tracking_component()
+                validate_tracking()
             });
 
-            $("#id_type").change(function(){
-                validate_tracking_component();
-                validate_int_luminosity()
-            });
-
-            $("#id_reference_run").change(function(){
-                validate_run_number();
-            });
-
-
+            /**
+             * Update Reference-run-dropdown-list on page load
+             */
+            if(get_selected_type().val()) // If a Type is selected
+                updateReferenceRunList();
 
             /**
              * Disable lowstat checkboxes on page load where necessary
@@ -385,89 +377,6 @@
                 disable_lowstat_for_excluded_components(component_id);
             });
 
-            function disable_lowstat_for_excluded_components(component_id){
-                const selector = "#" + component_id + " option:checked";
-                const option = $(selector).val();
-                const lowstat_selector = "#" + component_id + "_lowstat";
-                if(option === "Excluded"){
-                    $(lowstat_selector).prop('disabled', true);
-                } else {
-                    $(lowstat_selector).prop('disabled', false);
-                }
-            }
-
-            function get_selected_type(){
-                return $("#id_type").find(":selected")
-            }
-
-            function get_selected_runtype(){
-                return get_selected_type().text().split(' ')[1]
-            }
-
-            function get_selected_reco(){
-                return get_selected_type().text().split(' ')[0]
-            }
-
-            function get_selected_reference_run_number(){
-                return $("#id_reference_run option:selected").text().split(' ')[0];
-            }
-
-            function get_selected_component_text(component_id){
-                return  $("#" + component_id).find(":selected").text()
-            }
-
-            function clear_validation(field_name){
-                let form_group = $("#id_" + field_name).closest(".form-group");
-                form_group.removeClass("has-success");
-                form_group.removeClass("has-warning");
-                form_group.removeClass("has-error");
-                form_group.find(".help-block").text("");
-            }
-
-            function set_help_block_text_and_class(field_name, error_text, css_class){
-                let form_group = $("#id_" + field_name).closest(".form-group");
-                let help_block = form_group.find(".help-block");
-                form_group.removeClass("has-success");
-                form_group.removeClass("has-warning");
-                form_group.removeClass("has-error");
-                form_group.addClass(css_class);
-                help_block.text(error_text);
-            }
-
-            function display_validation_error(field_name, error_text){
-                set_help_block_text_and_class(field_name, error_text, "has-error")
-            }
-
-            function display_validation_warning(field_name, error_text){
-                set_help_block_text_and_class(field_name, error_text, "has-warning")
-            }
-
-            function display_validation_success(field_name, error_text){
-                set_help_block_text_and_class(field_name, error_text, "has-success")
-            }
-
-            function validate_tracking_component(){
-                const pixel = get_selected_component_text("id_pixel");
-                const sistrip = get_selected_component_text("id_sistrip");
-                const tracking = get_selected_component_text("id_tracking");
-                const runtype = get_selected_runtype();
-
-                if(sistrip === "Bad" && tracking === "Good"){
-                    const error_text = "Tracking cant be good if SiStrip is Bad.";
-                    display_validation_error("tracking", error_text)
-                } else if(sistrip === "Excluded" && tracking === "Good"){
-                    const error_text = "Tracking cant be good if SiStrip is Excluded.";
-                    display_validation_error("tracking", error_text)
-                } else if (runtype === "Collisions" && pixel === "Bad" && tracking === "Good"){
-                    const error_text = "In Collisions Tracking cant be good if Pixel is Bad.";
-                    display_validation_error("tracking", error_text)
-                } else if (runtype === "Collisions" && pixel === "Excluded" && tracking === "Good"){
-                    const error_text = "In Collisions Tracking cant be good if Pixel is Excluded.";
-                    display_validation_error("tracking", error_text)
-                } else {
-                    clear_validation("tracking")
-                }
-            }
         });
     </script>
 {% endblock script %}

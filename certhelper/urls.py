@@ -65,4 +65,5 @@ urlpatterns = [
     url(r'^ajax/load-subcategories/$', views.load_subcategories, name='ajax_load_subcategories'),
     url(r'^ajax/load-subsubcategories/$', views.load_subsubcategories, name='ajax_load_subsubcategories'),
     url(r'^ajax/validate-cc-list/$', views.validate_central_certification_list, name='ajax_validate_cc_list'),
+    url(r'^ajax/check_integrity_of_run/$', views.check_integrity_of_run, name='ajax_check_integrity_of_run'),
 ]

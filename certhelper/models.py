@@ -439,6 +439,17 @@ class RunInfo(SoftDeletionModel):
         self.validate_unique()
         super(RunInfo, self).save()
 
+    def print(self):
+        print("Run number: {}".format(self.run_number))
+        print("Type: {}".format(self.type))
+        print("Reference: {}".format(self.reference_run))
+        print("Trackermap: {}".format(self.trackermap))
+        print("Lumisections: {}".format(self.number_of_ls))
+        print("Int. luminosity: {}".format(self.int_luminosity))
+        print("Pixel: {} {}".format(self.pixel, self.pixel_lowstat))
+        print("SiStrip: {} {}".format(self.sistrip, self.sistrip_lowstat))
+        print("Tracking: {} {}".format(self.tracking, self.tracking_lowstat))
+
 
 class Checklist(models.Model):
     title = models.CharField(max_length=50, unique=True)
