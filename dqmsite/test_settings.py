@@ -7,10 +7,6 @@ DATABASES = {
     }
 }
 
-# Disable static files server when testing
-MIDDLEWARE.remove('whitenoise.middleware.WhiteNoiseMiddleware')
-
-
 DYNAMIC_PREFERENCES = {
     'ENABLE_CACHE': False,
 }
