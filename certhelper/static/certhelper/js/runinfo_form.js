@@ -306,15 +306,15 @@ function validate_form(){
     validate_tracking();
 }
 
-function remove_css_class_from_successfully_validated_fields(){
+function hide_green_borders_from_successfully_validated_fields(){
     $(".has-success").removeClass("has-success");
 }
 
-/****************
+/************************
  * MISC
  *
  * miscellaneous functions
- ***************/
+ ************************/
 
 function disable_lowstat_for_excluded_components(component_id){
     const selector = "#" + component_id + " option:checked";
@@ -370,6 +370,14 @@ function checkAllItems(checklist_id) {
             $(this).prop('checked', true);
         }
     });
+}
+
+function checkAllChecklists(){
+    $("#id_checklist_general").prop("checked", true);
+    $("#id_checklist_trackermap").prop("checked", true);
+    $("#id_checklist_pixel").prop("checked", true);
+    $("#id_checklist_sistrip").prop("checked", true);
+    $("#id_checklist_tracking").prop("checked", true);
 }
 
 /**

@@ -56,14 +56,16 @@
 
         <form class="well form-horizontal" method="POST" action="" id="id_runinfo_form">
             {% csrf_token %}
-            {# TODO change title when editing Run #}
-
             <legend style="text-align: center;">
                 <h1>
                     {% if object %}
                         Update Run
                     {% else %}
                         Add new Run
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <!-- super secret button for developers -->
+                        <span style="cursor: pointer;" onclick="checkAllChecklists();">&nbsp;</span>
                     {% endif %}
                 </h1>
             </legend>
@@ -349,7 +351,7 @@
              * Remove green borders (from validation) when jumping to the next field
              */
             $("form :input").focusout(function(){
-                remove_css_class_from_successfully_validated_fields();
+                hide_green_borders_from_successfully_validated_fields();
             });
 
             const components = "[name='pixel'], [name='sistrip'], [name='tracking']";
@@ -376,6 +378,26 @@
                 disable_lowstat_for_excluded_components(component_id);
             });
 
+            /**
+             * Prevents the form to be submitted and requires the user to
+             * confirm the submission if any integrity warnings exists
+             */
+            $("#id_runinfo_form").submit(function(){
+                if($(".has-error").length)
+                    return confirm("The form has a few errors. Are you sure you want to submit?");
+                if($(".has-warning").length)
+                    return confirm("The form has a few warnings. Are you sure you want to submit?");
+                return true;
+            });
+
+
+            {% if object %}
+                /**
+                 * Validate form on page load, when updating an existing run.
+                 */
+                validate_form();
+                hide_green_borders_from_successfully_validated_fields();
+            {% endif %}
         });
     </script>
 {% endblock script %}
