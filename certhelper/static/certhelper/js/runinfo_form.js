@@ -466,3 +466,19 @@ function round_int_luminosity(){
         int_luminosity.val(rounded);
     }
 }
+
+
+/**
+ * Checks the checkboxes to filter the type (Collision, Cosmics, Prompt, ...)
+ * based on the selected type chosen in the dropdown menue of the RunInfo form
+ *
+ * Used when an existing run is being updated and the page is loaded.
+ */
+function check_type_checkboxes_from_selected_type(){
+    const runtype = get_selected_runtype().toLowerCase();
+    const recotype = get_selected_reco().toLowerCase();
+    const runtype_selector = "input[type='checkbox'][name='runtype'][value='" + runtype + "']";
+    const recotype_selector = "input[type='checkbox'][name='recotype'][value='" + recotype + "']";
+    $(runtype_selector).prop('checked', true);
+    $(recotype_selector).prop('checked', true);
+}

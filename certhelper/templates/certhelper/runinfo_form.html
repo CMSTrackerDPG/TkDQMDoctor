@@ -396,6 +396,8 @@
                  */
                 validate_form();
                 hide_green_borders_from_successfully_validated_fields();
+                check_type_checkboxes_from_selected_type();
+                filterTypeOptionsByCheckboxes();
             {% endif %}
         });
     </script>
