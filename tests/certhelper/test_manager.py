@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from mixer.backend.django import mixer
 
@@ -320,7 +322,6 @@ class TestRunInfoManager:
 
         prompt_run.type.beamtype = 'Proton-Proton'
 
-
         assert not prompt_run.pk
         assert "beamtype" in RunInfo.objects.check_integrity_of_run(prompt_run)
 
@@ -355,5 +356,16 @@ class TestRunInfoManager:
         assert {"runtype": "Cosmics"} == check
         prompt_run.type.runtype = "Cosmics"
 
+        check = RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert {} == check
+
+        express_run.int_luminosity = 3.1
+        prompt_run.int_luminosity = Decimal("3.3")
+        express_run.save()
+
+        check = RunInfo.objects.check_integrity_of_run(prompt_run)
+        assert {"int_luminosity": Decimal("3.1")} == check
+
+        prompt_run.int_luminosity = Decimal("3.2")
         check = RunInfo.objects.check_integrity_of_run(prompt_run)
         assert {} == check

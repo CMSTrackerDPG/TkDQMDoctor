@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import Group, Permission
@@ -381,7 +382,7 @@ def get_runinfo_from_request(request):
         tracking=tracking,
     )
     if int_luminosity is not None and int_luminosity != "":
-        run.int_luminosity = float(int_luminosity)
+        run.int_luminosity = Decimal(int_luminosity)
 
     if number_of_ls is not None and number_of_ls != "":
         run.number_of_ls = int(number_of_ls)

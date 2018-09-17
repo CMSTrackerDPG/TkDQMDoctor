@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.db import models
+
 from certhelper.query import SoftDeletionQuerySet, RunInfoQuerySet
 from certhelper.utilities.utilities import uniquely_sorted
 
@@ -158,7 +161,6 @@ class RunInfoManager(SoftDeletionManager):
         ]
         run_attributes_to_be_checked = [
             "number_of_ls",
-            "int_luminosity",
             "pixel",
             "sistrip",
             "tracking",
@@ -166,6 +168,10 @@ class RunInfoManager(SoftDeletionManager):
             "sistrip_lowstat",
             "tracking_lowstat"
         ]
+        decimal_attributes_to_be_checked = [
+            "int_luminosity",
+        ]
+
         mismatches = {}
 
         try:
@@ -191,6 +197,15 @@ class RunInfoManager(SoftDeletionManager):
                 for attribute in run_attributes_to_be_checked
                 if getattr(run, attribute) is not None and
                    getattr(counterpart_run, attribute) != getattr(run, attribute)
+            })
+
+            mismatches.update({
+                attribute: getattr(counterpart_run, attribute)
+                for attribute in decimal_attributes_to_be_checked
+                if getattr(run, attribute) is not None and
+                    abs(
+                        getattr(counterpart_run, attribute) - getattr(run, attribute)
+                    ) > Decimal("0.1")
             })
 
             return mismatches

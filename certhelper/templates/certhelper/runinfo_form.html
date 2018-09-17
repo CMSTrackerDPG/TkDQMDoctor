@@ -328,8 +328,8 @@
 
             int_luminosity_locator.on('focusout', function(){
                 round_int_luminosity();
+                validate_int_luminosity();
             });
-
 
             $("#id_number_of_ls").change(function(){
                 validate_number_of_ls();
@@ -389,7 +389,6 @@
                     return confirm("The form has a few warnings. Are you sure you want to submit?");
                 return true;
             });
-
 
             {% if object %}
                 /**
