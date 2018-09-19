@@ -385,7 +385,10 @@ def get_runinfo_from_request(request):
         run.int_luminosity = Decimal(int_luminosity)
 
     if number_of_ls is not None and number_of_ls != "":
-        run.number_of_ls = int(number_of_ls)
+        try:
+            run.number_of_ls = int(number_of_ls)
+        except ValueError:
+            run.number_of_ls = int(float(number_of_ls))  # to allow "12.0" as input
 
     if pixel_lowstat is not None and pixel_lowstat != "":
         run.pixel_lowstat = pixel_lowstat == "true"

@@ -467,6 +467,13 @@ function round_int_luminosity(){
     }
 }
 
+function round_number_of_ls(){
+    let number_of_ls = $("#id_number_of_ls");
+    if(number_of_ls.val()){
+        const rounded = Math.round(number_of_ls.val())
+        number_of_ls.val(rounded);
+    }
+}
 
 /**
  * Checks the checkboxes to filter the type (Collision, Cosmics, Prompt, ...)
