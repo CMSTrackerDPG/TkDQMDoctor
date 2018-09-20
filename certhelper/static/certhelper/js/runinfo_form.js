@@ -85,8 +85,11 @@ function validate_run_number(){
             display_validation_error("run_number", "Run number is too low");
         } else if(run_number_text > 999999){
             display_validation_error("run_number", "Run number is too high");
+        } else if(reference_run_number > run_number_text) {
+            const warning_text = "Reference run is from the future.";
+            display_validation_warning("run_number", warning_text);
         } else if(Math.abs(reference_run_number - run_number_text) > 6000) {
-            const warning_text = "Run number seems odd. Please check";
+            const warning_text = "Reference run seems old. Please check";
             display_validation_warning("run_number", warning_text);
         } else {
             display_validation_success("run_number", "");

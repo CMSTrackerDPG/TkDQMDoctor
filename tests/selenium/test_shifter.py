@@ -353,7 +353,7 @@ class TestShifter:
 
         help_text = wait_until(website.find_element_by_class_name, "has-warning") \
             .find_element_by_class_name("help-block").text
-        assert "Run number seems odd" in help_text
+        assert "Reference run seems old" in help_text
 
         website.find_element_by_id("id_run_number").clear()
         website.find_element_by_id("id_run_number").send_keys("306100")
