@@ -492,3 +492,16 @@ function check_type_checkboxes_from_selected_type(){
     $(runtype_selector).prop('checked', true);
     $(recotype_selector).prop('checked', true);
 }
+
+/**
+ * Updates the link to the CMS WBM Run Summary.
+ *
+ * Includes the run number if available
+ */
+function update_cmswbm_link(){
+    let link = "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary";
+    let run_number = get_run_number();
+    if(run_number)
+        link += "?RUN=" + run_number;
+    $('#id_cmswbm_link').attr("href", link);
+}

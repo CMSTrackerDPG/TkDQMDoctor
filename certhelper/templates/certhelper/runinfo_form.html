@@ -297,7 +297,7 @@
              * Update the cmsbwm link in the help text for the int luminosity
              */
             run_number_locator.on('input',function(){
-                $('#id_cmswbm_link').attr("href", "https://cmswbm.cern.ch/cmsdb/servlet/RunSummary?RUN=" + $(this).val());
+                update_cmswbm_link();
             });
 
             /**
@@ -399,6 +399,7 @@
                 hide_green_borders_from_successfully_validated_fields();
                 check_type_checkboxes_from_selected_type();
                 filterTypeOptionsByCheckboxes();
+                update_cmswbm_link();
             {% endif %}
         });
     </script>
