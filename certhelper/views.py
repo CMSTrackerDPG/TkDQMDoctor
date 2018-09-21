@@ -329,6 +329,7 @@ def check_integrity_of_run(request):
     return JsonResponse(data)
 
 
+@method_decorator(login_required, name="dispatch")
 class ComputeLuminosityView(FilterView):
     template_name = 'certhelper/compute_luminosity.html'
     filterset_class = ComputeLuminosityRunInfoFilter
