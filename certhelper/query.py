@@ -255,7 +255,7 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         return self.filter(type__reco="Prompt")
 
     def rereco(self):
-        return self.filter(type__reco="ReReco")
+        return self.filter(type__reco="reReco")
 
     def run_numbers(self):
         """
@@ -344,6 +344,12 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         if min_week != max_week:
             return "{}-{}".format(min_week, max_week)
         return min_week
+
+    def order_by_run_number(self):
+        return self.order_by('run_number')
+
+    def order_by_date(self):
+        return self.order_by('date', 'run_number')
 
     def print(self):
         """

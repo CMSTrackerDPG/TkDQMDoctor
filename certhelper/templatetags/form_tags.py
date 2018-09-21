@@ -56,3 +56,13 @@ def render_checklist_modal(form_checklist, label=""):
 @register.inclusion_tag('certhelper/components/templatetags/label_and_field.html')
 def render_label_and_field_for(field):
     return {'field': field}
+
+
+@register.inclusion_tag('certhelper/components/templatetags/luminosity_table.html')
+def render_luminosity_table(caption, queryset):
+    """"
+    renders a kuminosity table
+
+    Used in tools/calculate_luminosity/
+    """
+    return {"queryset": queryset, "caption": caption}

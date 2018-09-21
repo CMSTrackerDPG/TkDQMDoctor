@@ -94,3 +94,12 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
                 },
             },
         }
+
+
+class ComputeLuminosityRunInfoFilter(django_filters.FilterSet):
+    class Meta:
+        model = RunInfo
+        fields = {
+            'run_number': ['gte', 'lte', ],
+            'date': ['gte', 'lte', ],
+        }

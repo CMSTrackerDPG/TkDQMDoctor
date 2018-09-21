@@ -13,7 +13,8 @@ from django.views.generic import TemplateView
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
-from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter
+from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter, \
+    ComputeLuminosityRunInfoFilter
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
 from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
@@ -326,3 +327,8 @@ def check_integrity_of_run(request):
     run = get_runinfo_from_request(request)
     data = RunInfo.objects.check_integrity_of_run(run)
     return JsonResponse(data)
+
+
+class ComputeLuminosityView(FilterView):
+    template_name = 'certhelper/compute_luminosity.html'
+    filterset_class = ComputeLuminosityRunInfoFilter

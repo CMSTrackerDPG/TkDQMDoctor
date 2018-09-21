@@ -1,3 +1,11 @@
 .no-bold-label {
     font-weight: normal !important;
 }
+
+.bottom-buffer {
+    margin-bottom: 5px;
+}
+
+.top-buffer {
+    margin-top: 15px;
+}

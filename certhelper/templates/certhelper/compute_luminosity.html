@@ -1,0 +1,135 @@
+{% extends 'certhelper/base.html' %}
+
+{% block style %}
+    <style>
+        div > .luminosity-table{
+            width: 500px;
+            margin: auto auto 15px auto;
+        }
+
+        .luminosity-table{
+            margin: 50px;
+        }
+
+        .luminosity-div{
+            margin-bottom: 40px;
+        }
+
+        caption {
+            text-align: center;
+        }
+    </style>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.css" />
+{% endblock style %}
+
+{% block content %}
+
+    <div class="container-fluid" style="margin-top: 15px">
+        <a href="{% url 'certhelper:list' %}" type="button" class="btn btn-link"><span
+                class="glyphicon glyphicon-home"></span> Home</a>
+    </div>
+    <div class="container">
+        <h1 class="text-center">Compute Luminosity</h1>
+        <div class="well">
+            <form id="compute-luminosity-filter-form" class="form-horizontal" action="" method="get">
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Run Number</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" type="number" name="run_number__gte" step="1" id="id_run_number__gte" placeholder="Min">
+                    </div>
+                    <div class="col-sm-4">
+                        <input class="form-control" type="number" name="run_number__lte" step="1" id="id_run_number__lte" placeholder="Max">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Date</label>
+                    <div class="col-sm-4">
+                        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd">
+                            <input type="text" class="form-control" name="date__gte" id="id_date__gte" placeholder="From">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd">
+                            <input type="text" class="form-control" name="date__lte" id="id_date__lte" placeholder="To">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center top-buffer">
+                        <button type="submit" class="btn btn-primary">Calculate</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        {% if request.GET %}
+            <div id="myDiv" class="text-center">
+                {% load form_tags %}
+                {% render_luminosity_table "Collisions Express" filter.qs.collisions.express %}
+                {% render_luminosity_table "Collisions Prompt" filter.qs.collisions.prompt %}
+                {% render_luminosity_table "Collisions ReReco" filter.qs.collisions.rereco %}
+
+                {% render_luminosity_table "Cosmics Express" filter.qs.cosmics.express %}
+                {% render_luminosity_table "Cosmics Prompt" filter.qs.cosmics.prompt %}
+                {% render_luminosity_table "Cosmics ReReco" filter.qs.cosmics.rereco %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}
+
+
+{% block script %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.js"></script>
+    <script>
+        $(document).ready(function () {
+            populate_form_from_get_parameters();
+
+            /**
+             * Fills the filter form with URL parameters
+             */
+            function populate_form_from_get_parameters(){
+                const run_min = GetURLParameter("run_number__gte");
+                const run_max = GetURLParameter("run_number__lte");
+                $("#id_run_number__gte").val(run_min);
+                $("#id_run_number__lte").val(run_max);
+            }
+
+            /**
+             * Extracts a get parameter from the URL
+             *
+             * Credit: http://www.jquerybyexample.net/2012/06/get-url-parameters-using-jquery.html
+             * @return {string}
+             */
+            function GetURLParameter(sParam)
+            {
+                const sPageURL = window.location.search.substring(1);
+                const sURLVariables = sPageURL.split('&');
+                for (let i = 0; i < sURLVariables.length; i++)
+                {
+                    const sParameterName = sURLVariables[i].split('=');
+                    if (sParameterName[0] === sParam)
+                    {
+                        return sParameterName[1];
+                    }
+                }
+            }
+
+            $("#compute-luminosity-filter-form").submit(function () {
+                $(this).find(":input").filter(function () {
+                    return !this.value || this.value === "0";
+                }).attr("disabled", "disabled");
+            });
+        });
+    </script>
+{% endblock script %}

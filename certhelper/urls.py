@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/hard_delete_run/$', views.hard_delete_run_view, name='hard_delete_run'),
     url(r'^(?P<pk>[0-9]+)/restore_run/$', views.restore_run_view, name='restore_run'),
 
+    url(r'^tools/compute/luminosity/$', views.ComputeLuminosityView.as_view(), name='compute-luminosity'),
+
     # checklists
     # TODO one general checklists page for all checklists /checklists/
     url(r'^checklists/general$', ChecklistTemplateView.as_view(
