@@ -87,7 +87,7 @@ def fill_form_with_data(browser, data=None):
         data.get("number_of_ls", "42"))  #
     browser.find_element_by_id("id_int_luminosity").clear()
     browser.find_element_by_id("id_int_luminosity").send_keys(
-        data.get("int_luminosity", "1.337"))
+        data.get("int_luminosity", "1.3"))
     Select(browser.find_element_by_id("id_pixel")).select_by_visible_text(
         data.get("pixel", "Good"))
     Select(browser.find_element_by_id("id_sistrip")).select_by_visible_text(
