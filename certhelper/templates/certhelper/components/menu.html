@@ -1,62 +1,45 @@
 
-{% url "certhelper:shiftleader" as shiftleader_url %}
+{% url "certhelper:list" as listruns_url %}
 
-<div class="container-fluid" style="margin-top: 15px">
-    <div class="row">
-        <div class="col col-sm-6">
-            {% if not user.is_authenticated %}
-                <!-- Dont show any buttons if the user is not logged in -->
-            {% else %}
-                <a href="{% url 'certhelper:create' %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-plus-sign"></span> Add Run</a>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <ul class="nav navbar-nav">
 
-                {% if request.path !=  shiftleader_url %}
-                    <a href="{% url 'certhelper:summary' %}{{ filter_parameters }}" type="button"
-                       class="btn btn-link"><span
-                            class="glyphicon glyphicon-list-alt"></span> Generate Summary</a>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'certhelper:create' %}"><span class="glyphicon glyphicon-plus-sign"></span> Add Run</a></li>
+
+                {% if request.path ==  listruns_url %}
+                    <li><a href="{% url 'certhelper:summary' %}{{ filter_parameters }}"><span class="glyphicon glyphicon-list-alt"></span> Generate Summary</a></li>
                 {% endif %}
 
                 {% if user.is_staff %}
-                    {% if request.path ==  shiftleader_url %}
-                        <a href="{% url 'certhelper:list' %}{{ filter_parameters }}" type="button"
-                           class="btn btn-link"><span
-                                class="glyphicon glyphicon-th-list"></span> List of Certified Runs</a>
-                    {% else %}
-                        <a href="{% url 'certhelper:shiftleader' %}" type="button"
-                           class="btn btn-link"><span
-                                class="glyphicon glyphicon-list"></span> Shift Leader</a>
-                    {% endif %}
+                    <li><a href="{% url 'certhelper:shiftleader' %}"><span class="glyphicon glyphicon-list"></span> Shift Leader</a></li>
                 {% endif %}
-                <a href="{% url 'certhelper:references' %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-pushpin"></span> List of reference runs</a>
 
-                <span class="dropdown">
-                    <button class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-wrench"></span> Tools <span class="caret"></span></button>
+                <li><a href="{% url 'certhelper:list' %}{{ filter_parameters }}"><span class="glyphicon glyphicon-th-list"></span> List of Certified Runs</a></li>
+
+                <li><a href="{% url 'certhelper:references' %}"><span class="glyphicon glyphicon-pushpin"></span> List of reference runs</a></li>
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-wrench"></span> Tools<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'certhelper:compute-luminosity' %}">Compute Luminosity</a></li>
                     </ul>
-                </span>
-
+                </li>
             {% endif %}
-        </div>
-        <div class="col col-sm-6 text-right">
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+
             {% if user.is_staff %}
-                <a href="{% url 'admin:index' %} " type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-cog"></span> Admin Settings</a>
+                <li><a href="{% url 'admin:index' %}"><span class="glyphicon glyphicon-cog"></span> Admin Settings</a></li>
             {% endif %}
+            <li><a href="{% url 'certhelper:help' %}"><span class="glyphicon glyphicon-question-sign"></span> Help</a></li>
 
-            <a href="{% url 'certhelper:help' %}" type="button" class="btn btn-link"><span
-                    class="glyphicon glyphicon-question-sign"></span> Help</a>
             {% if not user.is_authenticated %}
                 {% load socialaccount %}
-                <a href="/accounts/login" type="button"
-                   class="btn btn-link"><span
-                        class="glyphicon glyphicon-user"></span> Login</a>
+                <li><a href="/accounts/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
             {% else %}
-                <a href="{% url 'certhelper:logout' %}" type="button" class="btn btn-link"><span
-                        class="glyphicon glyphicon-off"></span> Logout {{ request.user.username }}</a>
+                <li><a href="{% url 'certhelper:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout {{ request.user.username }}</a></li>
             {% endif %}
-        </div>
+        </ul>
     </div>
-</div>
+</nav>
