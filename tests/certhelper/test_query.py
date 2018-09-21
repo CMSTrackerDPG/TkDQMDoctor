@@ -145,13 +145,13 @@ class TestRunInfoQuerySet:
             assert "Prompt" == run.type.reco
 
     def test_rereco(self, some_certified_runs):
-        mixer.blend("certhelper.RunInfo", type__reco="ReReco")
-        mixer.blend("certhelper.RunInfo", type__reco="ReReco")
+        mixer.blend("certhelper.RunInfo", type__reco="reReco")
+        mixer.blend("certhelper.RunInfo", type__reco="reReco")
         runs = RunInfo.objects.all().rereco()
         assert 0 != len(runs)
 
         for run in runs:
-            assert "ReReco" == run.type.reco
+            assert "reReco" == run.type.reco
 
     def test_run_numbers(self):
         mixer.blend("certhelper.RunInfo", run_number=123456)
