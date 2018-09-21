@@ -9,10 +9,9 @@
     {% load render_table from django_tables2 %}
     {% load bootstrap3 %}
 
+    {% include "certhelper/components/menu.html" %}
     <div class="container-fluid">
         <h1 align="center">Shift Leader View</h1>
-
-        {% include "certhelper/components/menu.html" %}
         <div class="container">
             {% if filter %}
                 {% include "certhelper/components/filter.html" %}
