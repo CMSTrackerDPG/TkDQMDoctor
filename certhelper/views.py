@@ -16,6 +16,7 @@ from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter, \
     ComputeLuminosityRunInfoFilter
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
+from certhelper.runregistry import TrackerRunRegistryClient
 from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
 from certhelper.utilities.utilities import get_filters_from_request_GET, \
@@ -333,3 +334,28 @@ def check_integrity_of_run(request):
 class ComputeLuminosityView(FilterView):
     template_name = 'certhelper/compute_luminosity.html'
     filterset_class = ComputeLuminosityRunInfoFilter
+
+
+@method_decorator(login_required, name="dispatch")
+class RunRegistryView(TemplateView):
+    template_name = 'certhelper/runregistry.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        run_min = request.POST.get("run_min")
+        run_max = request.POST.get("run_max")
+        run_list = request.POST.get("run_list")
+
+        run_registry = TrackerRunRegistryClient()
+        if run_list:
+            run_numbers = re.sub('[^0-9]', ' ', run_list).split()  # only run_numbers
+            run_numbers = set(run_numbers)  # remove duplicates
+            data = run_registry.get_runs_by_list(run_numbers)
+        else:
+            data = run_registry.get_runs_by_range(run_min, run_max)
+
+        table = RunRegistryTable(data)
+
+        return render(request, self.template_name, {'table': table})

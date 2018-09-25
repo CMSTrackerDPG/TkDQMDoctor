@@ -329,17 +329,19 @@ def render_component(component, component_lowstat):
 
     This should lead to a similar behavior as in the RunRegistry
     """
+    component_rating = component.lower()
     css_class = None
-    if component == "Good" or component == "Lowstat":
+
+    if component_rating == "good" or component_rating == "lowstat":
         css_class = "good-component"
-    elif component == "Bad":
+    elif component_rating == "bad":
         css_class = "bad-component"
-    elif component == "Excluded":
+    elif component_rating == "excluded":
         css_class = "excluded-component"
 
     component_value = component
 
-    if component_lowstat is True and component != "Excluded":
+    if component_lowstat is True and component_rating != "excluded":
         component_value = "Lowstat"
 
     if css_class:

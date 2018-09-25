@@ -111,3 +111,26 @@ class DeletedRunInfoTable(tables.Table):
                   'reference_run.reference_run',
                   'date')
         attrs = {'class': 'table table-hover table-bordered'}
+
+
+class RunRegistryTable(tables.Table):
+    shifter = tables.Column()
+    run_number = tables.Column()
+    run_class = tables.Column()
+    dataset = tables.Column()
+    state = tables.Column()
+    pixel = tables.Column()
+    sistrip = tables.Column()
+    tracking = tables.Column()
+
+    class Meta:
+        attrs = {'class': 'table table-hover table-bordered'}
+
+    def render_pixel(self, record):
+        return render_component(record.get("pixel"), record.get("pixel_lowstat"))
+
+    def render_sistrip(self, record):
+        return render_component(record.get("sistrip"), record.get("sistrip_lowstat"))
+
+    def render_tracking(self, record):
+        return render_component(record.get("tracking"), record.get("tracking_lowstat"))
