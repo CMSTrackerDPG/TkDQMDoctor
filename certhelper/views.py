@@ -380,3 +380,35 @@ class RunRegistryLumiSectionView(TemplateView):
             table = RunRegistryLumiSectionTable(data)
             return render(request, self.template_name, {'table': table})
         return render(request, self.template_name)
+
+
+@method_decorator(login_required, name="dispatch")
+class RunRegistryCompareView(TemplateView):
+    template_name = 'certhelper/compare_runregistry.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        """run_min = request.POST.get("run_min")
+        run_max = request.POST.get("run_max")
+        run_list = request.POST.get("run_list")
+
+        run_registry = TrackerRunRegistryClient()
+        if run_list:
+            run_numbers = re.sub('[^0-9]', ' ', run_list).split()  # only run_numbers
+            run_numbers = set(run_numbers)  # remove duplicates
+            data = run_registry.get_runs_with_lumi_section_sum_by_list(run_numbers)
+        else:
+            data = run_registry.get_runs_by_range(run_min, run_max)
+        """
+        runs = RunInfo.objects.all()
+
+        deviating, corresponding = runs.compare_with_run_registry()
+        deviating_run_table = RunRegistryComparisonTable(deviating)
+        corresponding_run_table = RunRegistryComparisonTable(corresponding)
+
+        return render(request, self.template_name, {
+            "table": deviating_run_table,
+            "corresponding_table": corresponding_run_table
+        })

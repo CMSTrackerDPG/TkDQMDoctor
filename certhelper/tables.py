@@ -119,7 +119,7 @@ class RunRegistryTable(tables.Table):
     run_number = tables.Column()
     run_class = tables.Column()
     dataset = tables.Column()
-    #lumi_sections = tables.Column()
+    # lumi_sections = tables.Column()
     state = tables.Column()
     pixel = tables.Column()
     sistrip = tables.Column()
@@ -181,3 +181,24 @@ class RunRegistryLumiSectionTable(tables.Table):
     def render_bpix(self, value): return render_boolean_cell(value)
 
     def render_fpix(self, value): return render_boolean_cell(value)
+
+
+class RunRegistryComparisonTable(tables.Table):
+    run_number = tables.Column()
+    type__runtype = tables.Column()
+    type__reco = tables.Column()
+    pixel = tables.Column()
+    sistrip = tables.Column()
+    tracking = tables.Column()
+
+    class Meta:
+        attrs = {'class': 'table table-hover table-bordered'}
+
+    def render_pixel(self, record):
+        return render_component(record.get("pixel"), record.get("pixel_lowstat"))
+
+    def render_sistrip(self, record):
+        return render_component(record.get("sistrip"), record.get("sistrip_lowstat"))
+
+    def render_tracking(self, record):
+        return render_component(record.get("tracking"), record.get("tracking_lowstat"))

@@ -7,6 +7,9 @@ from django.db.models import QuerySet, Q, Count, Sum, FloatField, When, Case, Va
 from django.db.models.functions import ExtractWeekDay
 from django.utils import timezone
 
+from certhelper.runregistry import TrackerRunRegistryClient
+from certhelper.utilities.utilities import convert_run_registry_to_runinfo, chunks
+
 
 class SoftDeletionQuerySet(QuerySet):
     """
@@ -406,3 +409,46 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
                 ref.beamenergy,
                 ref.dataset)
             )
+
+    def compare_with_run_registry(self):
+        run_numbers = self.run_numbers()
+        run_registry = TrackerRunRegistryClient()
+        keys = [
+            "run_number",
+            "type__runtype",
+            "type__reco",
+            "pixel",
+            "sistrip",
+            "tracking",
+            "pixel_lowstat",
+            "sistrip_lowstat",
+            "tracking_lowstat",
+        ]
+
+        run_info_tuple_set = set(self.values_list(*keys))
+
+        # the resthub api cannot handle more than 1000 elements in the SQL query
+        if len(run_numbers) <= 500:
+            run_registry_entries = run_registry.get_runs_by_list(run_numbers)
+        else:  # split the list if it is too big
+            list_of_run_number_lists = chunks(run_numbers, 500)
+            run_registry_entries = []
+            for run_number_list in list_of_run_number_lists:
+                new_entries = run_registry.get_runs_by_list(run_number_list)
+                run_registry_entries.extend(new_entries)
+
+        convert_run_registry_to_runinfo(run_registry_entries)
+        run_registry_tuple_set = {tuple(d[key] for key in keys) for d in run_registry_entries}
+
+        deviating_run_info_tuple_list = sorted(run_info_tuple_set - run_registry_tuple_set)
+        corresponding_run_registry_runs = []
+        for run in deviating_run_info_tuple_list:
+            elements = list(filter(lambda x: x[0] == run[0] and x[2] == run[2], run_registry_tuple_set))
+            if not elements:
+                elements = [("", "", "", "", "", "", False, False, False)]
+            corresponding_run_registry_runs.extend(elements)
+
+        deviating_run_info_dict = [dict(zip(keys, run)) for run in deviating_run_info_tuple_list]
+        corresponding_run_registry_dict = [dict(zip(keys, run)) for run in corresponding_run_registry_runs]
+
+        return deviating_run_info_dict, corresponding_run_registry_dict

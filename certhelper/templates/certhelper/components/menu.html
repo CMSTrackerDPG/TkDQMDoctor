@@ -21,7 +21,12 @@
                 <li><a href="{% url 'certhelper:references' %}"><span class="glyphicon glyphicon-pushpin"></span> List of reference runs</a></li>
                 <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-wrench"></span> Tools<span class="caret"></span></a>
                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Certification Helper</li>
                         <li><a href="{% url 'certhelper:compute-luminosity' %}">Compute Luminosity</a></li>
+
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Run Registry</li>
+                        <li><a href="{% url 'certhelper:compare-runregistry' %}">Compare with Run Registry</a></li>
                         <li><a href="{% url 'certhelper:view-runregistry' %}">View Run Registry</a></li>
                         <li><a href="{% url 'certhelper:view-lumisections' %}">View Lumi Sections</a></li>
                     </ul>

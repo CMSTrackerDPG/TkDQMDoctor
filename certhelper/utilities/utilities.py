@@ -345,8 +345,8 @@ def render_component(component, component_lowstat):
         component_value = "Lowstat"
 
     if css_class:
-        return mark_safe('<div class="{}">{}</div>'.format(css_class, component_value))
-    return component_lowstat
+        return mark_safe('<div class="{}">{}</div>'.format(css_class, component_value.title()))
+    return component
 
 
 def render_trackermap(trackermap):
@@ -413,3 +413,53 @@ def get_runinfo_from_request(request):
         run.tracking_lowstat = tracking_lowstat == "true"
 
     return run
+
+
+def convert_run_registry_to_runinfo(list_of_dictionaries):
+    """
+    Converts the list of JSON dictionaries into a RunInfo compatible format, i.e.:
+    run_class => type__runtype
+    dataset => type__dataset
+
+    :param list_of_dictionaries:
+    :return:
+    """
+    for entry in list_of_dictionaries:
+        run_class = entry.pop("run_class").lower()
+        entry["type__dataset"] = entry.pop("dataset")
+        dataset = entry["type__dataset"].lower()
+
+        if "collision" in run_class:
+            entry["type__runtype"] = "Collisions"
+        elif "cosmic" in run_class:
+            entry["type__runtype"] = "Cosmics"
+        elif "collision" in dataset:  # When run_class is e.g. Commissioning18
+            entry["type__runtype"] = "Collisions"
+        elif "cosmic" in dataset:
+            entry["type__runtype"] = "Cosmics"
+
+        if "express" in dataset:
+            entry["type__reco"] = "Express"
+        elif "prompt" in dataset:
+            entry["type__reco"] = "Prompt"
+        elif "rereco" in dataset:
+            entry["type__reco"] = "reReco"
+
+        entry["pixel"] = entry["pixel"].title()
+        entry["sistrip"] = entry["sistrip"].title()
+        entry["tracking"] = entry["tracking"].title()
+
+    return list_of_dictionaries
+
+
+def chunks(elements_list, n):
+    """
+    Split a list into sublists of fixed length n
+
+    Credit: https://stackoverflow.com/a/312464/9907540
+
+    :param elements_list: list of elements that needs to be split
+    :param n: chunk size of new lists
+    """
+    for index in range(0, len(elements_list), n):
+        yield elements_list[index:index + n]
