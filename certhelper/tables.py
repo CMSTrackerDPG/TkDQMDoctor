@@ -1,6 +1,7 @@
 import django_tables2 as tables
 
-from certhelper.utilities.utilities import render_component, render_trackermap
+from certhelper.utilities.utilities import render_component, render_trackermap, \
+    render_boolean_cell
 from .models import RunInfo, ReferenceRun
 
 
@@ -118,6 +119,7 @@ class RunRegistryTable(tables.Table):
     run_number = tables.Column()
     run_class = tables.Column()
     dataset = tables.Column()
+    #lumi_sections = tables.Column()
     state = tables.Column()
     pixel = tables.Column()
     sistrip = tables.Column()
@@ -134,3 +136,48 @@ class RunRegistryTable(tables.Table):
 
     def render_tracking(self, record):
         return render_component(record.get("tracking"), record.get("tracking_lowstat"))
+
+
+class RunRegistryLumiSectionTable(tables.Table):
+    run_number = tables.Column()
+    lhcfill = tables.Column()
+    dataset = tables.Column()
+    section_from = tables.Column()
+    section_to = tables.Column()
+    section_count = tables.Column()
+    cms_active = tables.Column()
+    beam1_stable = tables.Column()
+    beam2_stable = tables.Column()
+    beam1_present = tables.Column()
+    beam2_present = tables.Column()
+    tibtid = tables.Column()
+    tob = tables.Column()
+    tecp = tables.Column()
+    tecm = tables.Column()
+    bpix = tables.Column()
+    fpix = tables.Column()
+
+    class Meta:
+        attrs = {'class': 'table table-hover table-bordered'}
+
+    def render_cms_active(self, value): return render_boolean_cell(value)
+
+    def render_beam1_stable(self, value): return render_boolean_cell(value)
+
+    def render_beam2_stable(self, value): return render_boolean_cell(value)
+
+    def render_beam1_present(self, value): return render_boolean_cell(value)
+
+    def render_beam2_present(self, value): return render_boolean_cell(value)
+
+    def render_tibtid(self, value): return render_boolean_cell(value)
+
+    def render_tob(self, value): return render_boolean_cell(value)
+
+    def render_tecp(self, value): return render_boolean_cell(value)
+
+    def render_tecm(self, value): return render_boolean_cell(value)
+
+    def render_bpix(self, value): return render_boolean_cell(value)
+
+    def render_fpix(self, value): return render_boolean_cell(value)

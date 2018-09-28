@@ -36,6 +36,7 @@ urlpatterns = [
 
     url(r'^tools/compute/luminosity/$', views.ComputeLuminosityView.as_view(), name='compute-luminosity'),
     url(r'^tools/view/runregistry/$', views.RunRegistryView.as_view(), name='view-runregistry'),
+    url(r'^tools/view/lumisections/$', views.RunRegistryLumiSectionView.as_view(), name='view-lumisections'),
 
     # checklists
     # TODO one general checklists page for all checklists /checklists/

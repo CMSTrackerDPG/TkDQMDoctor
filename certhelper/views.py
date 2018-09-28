@@ -359,3 +359,24 @@ class RunRegistryView(TemplateView):
         table = RunRegistryTable(data)
 
         return render(request, self.template_name, {'table': table})
+
+
+class RunRegistryLumiSectionView(TemplateView):
+    template_name = 'certhelper/lumisections.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        # run_min = request.POST.get("run_min")
+        # run_max = request.POST.get("run_max")
+        run_list = request.POST.get("run_list")
+
+        run_registry = TrackerRunRegistryClient()
+        if run_list:
+            run_numbers = re.sub('[^0-9]', ' ', run_list).split()  # only run_numbers
+            run_numbers = set(run_numbers)  # remove duplicates
+            data = run_registry.get_lumi_sections_by_list(run_numbers)
+            table = RunRegistryLumiSectionTable(data)
+            return render(request, self.template_name, {'table': table})
+        return render(request, self.template_name)

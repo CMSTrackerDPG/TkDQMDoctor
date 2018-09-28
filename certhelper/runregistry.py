@@ -23,7 +23,7 @@ class RunRegistryClient:
         response = requests.get(self.url + resource)
         return response.json()
 
-    def get_query_id(self, query):
+    def __get_query_id(self, query):
         """
         Converts a SQL query string into a query id (qid), that will be used to access
         the RunRegistry.
@@ -63,7 +63,7 @@ class RunRegistryClient:
         :param query: SQL query string
         :return: JSON dictionary
         """
-        query_id = self.get_query_id(query)
+        query_id = self.__get_query_id(query)
         resource = "/query/" + query_id + "/data"
         return self.__get_json_response(resource)
 
@@ -123,8 +123,6 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "and r.rda_name != '/Global/Online/ALL'".format(where_clause)
         )
 
-        print(query)
-
         run_list = self.execute_query(query).get("data")
 
         keys = [
@@ -180,9 +178,107 @@ class TrackerRunRegistryClient(RunRegistryClient):
         :param list_of_run_numbers: list of run numbers
         :return: dictionary containing the queryset
         """
+        if not list_of_run_numbers:
+            return []
 
         list_of_run_numbers = ["'" + str(item) + "'" for item in list_of_run_numbers]
         list_of_run_numbers = ", ".join(list_of_run_numbers)
         where_clause = "r.run_number in ({})".format(list_of_run_numbers)
 
         return self.__get_runs(where_clause)
+
+    def get_lumi_sections_by_list(self, list_of_run_numbers):
+        list_of_run_numbers = ["'" + str(item) + "'" for item in list_of_run_numbers]
+        list_of_run_numbers = ", ".join(list_of_run_numbers)
+
+        query = (
+            "select r.rdr_run_number, r.lhcfill, r.rdr_rda_name, r.rdr_section_from, "
+            "r.rdr_section_to, r.rdr_section_count, "
+            "r.cms_active, r.beam1_stable, r.beam2_stable, r.beam1_present, "
+            "r.beam2_present, r.tibtid_ready, r.tob_ready, r.tecp_ready, "
+            "r.tecm_ready, r.bpix_ready, r.fpix_ready "
+            "from runreg_tracker.dataset_lumis r "
+            "where r.rdr_rda_name != '/Global/Online/ALL' "
+            "and r.rdr_run_number in ({}) "
+            "order by r.rdr_run_number, r.rdr_rda_name, r.rdr_range".format(
+                list_of_run_numbers
+            )
+        )
+
+        keys = [
+            "run_number",
+            "lhcfill",
+            "dataset",
+            "section_from",
+            "section_to",
+            "section_count",
+            "cms_active",
+            "beam1_stable",
+            "beam2_stable",
+            "beam1_present",
+            "beam2_present",
+            "tibtid",
+            "tob",
+            "tecp",
+            "tecm",
+            "bpix",
+            "fpix"
+        ]
+        run_list = self.execute_query(query).get("data")
+        return [dict(zip(keys, run)) for run in run_list]
+
+    def get_runs_with_lumi_section_sum_by_list(self, list_of_run_numbers):
+        list_of_run_numbers = ["'" + str(item) + "'" for item in list_of_run_numbers]
+        list_of_run_numbers = ", ".join(list_of_run_numbers)
+
+        query = (
+            "select r.run_number, r.run_class_name, r.rda_name, "
+            "sum(l.rdr_section_count) as lumi_sections, "
+            "r.rda_state, r.rda_last_shifter, r.rda_cmp_pixel, r.rda_cmp_strip, "
+            "r.rda_cmp_tracking, r.rda_cmp_pixel_cause, r.rda_cmp_strip_cause, "
+            "r.rda_cmp_tracking_cause "
+            "from runreg_tracker.dataset_lumis l, runreg_tracker.datasets r "
+            "where l.rdr_run_number = r.run_number "
+            "and l.rdr_rda_name = r.rda_name "
+            "and l.rdr_rda_name != '/Global/Online/ALL' "
+            "and l.cms_active = 1 "
+            "and l.beam1_stable = 1 "
+            "and l.beam2_stable = 1 "
+            "and l.TIBTID_READY = 1 "
+            "and l.TOB_READY = 1 "
+            "and l.TECP_READY = 1 "
+            "and l.TECM_READY = 1 "
+            "and l.BPIX_READY = 1 "
+            "and l.FPIX_READY = 1 "
+            "and l.rdr_run_number in ({}) "
+            "group by r.run_number, r.rda_name, r.run_class_name, "
+            "r.rda_state, r.rda_last_shifter, r.rda_cmp_pixel, r.rda_cmp_strip, "
+            "r.rda_cmp_tracking, r.rda_cmp_pixel_cause, r.rda_cmp_strip_cause, "
+            "r.rda_cmp_tracking_cause ".format(list_of_run_numbers)
+        )
+
+        run_list = self.execute_query(query).get("data")
+
+        keys = [
+            "run_number",
+            "run_class",
+            "dataset",
+            "lumi_sections",
+            "state",
+            "shifter",
+            "pixel",
+            "sistrip",
+            "tracking",
+            "pixel_lowstat",
+            "sistrip_lowstat",
+            "tracking_lowstat",
+        ]
+
+        run_dict = [dict(zip(keys, run)) for run in run_list]
+
+        for run in run_dict:
+            run["pixel_lowstat"] = run["pixel_lowstat"] == "LOW_STATS"
+            run["sistrip_lowstat"] = run["sistrip_lowstat"] == "LOW_STATS"
+            run["tracking_lowstat"] = run["tracking_lowstat"] == "LOW_STATS"
+
+        return run_dict

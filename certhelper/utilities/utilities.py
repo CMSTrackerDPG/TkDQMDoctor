@@ -355,6 +355,17 @@ def render_trackermap(trackermap):
     return trackermap
 
 
+def render_boolean_cell(value):
+    boolean_value = False if value is False or value == "0" or value == 0 else True
+    print("{} {}".format(value, boolean_value))
+    glyphicon = "ok" if boolean_value else "remove"
+
+    html = '<span class="glyphicon glyphicon-{}"></span>' \
+        .format(glyphicon, glyphicon)
+
+    return mark_safe(html)
+
+
 def get_runinfo_from_request(request):
     """
     :return: RunInfo instance filled with attributes from the request
