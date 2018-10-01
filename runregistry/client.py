@@ -1,5 +1,12 @@
 import requests
 
+from runregistry.utilities import (
+    transform_lowstat_to_boolean,
+    list_to_dict,
+    build_range_where_clause,
+    build_list_where_clause,
+)
+
 
 class RunRegistryClient:
     """
@@ -112,7 +119,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
     https://cmswbmoffshift.web.cern.ch/cmswbmoffshift/runregistry_offline/index.jsf
     """
 
-    def __get_runs(self, where_clause):
+    def __get_dataset_runs(self, where_clause):
         query = (
             "select r.run_number, r.run_class_name, r.rda_name, r.rda_state, "
             "r.rda_last_shifter, r.rda_cmp_pixel, r.rda_cmp_strip, "
@@ -139,58 +146,12 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "tracking_lowstat",
         ]
 
-        run_dict = [dict(zip(keys, run)) for run in run_list]
+        run_dicts = list_to_dict(run_list, keys)
+        transform_lowstat_to_boolean(run_dicts)
 
-        for run in run_dict:
-            run["pixel_lowstat"] = run["pixel_lowstat"] == "LOW_STATS"
-            run["sistrip_lowstat"] = run["sistrip_lowstat"] == "LOW_STATS"
-            run["tracking_lowstat"] = run["tracking_lowstat"] == "LOW_STATS"
+        return run_dicts
 
-        return run_dict
-
-    def get_runs_by_range(self, min_run_number, max_run_number):
-        """
-        Get list of run dictionaries from the Tracker workspace in the Run Registry
-
-        Example:
-        >>> client = TrackerRunRegistryClient()
-        >>> client.get_runs_by_range("323471", "323475")
-
-        :param min_run_number: first run number
-        :param max_run_number: last run number
-        :return: dictionary containing the queryset
-        """
-
-        where_clause = "r.run_number >= '{}' and r.run_number <= '{}'".format(
-            min_run_number, max_run_number
-        )
-
-        return self.__get_runs(where_clause)
-
-    def get_runs_by_list(self, list_of_run_numbers):
-        """
-        Get list of run dictionaries from the Tracker workspace in the Run Registry
-
-        Example:
-        >>> client = TrackerRunRegistryClient()
-        >>> client.get_runs_by_list(["323423", "323471", "323397"])
-
-        :param list_of_run_numbers: list of run numbers
-        :return: dictionary containing the queryset
-        """
-        if not list_of_run_numbers:
-            return []
-
-        list_of_run_numbers = ["'" + str(item) + "'" for item in list_of_run_numbers]
-        list_of_run_numbers = ", ".join(list_of_run_numbers)
-        where_clause = "r.run_number in ({})".format(list_of_run_numbers)
-
-        return self.__get_runs(where_clause)
-
-    def get_lumi_sections_by_list(self, list_of_run_numbers):
-        list_of_run_numbers = ["'" + str(item) + "'" for item in list_of_run_numbers]
-        list_of_run_numbers = ", ".join(list_of_run_numbers)
-
+    def __get_dataset_lumis_runs(self, where_clause):
         query = (
             "select r.rdr_run_number, r.lhcfill, r.rdr_rda_name, r.rdr_section_from, "
             "r.rdr_section_to, r.rdr_section_count, "
@@ -199,11 +160,13 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "r.tecm_ready, r.bpix_ready, r.fpix_ready "
             "from runreg_tracker.dataset_lumis r "
             "where r.rdr_rda_name != '/Global/Online/ALL' "
-            "and r.rdr_run_number in ({}) "
+            "and {} "
             "order by r.rdr_run_number, r.rdr_rda_name, r.rdr_range".format(
-                list_of_run_numbers
+                where_clause
             )
         )
+
+        run_list = self.execute_query(query).get("data")
 
         keys = [
             "run_number",
@@ -222,15 +185,12 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "tecp",
             "tecm",
             "bpix",
-            "fpix"
+            "fpix",
         ]
-        run_list = self.execute_query(query).get("data")
-        return [dict(zip(keys, run)) for run in run_list]
 
-    def get_runs_with_lumi_section_sum_by_list(self, list_of_run_numbers):
-        list_of_run_numbers = ["'" + str(item) + "'" for item in list_of_run_numbers]
-        list_of_run_numbers = ", ".join(list_of_run_numbers)
+        return list_to_dict(run_list, keys)
 
+    def __get_dataset_runs_with_active_lumis(self, where_clause):
         query = (
             "select r.run_number, r.run_class_name, r.rda_name, "
             "sum(l.rdr_section_count) as lumi_sections, "
@@ -250,11 +210,11 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "and l.TECM_READY = 1 "
             "and l.BPIX_READY = 1 "
             "and l.FPIX_READY = 1 "
-            "and l.rdr_run_number in ({}) "
+            "and {} "
             "group by r.run_number, r.rda_name, r.run_class_name, "
             "r.rda_state, r.rda_last_shifter, r.rda_cmp_pixel, r.rda_cmp_strip, "
             "r.rda_cmp_tracking, r.rda_cmp_pixel_cause, r.rda_cmp_strip_cause, "
-            "r.rda_cmp_tracking_cause ".format(list_of_run_numbers)
+            "r.rda_cmp_tracking_cause ".format(where_clause)
         )
 
         run_list = self.execute_query(query).get("data")
@@ -274,11 +234,108 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "tracking_lowstat",
         ]
 
-        run_dict = [dict(zip(keys, run)) for run in run_list]
-
-        for run in run_dict:
-            run["pixel_lowstat"] = run["pixel_lowstat"] == "LOW_STATS"
-            run["sistrip_lowstat"] = run["sistrip_lowstat"] == "LOW_STATS"
-            run["tracking_lowstat"] = run["tracking_lowstat"] == "LOW_STATS"
+        run_dict = list_to_dict(run_list, keys)
+        transform_lowstat_to_boolean(run_dict)
 
         return run_dict
+
+    def get_runs_by_list(self, list_of_run_numbers):
+        """
+        Get list of run dictionaries from the Tracker workspace in the Run Registry
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> runs = client.get_runs_by_list(["323423"])
+        >>> runs[0]["state"]
+        'COMPLETED'
+
+        :param list_of_run_numbers: list of run numbers
+        :return: dictionary containing the queryset
+        """
+        if not list_of_run_numbers:
+            return []
+
+        where_clause = build_list_where_clause(list_of_run_numbers, "r.run_number")
+        return self.__get_dataset_runs(where_clause)
+
+    def get_runs_by_range(self, min_run_number, max_run_number):
+        """
+        Get list of run dictionaries from the Tracker workspace in the Run Registry
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> runs = client.get_runs_by_range("323471", "323475")
+        >>> runs[0]["run_class"]
+        'Collisions18'
+
+        :param min_run_number: first run number
+        :param max_run_number: last run number
+        :return: dictionary containing the queryset
+        """
+        where_clause = build_range_where_clause(
+            min_run_number, max_run_number, "r.run_number"
+        )
+        return self.__get_dataset_runs(where_clause)
+
+    def get_lumi_sections_by_list(self, list_of_run_numbers):
+        """
+        Get list of lumisections for the given run number list
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> lumis = client.get_lumi_sections_by_list(["323471"])
+        >>> lumis[0]["lhcfill"]
+        7217
+
+        :param list_of_run_numbers:
+        :return:
+        """
+        where_clause = build_list_where_clause(list_of_run_numbers, "r.rdr_run_number")
+        return self.__get_dataset_lumis_runs(where_clause)
+
+    def get_lumi_sections_by_range(self, min_run_number, max_run_number):
+        """
+        Get list of lumisections for the given run number range
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> lumis = client.get_lumi_sections_by_range("323472", "323485")
+        >>> lumis[0]["section_count"]
+        94
+
+        :param min_run_number: first run number
+        :param max_run_number: last run number
+        :return: dictionary containing the queryset
+        """
+        where_clause = build_range_where_clause(
+            min_run_number, max_run_number, "r.rdr_run_number"
+        )
+        return self.__get_dataset_lumis_runs(where_clause)
+
+    def get_active_lumi_runs_by_list(self, list_of_run_numbers):
+        """
+        Get list of runs with certification status and active lumi sections
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> runs = client.get_active_lumi_runs_by_list(["321777"])
+        >>> runs[0]["lumi_sections"]
+        279
+        """
+        where_clause = build_list_where_clause(list_of_run_numbers, "r.run_number")
+        return self.__get_dataset_runs_with_active_lumis(where_clause)
+
+    def get_active_lumi_runs_by_range(self, min_run_number, max_run_number):
+        """
+        Get list of runs with certification status and active lumi sections
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> runs = client.get_active_lumi_runs_by_range("323472", "323485")
+        >>> runs[0]["pixel"]
+        'GOOD'
+        """
+        where_clause = build_range_where_clause(
+            min_run_number, max_run_number, "r.run_number"
+        )
+        return self.__get_dataset_runs_with_active_lumis(where_clause)
