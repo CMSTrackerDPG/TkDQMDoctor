@@ -216,49 +216,6 @@ class TestUtilities:
         assert not updated_user.userprofile.is_shiftleader
         assert updated_user.userprofile.is_expert
 
-    def test_runinfo_against_runregistry(self):
-        run_info_list = [
-            {"run_number": 350000, "type__reco": "Express", "Pixel": "Good"},
-            {"run_number": 350000, "type__reco": "Prompt", "Pixel": "Good"},
-            {"run_number": 350001, "type__reco": "Express", "Pixel": "Good"},
-            {"run_number": 350001, "type__reco": "Prompt", "Pixel": "Good"},
-            {"run_number": 350002, "type__reco": "Express", "Pixel": "Bad"},
-            {"run_number": 350003, "type__reco": "Express", "Pixel": "Good"},
-            {"run_number": 350003, "type__reco": "Prompt", "Pixel": "Good"},
-        ]
-
-        run_registry_list = [
-            {"run_number": 350000, "type__reco": "Express", "Pixel": "Good"},
-            {"run_number": 350000, "type__reco": "Prompt", "Pixel": "Good"},
-            {"run_number": 350001, "type__reco": "Express", "Pixel": "Bad"},
-            {"run_number": 350001, "type__reco": "Prompt", "Pixel": "Good"},
-            {"run_number": 350002, "type__reco": "Express", "Pixel": "Good"},
-            {"run_number": 350002, "type__reco": "Prompt", "Pixel": "Good"},
-            {"run_number": 350003, "type__reco": "Express", "Pixel": "Good"},
-        ]
-
-        run_info_set = {tuple(d.values()) for d in run_info_list}
-        run_registry_set = {tuple(d.values()) for d in run_registry_list}
-
-        diff = run_info_set ^ run_registry_set
-        expected = {
-            (350001, "Express", "Bad"),
-            (350001, "Express", "Good"),
-            (350002, "Express", "Bad"),
-            (350002, "Express", "Good"),
-            (350002, "Prompt", "Good"),
-            (350003, "Prompt", "Good"),
-        }
-        assert expected == diff
-
-        diff = run_info_set - run_registry_set
-        expected = {
-            (350001, "Express", "Good"),
-            (350002, "Express", "Bad"),
-            (350003, "Prompt", "Good"),
-        }
-        assert expected == diff
-
 
 class TestCreateUserProfile(TestCase):
     fixtures = ["tests/fixtures/user_without_userprofile.json"]
