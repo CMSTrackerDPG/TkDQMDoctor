@@ -1,4 +1,5 @@
 import datetime
+import re
 from decimal import Decimal
 
 from allauth.socialaccount.models import SocialAccount
@@ -14,7 +15,7 @@ logger = get_configured_logger(loggername=__name__, filename="utilities.log")
 
 def is_valid_date(date_text):
     try:
-        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        datetime.datetime.strptime(date_text, "%Y-%m-%d")
         return True
     except:
         return False
@@ -29,10 +30,15 @@ def get_date_string(year, month, day):
     datestring = None
 
     if year and month and day:  # if attributes exist
-        if int(year) in range(1900, 3000) and int(month) in range(1, 13) and int(
-                day) in range(1, 32):
-            if len(month) == 1: month = "0" + month
-            if len(day) == 1: day = "0" + day
+        if (
+            int(year) in range(1900, 3000)
+            and int(month) in range(1, 13)
+            and int(day) in range(1, 32)
+        ):
+            if len(month) == 1:
+                month = "0" + month
+            if len(day) == 1:
+                day = "0" + day
             datestring = year + "-" + month + "-" + day
 
     if is_valid_date(datestring):
@@ -42,35 +48,38 @@ def get_date_string(year, month, day):
 
 def get_filters_from_request_GET(request):
     filter_candidates = [
-        'category',
-        'subcategory',
-        'subsubcategory',
-        'date_range_0',
-        'date_range_1',
-        'runs_0',
-        'runs_1',
-        'type',
+        "category",
+        "subcategory",
+        "subsubcategory",
+        "date_range_0",
+        "date_range_1",
+        "runs_0",
+        "runs_1",
+        "type",
     ]
     applied_filters = {}
     for candidate in filter_candidates:
-        tmp = request.GET.get(candidate, '')
-        if tmp != '' and tmp != 0:
-            if not candidate.startswith('date_range') or candidate.startswith(
-                    'date_range') and is_valid_date(tmp):
+        tmp = request.GET.get(candidate, "")
+        if tmp != "" and tmp != 0:
+            if (
+                not candidate.startswith("date_range")
+                or candidate.startswith("date_range")
+                and is_valid_date(tmp)
+            ):
                 applied_filters[candidate] = tmp
 
-    year = request.GET.get('date_year', '')
-    month = request.GET.get('date_month', '')
-    day = request.GET.get('date_day', '')
+    year = request.GET.get("date_year", "")
+    month = request.GET.get("date_month", "")
+    day = request.GET.get("date_day", "")
 
     the_date = get_date_string(year, month, day)
 
     # TODO solve conflict between two dates set
-    if request.GET.get('date', ''):
-        the_date = request.GET.get('date', '')
+    if request.GET.get("date", ""):
+        the_date = request.GET.get("date", "")
 
     if the_date:
-        applied_filters['date'] = the_date
+        applied_filters["date"] = the_date
 
     return applied_filters
 
@@ -93,7 +102,7 @@ def request_contains_filter_parameter(request):
         "date",
         "userid",
         "run_number",
-        "problem_categories"
+        "problem_categories",
     ]:
         for word in request.GET:
             if candidate in word:
@@ -105,10 +114,20 @@ def get_this_week_filter_parameter():
     start_of_week = timezone.now() - timezone.timedelta(timezone.now().weekday())
     end_of_week = start_of_week + timezone.timedelta(6)
 
-    date_gte = str(start_of_week.year) + "-" + str(start_of_week.month) + "-" + str(
-        start_of_week.day)
-    date_lte = str(end_of_week.year) + "-" + str(end_of_week.month) + "-" + str(
-        end_of_week.day)
+    date_gte = (
+        str(start_of_week.year)
+        + "-"
+        + str(start_of_week.month)
+        + "-"
+        + str(start_of_week.day)
+    )
+    date_lte = (
+        str(end_of_week.year)
+        + "-"
+        + str(end_of_week.month)
+        + "-"
+        + str(end_of_week.day)
+    )
 
     get_parameters = "?date__gte=" + str(date_gte)
     get_parameters += "&date__lte=" + str(date_lte)
@@ -117,17 +136,17 @@ def get_this_week_filter_parameter():
 
 
 def get_today_filter_parameter():
-    return "?date={}".format(timezone.now().strftime('%Y-%m-%d'))
+    return "?date={}".format(timezone.now().strftime("%Y-%m-%d"))
 
 
 def get_from_summary(summary, runtype=None, reco=None, date=None):
     filtered = summary
     if runtype:
-        filtered = [item for item in filtered if item['type__runtype'] == runtype]
+        filtered = [item for item in filtered if item["type__runtype"] == runtype]
     if reco:
-        filtered = [item for item in filtered if item['type__reco'] == reco]
+        filtered = [item for item in filtered if item["type__reco"] == reco]
     if date:
-        filtered = [item for item in filtered if item['date'] == to_date(date)]
+        filtered = [item for item in filtered if item["date"] == to_date(date)]
     return filtered
 
 
@@ -159,8 +178,7 @@ def get_full_name(user):
 
 
 def extract_numbers_from_list(list_of_elements):
-    return [int(i) for i in list_of_elements
-            if type(i) == int or i.isdigit()]
+    return [int(i) for i in list_of_elements if type(i) == int or i.isdigit()]
 
 
 def uniquely_sorted(list_of_elements):
@@ -193,14 +211,14 @@ def get_or_create_shift_leader_group(group_name):
     try:
         g = Group.objects.get(name=group_name)
     except Group.DoesNotExist:
-        user_permissions = Permission.objects.filter(
-            content_type__model="user")
+        user_permissions = Permission.objects.filter(content_type__model="user")
         certhelper_permissions = Permission.objects.filter(
-            content_type__app_label="certhelper")
+            content_type__app_label="certhelper"
+        )
         categories_permissions = Permission.objects.filter(
-            content_type__app_label="categories")
-        g = Group.objects.create(
-            name=group_name)
+            content_type__app_label="categories"
+        )
+        g = Group.objects.create(name=group_name)
         for permission in user_permissions:
             g.permissions.add(permission)
         for permission in certhelper_permissions:
@@ -213,19 +231,27 @@ def get_or_create_shift_leader_group(group_name):
 
 def create_userprofile(user):
     from certhelper.models import UserProfile
+
     try:
         userprofile = UserProfile.objects.get(user=user)
-        logger.info("UserProfile with id {} for User {} already exists"
-                    .format(userprofile.id, user))
+        logger.info(
+            "UserProfile with id {} for User {} already exists".format(
+                userprofile.id, user
+            )
+        )
     except UserProfile.DoesNotExist:
         userprofile = UserProfile.objects.create(user=user)
-        logger.info("New UserProfile with id {} for User {} has been created"
-                    .format(userprofile.id, user))
+        logger.info(
+            "New UserProfile with id {} for User {} has been created".format(
+                userprofile.id, user
+            )
+        )
     return userprofile
 
 
 def update_userprofile(user):
     from certhelper.models import UserProfile
+
     if user.pk:  # Only already existing users
         try:
             socialaccount = SocialAccount.objects.get(user=user)
@@ -256,13 +282,13 @@ def get_runs_from_request_filters(request, alert_errors, alert_infos, alert_filt
 
     runs = RunInfo.objects.filter(userid=request.user)
 
-    date_filter_value = request.GET.get('date', None)
+    date_filter_value = request.GET.get("date", None)
 
-    date_from = request.GET.get('date_range_0', None)
-    date_to = request.GET.get('date_range_1', None)
-    runs_from = request.GET.get('runs_0', None)
-    runs_to = request.GET.get('runs_1', None)
-    type_id = request.GET.get('type', None)
+    date_from = request.GET.get("date_range_0", None)
+    date_to = request.GET.get("date_range_1", None)
+    runs_from = request.GET.get("runs_0", None)
+    runs_to = request.GET.get("runs_1", None)
+    type_id = request.GET.get("type", None)
 
     if date_filter_value:
         if is_valid_date(date_filter_value):
@@ -313,9 +339,17 @@ def get_runs_from_request_filters(request, alert_errors, alert_infos, alert_filt
             alert_errors.append("Invalid Type: " + str(type_id))
             return RunInfo.objects.none()
 
-    if not date_filter_value and not type_id and not date_from and not date_to and not runs_from and not runs_to:
+    if (
+        not date_filter_value
+        and not type_id
+        and not date_from
+        and not date_to
+        and not runs_from
+        and not runs_to
+    ):
         alert_infos.append(
-            "No filters applied. Showing every run you have ever certified!")
+            "No filters applied. Showing every run you have ever certified!"
+        )
 
     return runs
 
@@ -345,7 +379,9 @@ def render_component(component, component_lowstat):
         component_value = "Lowstat"
 
     if css_class:
-        return mark_safe('<div class="{}">{}</div>'.format(css_class, component_value.title()))
+        return mark_safe(
+            '<div class="{}">{}</div>'.format(css_class, component_value.title())
+        )
     return component
 
 
@@ -360,8 +396,7 @@ def render_boolean_cell(value):
     print("{} {}".format(value, boolean_value))
     glyphicon = "ok" if boolean_value else "remove"
 
-    html = '<span class="glyphicon glyphicon-{}"></span>' \
-        .format(glyphicon, glyphicon)
+    html = '<span class="glyphicon glyphicon-{}"></span>'.format(glyphicon, glyphicon)
 
     return mark_safe(html)
 
@@ -372,19 +407,25 @@ def get_runinfo_from_request(request):
     """
     from certhelper.models import RunInfo, ReferenceRun, Type
 
-    type_id = request.GET.get('type', None)
-    type_ = Type.objects.get(pk=type_id) if type_id is not None and type_id != "" else None
-    reference_run_id = request.GET.get('reference_run', None)
-    reference_run = ReferenceRun.objects.get(pk=reference_run_id) if reference_run_id is not None and reference_run_id != "" else None
-    run_number = request.GET.get('run_number', None)
-    int_luminosity = request.GET.get('int_luminosity', None)
-    number_of_ls = request.GET.get('number_of_ls', None)
-    pixel = request.GET.get('pixel', None)
-    pixel_lowstat = request.GET.get('pixel_lowstat', False)
-    sistrip = request.GET.get('sistrip', None)
-    sistrip_lowstat = request.GET.get('sistrip_lowstat', False)
-    tracking = request.GET.get('tracking', None)
-    tracking_lowstat = request.GET.get('tracking_lowstat', False)
+    type_id = request.GET.get("type", None)
+    type_ = (
+        Type.objects.get(pk=type_id) if type_id is not None and type_id != "" else None
+    )
+    reference_run_id = request.GET.get("reference_run", None)
+    reference_run = (
+        ReferenceRun.objects.get(pk=reference_run_id)
+        if reference_run_id is not None and reference_run_id != ""
+        else None
+    )
+    run_number = request.GET.get("run_number", None)
+    int_luminosity = request.GET.get("int_luminosity", None)
+    number_of_ls = request.GET.get("number_of_ls", None)
+    pixel = request.GET.get("pixel", None)
+    pixel_lowstat = request.GET.get("pixel_lowstat", False)
+    sistrip = request.GET.get("sistrip", None)
+    sistrip_lowstat = request.GET.get("sistrip_lowstat", False)
+    tracking = request.GET.get("tracking", None)
+    tracking_lowstat = request.GET.get("tracking_lowstat", False)
 
     run = RunInfo(
         type=type_,
@@ -462,4 +503,12 @@ def chunks(elements_list, n):
     :param n: chunk size of new lists
     """
     for index in range(0, len(elements_list), n):
-        yield elements_list[index:index + n]
+        yield elements_list[index : index + n]
+
+
+def number_string_to_list(number_string):
+    """
+    Converts a string of numbers to a list
+    """
+    new_list = re.sub("[^0-9]", " ", number_string).split()  # only integers
+    return sorted(set(new_list))  # remove duplicates

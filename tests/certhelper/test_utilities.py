@@ -36,7 +36,9 @@ class TestUtilities:
         d = to_date("2018-02-28")
         assert d == datetime.date(2018, 2, 28)
         assert to_date(datetime.date(2019, 12, 29)) == datetime.date(2019, 12, 29)
-        assert to_date(datetime.datetime(2017, 1, 2, 3, 4, 5)) == datetime.date(2017, 1, 2)
+        assert to_date(datetime.datetime(2017, 1, 2, 3, 4, 5)) == datetime.date(
+            2017, 1, 2
+        )
 
         with pytest.raises(ValueError):
             to_date("2018-02-29")
@@ -45,8 +47,12 @@ class TestUtilities:
         assert to_weekdayname(to_date("2018-06-12")) == "Tuesday"
 
     def test_get_full_name(self):
-        user1 = mixer.blend(User, username="abcdef1", first_name="Hans", last_name="Skywalker")
-        user2 = mixer.blend(User, username="abcdef2", first_name="", last_name="Skywalker")
+        user1 = mixer.blend(
+            User, username="abcdef1", first_name="Hans", last_name="Skywalker"
+        )
+        user2 = mixer.blend(
+            User, username="abcdef2", first_name="", last_name="Skywalker"
+        )
         user3 = mixer.blend(User, username="abcdef3", first_name="Hans", last_name="")
         user4 = mixer.blend(User, username="abc def4", first_name="", last_name="")
 
@@ -70,13 +76,13 @@ class TestUtilities:
         assert "date__lte" in param
 
     def test_request_contains_filter_parameter(self):
-        req = RequestFactory().get('/')
+        req = RequestFactory().get("/")
         assert False is request_contains_filter_parameter(req)
         user = mixer.blend(User)
         req.GET = req.GET.copy()
         req.GET["userid"] = user.id
         assert True is request_contains_filter_parameter(req)
-        req = RequestFactory().get('/')
+        req = RequestFactory().get("/")
         req.GET = req.GET.copy()
         assert False is request_contains_filter_parameter(req)
         req.GET["date_year"] = "2017"
@@ -87,11 +93,9 @@ class TestUtilities:
         assert egroups is None
         egroups = extract_egroups({"test": ["something", "wrong"]})
         assert egroups is None
-        egroups = extract_egroups({
-            "unrelated": None,
-            "groups": ["correct", "groups"],
-            "name": "Frank",
-        })
+        egroups = extract_egroups(
+            {"unrelated": None, "groups": ["correct", "groups"], "name": "Frank"}
+        )
         assert ["correct", "groups"] == egroups
 
     def test_get_highest_privilege_from_egroup_list(self):
@@ -134,20 +138,14 @@ class TestUtilities:
         ADMIN = 50
 
         criteria_dict = {
-            SHIFTER: [
-                "tkdqmdoctor-shifters",
-            ],
+            SHIFTER: ["tkdqmdoctor-shifters"],
             SHIFTLEADER: [
                 "cms-tracker-offline-shiftleader",
                 "cms-tracker-offline-shiftleaders",
                 "tkdqmdoctor-shiftleaders",
             ],
-            EXPERT: [
-                "tkdqmdoctor-experts",
-            ],
-            ADMIN: [
-                "tkdqmdoctor-admins",
-            ]
+            EXPERT: ["tkdqmdoctor-experts"],
+            ADMIN: ["tkdqmdoctor-admins"],
         }
 
         egroups = []
@@ -218,9 +216,52 @@ class TestUtilities:
         assert not updated_user.userprofile.is_shiftleader
         assert updated_user.userprofile.is_expert
 
+    def test_runinfo_against_runregistry(self):
+        run_info_list = [
+            {"run_number": 350000, "type__reco": "Express", "Pixel": "Good"},
+            {"run_number": 350000, "type__reco": "Prompt", "Pixel": "Good"},
+            {"run_number": 350001, "type__reco": "Express", "Pixel": "Good"},
+            {"run_number": 350001, "type__reco": "Prompt", "Pixel": "Good"},
+            {"run_number": 350002, "type__reco": "Express", "Pixel": "Bad"},
+            {"run_number": 350003, "type__reco": "Express", "Pixel": "Good"},
+            {"run_number": 350003, "type__reco": "Prompt", "Pixel": "Good"},
+        ]
+
+        run_registry_list = [
+            {"run_number": 350000, "type__reco": "Express", "Pixel": "Good"},
+            {"run_number": 350000, "type__reco": "Prompt", "Pixel": "Good"},
+            {"run_number": 350001, "type__reco": "Express", "Pixel": "Bad"},
+            {"run_number": 350001, "type__reco": "Prompt", "Pixel": "Good"},
+            {"run_number": 350002, "type__reco": "Express", "Pixel": "Good"},
+            {"run_number": 350002, "type__reco": "Prompt", "Pixel": "Good"},
+            {"run_number": 350003, "type__reco": "Express", "Pixel": "Good"},
+        ]
+
+        run_info_set = {tuple(d.values()) for d in run_info_list}
+        run_registry_set = {tuple(d.values()) for d in run_registry_list}
+
+        diff = run_info_set ^ run_registry_set
+        expected = {
+            (350001, "Express", "Bad"),
+            (350001, "Express", "Good"),
+            (350002, "Express", "Bad"),
+            (350002, "Express", "Good"),
+            (350002, "Prompt", "Good"),
+            (350003, "Prompt", "Good"),
+        }
+        assert expected == diff
+
+        diff = run_info_set - run_registry_set
+        expected = {
+            (350001, "Express", "Good"),
+            (350002, "Express", "Bad"),
+            (350003, "Prompt", "Good"),
+        }
+        assert expected == diff
+
 
 class TestCreateUserProfile(TestCase):
-    fixtures = ['tests/fixtures/user_without_userprofile.json']
+    fixtures = ["tests/fixtures/user_without_userprofile.json"]
 
     def test_userprofile_does_not_exist(self):
         # python manage.py loaddata should NOT create a UserProfile for a User

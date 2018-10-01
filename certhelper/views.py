@@ -16,12 +16,13 @@ from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter, \
     ComputeLuminosityRunInfoFilter
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
-from certhelper.runregistry import TrackerRunRegistryClient
 from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
 from certhelper.utilities.utilities import get_filters_from_request_GET, \
     request_contains_filter_parameter, get_this_week_filter_parameter, \
-    get_today_filter_parameter, get_runs_from_request_filters, get_runinfo_from_request
+    get_today_filter_parameter, get_runs_from_request_filters, get_runinfo_from_request, \
+    number_string_to_list
+from runregistry.client import TrackerRunRegistryClient
 from .forms import *
 from .tables import *
 
@@ -299,7 +300,7 @@ def restore_run_view(request, pk):
 
     return render(request, 'certhelper/restore.html', {'run': run})
 
-
+@login_required
 def validate_central_certification_list(request):
     text = request.GET.get('text', None)
     run_numbers = re.sub('[^0-9]', ' ', text).split()  # only run_numbers
@@ -316,6 +317,7 @@ class ChecklistTemplateView(TemplateView):
         return context
 
 
+@method_decorator(login_required, name="dispatch")
 def check_integrity_of_run(request):
     """
     Checks if a run with the same number but different type already exists and checks
@@ -350,17 +352,19 @@ class RunRegistryView(TemplateView):
 
         run_registry = TrackerRunRegistryClient()
         if run_list:
-            run_numbers = re.sub('[^0-9]', ' ', run_list).split()  # only run_numbers
-            run_numbers = set(run_numbers)  # remove duplicates
+            run_numbers = number_string_to_list(run_list)
             data = run_registry.get_runs_by_list(run_numbers)
-        else:
+        elif run_min and run_max:
             data = run_registry.get_runs_by_range(run_min, run_max)
+        else:
+            data = {}
 
         table = RunRegistryTable(data)
 
         return render(request, self.template_name, {'table': table})
 
 
+@method_decorator(login_required, name="dispatch")
 class RunRegistryLumiSectionView(TemplateView):
     template_name = 'certhelper/lumisections.html'
 
@@ -368,18 +372,21 @@ class RunRegistryLumiSectionView(TemplateView):
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        # run_min = request.POST.get("run_min")
-        # run_max = request.POST.get("run_max")
+        run_min = request.POST.get("run_min")
+        run_max = request.POST.get("run_max")
         run_list = request.POST.get("run_list")
 
         run_registry = TrackerRunRegistryClient()
         if run_list:
-            run_numbers = re.sub('[^0-9]', ' ', run_list).split()  # only run_numbers
-            run_numbers = set(run_numbers)  # remove duplicates
+            run_numbers = number_string_to_list(run_list)
             data = run_registry.get_lumi_sections_by_list(run_numbers)
-            table = RunRegistryLumiSectionTable(data)
-            return render(request, self.template_name, {'table': table})
-        return render(request, self.template_name)
+        elif run_min and run_max:
+            data = run_registry.get_lumi_sections_by_range(run_min, run_max)
+        else:
+            data = {}
+
+        table = RunRegistryLumiSectionTable(data)
+        return render(request, self.template_name, {'table': table})
 
 
 @method_decorator(login_required, name="dispatch")
@@ -390,25 +397,25 @@ class RunRegistryCompareView(TemplateView):
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        """run_min = request.POST.get("run_min")
+        run_min = request.POST.get("run_min")
         run_max = request.POST.get("run_max")
         run_list = request.POST.get("run_list")
 
-        run_registry = TrackerRunRegistryClient()
         if run_list:
-            run_numbers = re.sub('[^0-9]', ' ', run_list).split()  # only run_numbers
-            run_numbers = set(run_numbers)  # remove duplicates
-            data = run_registry.get_runs_with_lumi_section_sum_by_list(run_numbers)
+            run_numbers = number_string_to_list(run_list)
+            runs = RunInfo.objects.filter(run_number__in=run_numbers)
+        elif run_min and run_max:
+            runs = RunInfo.objects.filter(run_number__gte=run_min, run_number__lte=run_max)
+            runs.print()
         else:
-            data = run_registry.get_runs_by_range(run_min, run_max)
-        """
-        runs = RunInfo.objects.all()
+            runs = RunInfo.objects.none()
 
         deviating, corresponding = runs.compare_with_run_registry()
+
         deviating_run_table = RunRegistryComparisonTable(deviating)
-        corresponding_run_table = RunRegistryComparisonTable(corresponding)
+        run_registry_table = RunRegistryComparisonTable(corresponding)
 
         return render(request, self.template_name, {
             "table": deviating_run_table,
-            "corresponding_table": corresponding_run_table
+            "run_registry_table": run_registry_table
         })
