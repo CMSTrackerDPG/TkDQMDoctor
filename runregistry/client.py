@@ -1,6 +1,9 @@
 """"
 RunRegistry Client
 """
+from itertools import groupby
+from operator import itemgetter
+
 import requests
 
 from runregistry.utilities import (
@@ -81,6 +84,11 @@ class RunRegistryClient:
         """
         Table description in JSON
 
+        Example:
+        >>> client = RunRegistryClient()
+        >>> client.get_table_description("runreg_tracker", "dataset_lumis")["metadata"]["description"]
+        'Dataset lumisections including exceptions'
+
         :param namespace: runreg_{workspace}, e.g. runreg_tracker
         :param table: runs, run_lumis, datasets, dataset_lumis
         :return: json containing the table description
@@ -90,7 +98,7 @@ class RunRegistryClient:
 
     def get_queries(self):
         """
-        GET /query/{query_id}
+        GET /queries/
 
         :return: list of queries
         """
@@ -109,6 +117,11 @@ class RunRegistryClient:
         GET /info
 
         Contains a list of supported functions and the version numbers.
+
+        Example:
+        >>> client = RunRegistryClient()
+        >>> client.get_info()["version"]["resthub"]
+        '0.6.18'
 
         :return json with general information about the service
         """
@@ -350,10 +363,10 @@ class TrackerRunRegistryClient(RunRegistryClient):
         Example:
         >>> client = TrackerRunRegistryClient()
         >>> client.get_fill_number_by_run_number([321177, 321178, 321218])
-        [[321177, 7048], [321178, 7048], [321218, 7052]]
+        [{'run_number': 321177, 'fill_number': 7048}, {'run_number': 321178, 'fill_number': 7048}, {'run_number': 321218, 'fill_number': 7052}]
 
         :param list_of_run_numbers:
-        :return: dictionary containing run and corresponding fill number
+        :return: list of dictionaries containing run number and corresponding fill number
         """
         where_clause = build_list_where_clause(list_of_run_numbers, "r.runnumber")
         query = (
@@ -362,7 +375,9 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        return self.execute_query(query)["data"]
+        items = self.execute_query(query)["data"]
+        keys = ["run_number", "fill_number"]
+        return list_to_dict(items, keys)
 
     def get_run_numbers_by_fill_number(self, list_of_fill_numbers):
         """
@@ -370,11 +385,12 @@ class TrackerRunRegistryClient(RunRegistryClient):
 
         Example:
         >>> client = TrackerRunRegistryClient()
-        >>> client.get_run_numbers_by_fill_number([7048])
-        [[7048, 321171], [7048, 321174], [7048, 321175], [7048, 321177], [7048, 321178], [7048, 321179], [7048, 321181]]
+        >>> client.get_run_numbers_by_fill_number([7048, 7049])
+        [{'fill_number': 7048, 'run_number': [321171, 321174, 321175, 321177, 321178, 321179, 321181]}, {'fill_number': 7049, 'run_number': [321182, 321185, 321189]}]
 
         :param list_of_fill_numbers:
-        :return: dictioanry containing fill number and corresponding list of run numbers
+        :return: list of dictionaries containing fill number and corresponding
+        list of run numbers
         """
         where_clause = build_list_where_clause(list_of_fill_numbers, "r.lhcfill")
         query = (
@@ -383,4 +399,8 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        return self.execute_query(query)["data"]
+        response = self.execute_query(query)["data"]
+        groups = groupby(response, itemgetter(0))
+        items = [(key, [item[1] for item in value]) for key, value in groups]
+        keys = ["fill_number", "run_number"]
+        return list_to_dict(items, keys)
