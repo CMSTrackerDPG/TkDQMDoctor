@@ -277,6 +277,16 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             self.values_list("run_number", flat=True).order_by("run_number").distinct()
         )
 
+    def fill_numbers(self):
+        """
+        :return: sorted list of fill numbers (without duplicates)
+        """
+        if not self.run_numbers():
+            return []
+        client = TrackerRunRegistryClient()
+        return client.get_unique_fill_numbers_by_run_number(self.run_numbers())
+
+
     def pks(self):
         """
         :return: sorted list of primary keys
@@ -531,3 +541,7 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             run.fill_number = list(
                 filter(lambda x: x["run_number"] == run.run_number, fills)
             )[0]["fill_number"]
+
+    def group_run_numbers_by_fill_number(self):
+        run_registry = TrackerRunRegistryClient()
+        return run_registry.get_grouped_fill_numbers_by_run_number(self.run_numbers())

@@ -379,6 +379,28 @@ class TrackerRunRegistryClient(RunRegistryClient):
         keys = ["run_number", "fill_number"]
         return list_to_dict(items, keys)
 
+    def get_unique_fill_numbers_by_run_number(self, list_of_run_numbers):
+        """
+        Retrieve a list of unique fill numbers by the given run numbers
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> client.get_unique_fill_numbers_by_run_number([321177, 321178, 321218])
+        [7048, 7052]
+
+        :param list_of_run_numbers:
+        :return: list of dictionaries containing run number and corresponding fill number
+        """
+
+        where_clause = build_list_where_clause(list_of_run_numbers, "r.runnumber")
+        query = (
+            "select r.lhcfill "
+            "from runreg_tracker.runs r "
+            "where {} "
+            "order by r.runnumber".format(where_clause)
+        )
+        return sorted({item[0] for item in self.execute_query(query)["data"]})
+
     def get_run_numbers_by_fill_number(self, list_of_fill_numbers):
         """
         Retrieve a list of run numbers by the given fill numbers
@@ -393,6 +415,26 @@ class TrackerRunRegistryClient(RunRegistryClient):
         list of run numbers
         """
         where_clause = build_list_where_clause(list_of_fill_numbers, "r.lhcfill")
+        query = (
+            "select r.lhcfill, r.runnumber "
+            "from runreg_tracker.runs r "
+            "where {} "
+            "order by r.runnumber".format(where_clause)
+        )
+        response = self.execute_query(query)["data"]
+        groups = groupby(response, itemgetter(0))
+        items = [(key, [item[1] for item in value]) for key, value in groups]
+        keys = ["fill_number", "run_number"]
+        return list_to_dict(items, keys)
+
+    def get_grouped_fill_numbers_by_run_number(self, list_of_run_numbers):
+        """
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> client.get_grouped_fill_numbers_by_run_number([321171, 321179, 321181, 321182, 321185])
+        [{'fill_number': 7048, 'run_number': [321171, 321179, 321181]}, {'fill_number': 7049, 'run_number': [321182, 321185]}]
+        """
+        where_clause = build_list_where_clause(list_of_run_numbers, "r.runnumber")
         query = (
             "select r.lhcfill, r.runnumber "
             "from runreg_tracker.runs r "

@@ -172,6 +172,9 @@ class ShiftLeaderReportBase:
     def run_numbers(self):
         return self.runs.run_numbers()
 
+    def fill_numbers(self):
+        return self.runs.fill_numbers()
+
     def integrated_luminosity(self):
         return self.runs.integrated_luminosity()
 
@@ -198,7 +201,6 @@ class ShiftLeaderReportDay(ShiftLeaderReportBase):
     def flag_changed(self):
         runs = self.runs.filter_flag_changed(until=self.day_date)
         return type(self)(runs)
-
 
 class NewShiftLeaderReport(ShiftLeaderReportBase):
     def __init__(self, runs):
