@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
@@ -215,6 +217,56 @@ class TestUtilities:
         assert not updated_user.userprofile.is_guest
         assert not updated_user.userprofile.is_shiftleader
         assert updated_user.userprofile.is_expert
+
+    def test_decimal_or_none(self):
+        assert decimal_or_none("2.1") == Decimal("2.1")
+        assert decimal_or_none("2.1.0") is None
+        assert decimal_or_none(2.0) == Decimal("2")
+        assert decimal_or_none(None) is None
+        assert decimal_or_none(13) == Decimal("13")
+        assert decimal_or_none(-1) == Decimal("-1")
+        assert decimal_or_none(".314") == Decimal("0.314")
+        assert decimal_or_none(0.5) == Decimal(".5")
+
+    def test_integer_or_none(self):
+        assert integer_or_none("13") == 13
+        assert integer_or_none("13.7") == 13
+        assert integer_or_none("13.7.3") is None
+        assert integer_or_none("abc") is None
+        assert integer_or_none("0") == 0
+        assert integer_or_none(0) == 0
+        assert integer_or_none("-1.2") == -1
+        assert integer_or_none("-31.7") == -31
+        assert integer_or_none(".3") == 0
+
+    def test_boolean_or_none(self):
+        """
+        Returns the value casted as boolean or None if casting failed.
+
+        "true" -> True
+        "tRuE" -> True
+        "false" -> False
+        "" -> None
+        "abc" -> None
+        0 -> False
+        "1" -> True
+        1 -> True
+        2 -> None
+        """
+        assert boolean_or_none("1") is True
+        assert boolean_or_none("true") is True
+        assert boolean_or_none("tRuE") is True
+        assert boolean_or_none("false") is False
+        assert boolean_or_none("") is None
+        assert boolean_or_none(None) is None
+        assert boolean_or_none(True) is True
+        assert boolean_or_none(False) is False
+        assert boolean_or_none("0") is False
+        assert boolean_or_none(1) is True
+        assert boolean_or_none(0) is False
+        assert boolean_or_none(-1) is None
+        assert boolean_or_none(2) is None
+        assert boolean_or_none("abc") is None
 
 
 class TestCreateUserProfile(TestCase):

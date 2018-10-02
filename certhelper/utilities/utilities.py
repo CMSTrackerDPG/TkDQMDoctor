@@ -1,6 +1,6 @@
 import datetime
+import decimal
 import re
-from decimal import Decimal
 
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import Group, Permission
@@ -407,53 +407,38 @@ def get_runinfo_from_request(request):
     """
     from certhelper.models import RunInfo, ReferenceRun, Type
 
-    type_id = request.GET.get("type", None)
-    type_ = (
-        Type.objects.get(pk=type_id) if type_id is not None and type_id != "" else None
-    )
-    reference_run_id = request.GET.get("reference_run", None)
-    reference_run = (
-        ReferenceRun.objects.get(pk=reference_run_id)
-        if reference_run_id is not None and reference_run_id != ""
-        else None
-    )
-    run_number = request.GET.get("run_number", None)
-    int_luminosity = request.GET.get("int_luminosity", None)
-    number_of_ls = request.GET.get("number_of_ls", None)
-    pixel = request.GET.get("pixel", None)
-    pixel_lowstat = request.GET.get("pixel_lowstat", False)
-    sistrip = request.GET.get("sistrip", None)
-    sistrip_lowstat = request.GET.get("sistrip_lowstat", False)
-    tracking = request.GET.get("tracking", None)
-    tracking_lowstat = request.GET.get("tracking_lowstat", False)
+    type_id = integer_or_none(request.GET.get("type", None))
+    type_ = Type.objects.get(pk=type_id) if type_id else None
 
-    run = RunInfo(
+    reference_run_id = integer_or_none(request.GET.get("reference_run", None))
+    reference_run = (
+        ReferenceRun.objects.get(pk=reference_run_id) if reference_run_id else None
+    )
+
+    run_number = integer_or_none(request.GET.get("run_number", None))
+    int_luminosity = decimal_or_none(request.GET.get("int_luminosity", None))
+    number_of_ls = integer_or_none(request.GET.get("number_of_ls", None))
+
+    pixel = request.GET.get("pixel", None)
+    pixel_lowstat = boolean_or_none(request.GET.get("pixel_lowstat", False))
+    sistrip = request.GET.get("sistrip", None)
+    sistrip_lowstat = boolean_or_none(request.GET.get("sistrip_lowstat", False))
+    tracking = request.GET.get("tracking", None)
+    tracking_lowstat = boolean_or_none(request.GET.get("tracking_lowstat", False))
+
+    return RunInfo(
         type=type_,
         reference_run=reference_run,
         run_number=run_number,
+        int_luminosity=int_luminosity,
+        number_of_ls=number_of_ls,
         pixel=pixel,
         sistrip=sistrip,
         tracking=tracking,
+        pixel_lowstat=pixel_lowstat,
+        sistrip_lowstat=sistrip_lowstat,
+        tracking_lowstat=tracking_lowstat,
     )
-    if int_luminosity is not None and int_luminosity != "":
-        run.int_luminosity = Decimal(int_luminosity)
-
-    if number_of_ls is not None and number_of_ls != "":
-        try:
-            run.number_of_ls = int(number_of_ls)
-        except ValueError:
-            run.number_of_ls = int(float(number_of_ls))  # to allow "12.0" as input
-
-    if pixel_lowstat is not None and pixel_lowstat != "":
-        run.pixel_lowstat = pixel_lowstat == "true"
-
-    if sistrip_lowstat is not None and sistrip_lowstat != "":
-        run.sistrip_lowstat = sistrip_lowstat == "true"
-
-    if tracking_lowstat is not None and tracking_lowstat != "":
-        run.tracking_lowstat = tracking_lowstat == "true"
-
-    return run
 
 
 def convert_run_registry_to_runinfo(list_of_dictionaries):
@@ -512,3 +497,53 @@ def number_string_to_list(number_string):
     """
     new_list = re.sub("[^0-9]", " ", number_string).split()  # only integers
     return sorted(set(new_list))  # remove duplicates
+
+
+def decimal_or_none(number):
+    """
+    Returns the number casted as Decimal or None if casting failed.
+    """
+    try:
+        return decimal.Decimal(number)
+    except (decimal.InvalidOperation, ValueError, TypeError) as e:
+        return None
+
+
+def integer_or_none(number):
+    """
+    Returns the number casted as int or None if casting failed.
+    """
+    try:
+        return int(float(number))
+    except (ValueError, TypeError) as e:
+        return None
+
+
+def boolean_or_none(value):
+    """
+    Returns the value casted as boolean or None if casting failed.
+
+    "true" -> True
+    "tRuE" -> True
+    "false" -> False
+    "" -> None
+    "abc" -> None
+    0 -> False
+    "1" -> True
+    1 -> True
+    2 -> None
+    """
+    if isinstance(value, bool):
+        return value
+    try:
+        lower_val = value.lower()
+        if lower_val in ["true", "false"]:
+            return lower_val == "true"
+    except AttributeError:
+        pass
+
+    int_val = integer_or_none(value)
+    if int_val in [0, 1]:
+        return int_val == 1
+
+    return None
