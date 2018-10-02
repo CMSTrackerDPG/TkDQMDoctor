@@ -1,3 +1,6 @@
+""""
+RunRegistry Client
+"""
 import requests
 
 from runregistry.utilities import (
@@ -339,3 +342,45 @@ class TrackerRunRegistryClient(RunRegistryClient):
             min_run_number, max_run_number, "r.run_number"
         )
         return self.__get_dataset_runs_with_active_lumis(where_clause)
+
+    def get_fill_number_by_run_number(self, list_of_run_numbers):
+        """
+        Retrieve a list of fill numbers by the given run numbers
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> client.get_fill_number_by_run_number([321177, 321178, 321218])
+        [[321177, 7048], [321178, 7048], [321218, 7052]]
+
+        :param list_of_run_numbers:
+        :return: dictionary containing run and corresponding fill number
+        """
+        where_clause = build_list_where_clause(list_of_run_numbers, "r.runnumber")
+        query = (
+            "select r.runnumber, r.lhcfill "
+            "from runreg_tracker.runs r "
+            "where {} "
+            "order by r.runnumber".format(where_clause)
+        )
+        return self.execute_query(query)["data"]
+
+    def get_run_numbers_by_fill_number(self, list_of_fill_numbers):
+        """
+        Retrieve a list of run numbers by the given fill numbers
+
+        Example:
+        >>> client = TrackerRunRegistryClient()
+        >>> client.get_run_numbers_by_fill_number([7048])
+        [[7048, 321171], [7048, 321174], [7048, 321175], [7048, 321177], [7048, 321178], [7048, 321179], [7048, 321181]]
+
+        :param list_of_fill_numbers:
+        :return: dictioanry containing fill number and corresponding list of run numbers
+        """
+        where_clause = build_list_where_clause(list_of_fill_numbers, "r.lhcfill")
+        query = (
+            "select r.lhcfill, r.runnumber "
+            "from runreg_tracker.runs r "
+            "where {} "
+            "order by r.runnumber".format(where_clause)
+        )
+        return self.execute_query(query)["data"]
