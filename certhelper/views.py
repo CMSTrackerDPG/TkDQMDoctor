@@ -356,7 +356,7 @@ class ChecklistTemplateView(TemplateView):
         return context
 
 
-@method_decorator(login_required, name="dispatch")
+@login_required
 def check_integrity_of_run(request):
     """
     Checks if a run with the same number but different type already exists and checks
@@ -371,7 +371,7 @@ def check_integrity_of_run(request):
         run = get_runinfo_from_request(request)
         data = RunInfo.objects.check_integrity_of_run(run)
         return JsonResponse(data)
-    except (AssertionError, Exception):
+    except AssertionError:
         return JsonResponse({})
 
 

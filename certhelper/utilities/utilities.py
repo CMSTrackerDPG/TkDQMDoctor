@@ -501,10 +501,11 @@ def number_string_to_list(number_string):
 
 def decimal_or_none(number):
     """
-    Returns the number casted as Decimal or None if casting failed.
+    Returns the number casted as Decimal or None if it is not a number
     """
     try:
-        return decimal.Decimal(number)
+        decimal_number = decimal.Decimal(number)
+        return decimal_number if decimal_number.is_finite() else None
     except (decimal.InvalidOperation, ValueError, TypeError):
         return None
 
