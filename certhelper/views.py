@@ -13,15 +13,24 @@ from django.views.generic import TemplateView
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
-from certhelper.filters import RunInfoFilter, ShiftLeaderRunInfoFilter, \
-    ComputeLuminosityRunInfoFilter
+from certhelper.filters import (
+    RunInfoFilter,
+    ShiftLeaderRunInfoFilter,
+    ComputeLuminosityRunInfoFilter,
+)
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
 from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
-from certhelper.utilities.utilities import get_filters_from_request_GET, \
-    request_contains_filter_parameter, get_this_week_filter_parameter, \
-    get_today_filter_parameter, get_runs_from_request_filters, get_runinfo_from_request, \
-    number_string_to_list, integer_or_none
+from certhelper.utilities.utilities import (
+    get_filters_from_request_GET,
+    request_contains_filter_parameter,
+    get_this_week_filter_parameter,
+    get_today_filter_parameter,
+    get_runs_from_request_filters,
+    get_runinfo_from_request,
+    number_string_to_list,
+    integer_or_none,
+)
 from runregistry.client import TrackerRunRegistryClient
 from .forms import *
 from .tables import *
@@ -32,10 +41,11 @@ class CreateRun(generic.CreateView):
     """
     Form which allows for creation of a new entry in RunInfo
     """
+
     model = RunInfo
     form_class = RunInfoWithChecklistForm
-    template_name = 'certhelper/runinfo_form.html'
-    success_url = '/'
+    template_name = "certhelper/runinfo_form.html"
+    success_url = "/"
 
     def form_valid(self, form_class):
         form_class.instance.userid = self.request.user
@@ -69,14 +79,18 @@ def listruns(request):
 
     filter_parameters = ""
     for key, value in applied_filters.items():
-        filter_parameters += '&' if filter_parameters.startswith('?') else '?'
+        filter_parameters += "&" if filter_parameters.startswith("?") else "?"
         filter_parameters += key + "=" + value
 
-    return render(request, 'certhelper/list.html', {
-        'table': table,
-        'filter': run_info_filter,
-        'filter_parameters': filter_parameters,
-    })
+    return render(
+        request,
+        "certhelper/list.html",
+        {
+            "table": table,
+            "filter": run_info_filter,
+            "filter_parameters": filter_parameters,
+        },
+    )
 
 
 @method_decorator(login_required, name="dispatch")
@@ -85,6 +99,7 @@ class ListReferences(SingleTableView):
     Display ReferenceRuns in a tableview
     !!! USES DJANGO-TABLES2 !!! 
     """
+
     model = ReferenceRun
     table_class = ReferenceRunTable
 
@@ -94,13 +109,14 @@ class UpdateRun(generic.UpdateView):
     """
     Updates a specific Run from the RunInfo table
     """
+
     model = RunInfo
     form_class = RunInfoWithChecklistForm
-    template_name = 'certhelper/runinfo_form.html'
+    template_name = "certhelper/runinfo_form.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['checklist_not_required'] = True
+        context["checklist_not_required"] = True
         return context
 
     def same_user_or_shiftleader(self, user):
@@ -109,21 +125,24 @@ class UpdateRun(generic.UpdateView):
         has at least shift leader rights or is a super user (admin)
         """
         try:
-            return self.get_object().userid == user or \
-                   user.is_superuser or \
-                   user.userprofile.has_shift_leader_rights
+            return (
+                self.get_object().userid == user
+                or user.is_superuser
+                or user.userprofile.has_shift_leader_rights
+            )
         except UserProfile.DoesNotExist:
             return False
 
     def dispatch(self, request, *args, **kwargs):
         if self.same_user_or_shiftleader(request.user):
             return super(UpdateRun, self).dispatch(request, *args, **kwargs)
-        return redirect_to_login(request.get_full_path(),
-                                 login_url=reverse('admin:login'))
+        return redirect_to_login(
+            request.get_full_path(), login_url=reverse("admin:login")
+        )
 
     def get_success_url(self):
         is_same_user = self.get_object().userid == self.request.user
-        return reverse('certhelper:shiftleader') if not is_same_user else "/"
+        return reverse("certhelper:shiftleader") if not is_same_user else "/"
 
 
 @method_decorator(login_required, name="dispatch")
@@ -131,10 +150,11 @@ class DeleteRun(generic.DeleteView):
     """
     Deletes a specific Run from the RunInfo table
     """
+
     model = RunInfo
     form_class = RunInfoForm
-    success_url = '/shiftleader/'
-    template_name_suffix = '_delete_form'
+    success_url = "/shiftleader/"
+    template_name_suffix = "_delete_form"
 
 
 @method_decorator(login_required, name="dispatch")
@@ -142,10 +162,11 @@ class CreateType(generic.CreateView):
     """
     Form to create a new Type (RunType)
     """
+
     model = Type
     form_class = TypeForm
-    template_name_suffix = '_form'
-    success_url = '/create'
+    template_name_suffix = "_form"
+    success_url = "/create"
 
 
 @login_required
@@ -159,20 +180,24 @@ def summaryView(request):
     alert_infos = []
     alert_filters = []
 
-    runs = get_runs_from_request_filters(request, alert_errors, alert_infos,
-                                         alert_filters)
+    runs = get_runs_from_request_filters(
+        request, alert_errors, alert_infos, alert_filters
+    )
 
     summary = SummaryReport(runs)
 
-    context = {"refs": summary.reference_runs(),
-               "runs": summary.runs_checked_per_type(),
-               "tk_maps": summary.tracker_maps_per_type(),
-               "certified_runs": summary.certified_runs_per_type(),
-               "sums": summary.sum_of_quantities_per_type(),
-               'alert_errors': alert_errors, 'alert_infos': alert_infos,
-               'alert_filters': alert_filters}
+    context = {
+        "refs": summary.reference_runs(),
+        "runs": summary.runs_checked_per_type(),
+        "tk_maps": summary.tracker_maps_per_type(),
+        "certified_runs": summary.certified_runs_per_type(),
+        "sums": summary.sum_of_quantities_per_type(),
+        "alert_errors": alert_errors,
+        "alert_infos": alert_infos,
+        "alert_filters": alert_filters,
+    }
 
-    return render(request, 'certhelper/summary.html', context)
+    return render(request, "certhelper/summary.html", context)
 
 
 @login_required
@@ -182,40 +207,51 @@ def logout_view(request):
     """
     if request.user.is_authenticated:
         logout(request)
-        callback_url = 'https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl='
-        callback_url += 'http%3A//'
-        callback_url += request.META['HTTP_HOST']
-        callback_url += reverse('certhelper:logout_status')
+        callback_url = "https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl="
+        callback_url += "http%3A//"
+        callback_url += request.META["HTTP_HOST"]
+        callback_url += reverse("certhelper:logout_status")
         return HttpResponseRedirect(callback_url)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect("/")
 
 
 def logout_status(request):
     logout_successful = not request.user.is_authenticated
-    return render(request, 'certhelper/logout_status.html',
-                  {'logout_successful': logout_successful})
+    return render(
+        request,
+        "certhelper/logout_status.html",
+        {"logout_successful": logout_successful},
+    )
 
 
 def load_subcategories(request):
-    category_id = request.GET.get('categoryid')
+    category_id = request.GET.get("categoryid")
     if category_id:
         subcategories = SubCategory.objects.filter(
-            parent_category=category_id).order_by('name')
+            parent_category=category_id
+        ).order_by("name")
     else:
         subcategories = SubCategory.objects.none()
-    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html',
-                  {'categories': subcategories})
+    return render(
+        request,
+        "certhelper/dropdowns/category_dropdown_list_options.html",
+        {"categories": subcategories},
+    )
 
 
 def load_subsubcategories(request):
-    subcategory_id = request.GET.get('subcategoryid')
+    subcategory_id = request.GET.get("subcategoryid")
     if subcategory_id:
         subsubcategories = SubSubCategory.objects.filter(
-            parent_category=subcategory_id).order_by('name')
+            parent_category=subcategory_id
+        ).order_by("name")
     else:
         subsubcategories = SubCategory.objects.none()
-    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html',
-                  {'categories': subsubcategories})
+    return render(
+        request,
+        "certhelper/dropdowns/category_dropdown_list_options.html",
+        {"categories": subsubcategories},
+    )
 
 
 @staff_member_required
@@ -242,12 +278,13 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['summary'] = SummaryReport(self.filterset.qs)
-        context['slreport'] = NewShiftLeaderReport(self.filterset.qs)
-        context['deleted_runs'] = DeletedRunInfoTable(
-            RunInfo.all_objects.dead().order_by('-run_number'))
+        context["summary"] = SummaryReport(self.filterset.qs)
+        context["slreport"] = NewShiftLeaderReport(self.filterset.qs)
+        context["deleted_runs"] = DeletedRunInfoTable(
+            RunInfo.all_objects.dead().order_by("-run_number")
+        )
         try:
-            context['slchecklist'] = Checklist.objects.get(identifier='shiftleader')
+            context["slchecklist"] = Checklist.objects.get(identifier="shiftleader")
         except Checklist.DoesNotExist:
             # shift leader checklist has not been created yet.
             pass
@@ -264,13 +301,14 @@ def hard_deleteview(request, run_number):
         raise Http404("The run with the runnumber {} doesnt exist".format(run_number))
     except RunInfo.MultipleObjectsReturned:
         raise Http404(
-            "Multiple certifications with the runnumber {} exist".format(run_number))
+            "Multiple certifications with the runnumber {} exist".format(run_number)
+        )
 
     if request.method == "POST":
         run.hard_delete()
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
 
-    return render(request, 'certhelper/hard_delete.html', {'run': run})
+    return render(request, "certhelper/hard_delete.html", {"run": run})
 
 
 @staff_member_required
@@ -282,9 +320,9 @@ def hard_delete_run_view(request, pk):
 
     if request.method == "POST":
         run.hard_delete()
-        return HttpResponseRedirect('/shiftleader/')
+        return HttpResponseRedirect("/shiftleader/")
 
-    return render(request, 'certhelper/hard_delete.html', {'run': run})
+    return render(request, "certhelper/hard_delete.html", {"run": run})
 
 
 @staff_member_required
@@ -296,14 +334,15 @@ def restore_run_view(request, pk):
 
     if request.method == "POST":
         run.restore()
-        return HttpResponseRedirect('/shiftleader/')
+        return HttpResponseRedirect("/shiftleader/")
 
-    return render(request, 'certhelper/restore.html', {'run': run})
+    return render(request, "certhelper/restore.html", {"run": run})
+
 
 @login_required
 def validate_central_certification_list(request):
-    text = request.GET.get('text', None)
-    run_numbers = re.sub('[^0-9]', ' ', text).split()  # only run_numbers
+    text = request.GET.get("text", None)
+    run_numbers = re.sub("[^0-9]", " ", text).split()  # only run_numbers
     run_numbers = set(run_numbers)  # remove duplicates
     data = RunInfo.objects.check_if_certified(run_numbers)
     return JsonResponse(data)
@@ -313,7 +352,7 @@ def validate_central_certification_list(request):
 class ChecklistTemplateView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["checklist_base_template_name"] = 'certhelper/checklists/base.html'
+        context["checklist_base_template_name"] = "certhelper/checklists/base.html"
         return context
 
 
@@ -336,16 +375,15 @@ def check_integrity_of_run(request):
         return JsonResponse({})
 
 
-
 @method_decorator(login_required, name="dispatch")
 class ComputeLuminosityView(FilterView):
-    template_name = 'certhelper/compute_luminosity.html'
+    template_name = "certhelper/compute_luminosity.html"
     filterset_class = ComputeLuminosityRunInfoFilter
 
 
 @method_decorator(login_required, name="dispatch")
 class RunRegistryView(TemplateView):
-    template_name = 'certhelper/runregistry.html'
+    template_name = "certhelper/runregistry.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
@@ -366,12 +404,12 @@ class RunRegistryView(TemplateView):
 
         table = RunRegistryTable(data)
 
-        return render(request, self.template_name, {'table': table})
+        return render(request, self.template_name, {"table": table})
 
 
 @method_decorator(login_required, name="dispatch")
 class RunRegistryLumiSectionView(TemplateView):
-    template_name = 'certhelper/lumisections.html'
+    template_name = "certhelper/lumisections.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
@@ -391,12 +429,12 @@ class RunRegistryLumiSectionView(TemplateView):
             data = {}
 
         table = RunRegistryLumiSectionTable(data)
-        return render(request, self.template_name, {'table': table})
+        return render(request, self.template_name, {"table": table})
 
 
 @method_decorator(login_required, name="dispatch")
 class RunRegistryCompareView(TemplateView):
-    template_name = 'certhelper/compare_runregistry.html'
+    template_name = "certhelper/compare_runregistry.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
@@ -410,7 +448,9 @@ class RunRegistryCompareView(TemplateView):
             run_numbers = number_string_to_list(run_list)
             runs = RunInfo.objects.filter(run_number__in=run_numbers)
         elif run_min and run_max:
-            runs = RunInfo.objects.filter(run_number__gte=run_min, run_number__lte=run_max)
+            runs = RunInfo.objects.filter(
+                run_number__gte=run_min, run_number__lte=run_max
+            )
             runs.print()
         else:
             runs = RunInfo.objects.none()
@@ -420,7 +460,8 @@ class RunRegistryCompareView(TemplateView):
         deviating_run_table = RunRegistryComparisonTable(deviating)
         run_registry_table = RunRegistryComparisonTable(corresponding)
 
-        return render(request, self.template_name, {
-            "table": deviating_run_table,
-            "run_registry_table": run_registry_table
-        })
+        return render(
+            request,
+            self.template_name,
+            {"table": deviating_run_table, "run_registry_table": run_registry_table},
+        )
