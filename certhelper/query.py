@@ -518,3 +518,16 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         ]
 
         return deviating_run_info_dict, corresponding_run_registry_dict
+
+    def annotate_fill_number(self):
+        """
+        Adds the lhc fill number from the Run Registry
+
+        :return: QuerySet with added LHC fill number
+        """
+        run_registry = TrackerRunRegistryClient()
+        fills = run_registry.get_fill_number_by_run_number(self.run_numbers())
+        for run in self:
+            run.fill_number = list(
+                filter(lambda x: x["run_number"] == run.run_number, fills)
+            )[0]["fill_number"]
