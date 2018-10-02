@@ -21,7 +21,7 @@ from certhelper.utilities.SummaryReport import SummaryReport
 from certhelper.utilities.utilities import get_filters_from_request_GET, \
     request_contains_filter_parameter, get_this_week_filter_parameter, \
     get_today_filter_parameter, get_runs_from_request_filters, get_runinfo_from_request, \
-    number_string_to_list
+    number_string_to_list, integer_or_none
 from runregistry.client import TrackerRunRegistryClient
 from .forms import *
 from .tables import *
@@ -327,9 +327,14 @@ def check_integrity_of_run(request):
     :return: JsonResponse containing the attributes that do not match and their
     expected value
     """
-    run = get_runinfo_from_request(request)
-    data = RunInfo.objects.check_integrity_of_run(run)
-    return JsonResponse(data)
+    try:
+        assert integer_or_none(request.GET.get("run_number", None))
+        run = get_runinfo_from_request(request)
+        data = RunInfo.objects.check_integrity_of_run(run)
+        return JsonResponse(data)
+    except (AssertionError, Exception):
+        return JsonResponse({})
+
 
 
 @method_decorator(login_required, name="dispatch")

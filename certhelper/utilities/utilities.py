@@ -505,7 +505,7 @@ def decimal_or_none(number):
     """
     try:
         return decimal.Decimal(number)
-    except (decimal.InvalidOperation, ValueError, TypeError) as e:
+    except (decimal.InvalidOperation, ValueError, TypeError):
         return None
 
 
@@ -515,7 +515,7 @@ def integer_or_none(number):
     """
     try:
         return int(float(number))
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         return None
 
 
