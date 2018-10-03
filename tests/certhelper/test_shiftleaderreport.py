@@ -2,8 +2,10 @@ import pytest
 from mixer.backend.django import mixer
 
 from certhelper.models import RunInfo
-from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport, \
-    NewShiftLeaderReport
+from certhelper.utilities.ShiftLeaderReport import (
+    ShiftLeaderReport,
+    NewShiftLeaderReport,
+)
 from certhelper.utilities.utilities import to_weekdayname, to_date
 from tests.utils.utilities import create_runs
 
@@ -36,9 +38,10 @@ class TestShiftLeaderReport:
 
         for condition in conditions:
             mixer.blend(
-                'certhelper.RunInfo',
-                type=mixer.blend('certhelper.Type', runtype=condition[0],
-                                 reco=condition[1]),
+                "certhelper.RunInfo",
+                type=mixer.blend(
+                    "certhelper.Type", runtype=condition[0], reco=condition[1]
+                ),
                 int_luminosity=condition[2],
                 number_of_ls=condition[3],
                 date=condition[4],
@@ -80,23 +83,43 @@ class TestShiftLeaderReport:
         assert report.sum_int_lum("Cosmics", "Express", day="2018-05-14") == 0.12
         assert report.sum_int_lum("Cosmics", "Prompt", day="2018-05-14") == 0
 
-        assert report.number_of_runs("Collisions", "Express", bad_only=True,
-                                     day="2018-05-14") == 0
-        assert report.number_of_runs("Collisions", "Prompt", bad_only=True,
-                                     day="2018-05-14") == 1
-        assert report.number_of_runs("Cosmics", "Express", bad_only=True,
-                                     day="2018-05-14") == 1
-        assert report.number_of_runs("Cosmics", "Prompt", bad_only=True,
-                                     day="2018-05-14") == 1
+        assert (
+            report.number_of_runs(
+                "Collisions", "Express", bad_only=True, day="2018-05-14"
+            )
+            == 0
+        )
+        assert (
+            report.number_of_runs(
+                "Collisions", "Prompt", bad_only=True, day="2018-05-14"
+            )
+            == 1
+        )
+        assert (
+            report.number_of_runs("Cosmics", "Express", bad_only=True, day="2018-05-14")
+            == 1
+        )
+        assert (
+            report.number_of_runs("Cosmics", "Prompt", bad_only=True, day="2018-05-14")
+            == 1
+        )
 
-        assert report.sum_int_lum("Collisions", "Express", bad_only=True,
-                                  day="2018-05-14") == 0
-        assert report.sum_int_lum("Collisions", "Prompt", bad_only=True,
-                                  day="2018-05-14") == 1.23
-        assert report.sum_int_lum("Cosmics", "Express", bad_only=True,
-                                  day="2018-05-14") == 0
-        assert report.sum_int_lum("Cosmics", "Prompt", bad_only=True,
-                                  day="2018-05-14") == 0
+        assert (
+            report.sum_int_lum("Collisions", "Express", bad_only=True, day="2018-05-14")
+            == 0
+        )
+        assert (
+            report.sum_int_lum("Collisions", "Prompt", bad_only=True, day="2018-05-14")
+            == 1.23
+        )
+        assert (
+            report.sum_int_lum("Cosmics", "Express", bad_only=True, day="2018-05-14")
+            == 0
+        )
+        assert (
+            report.sum_int_lum("Cosmics", "Prompt", bad_only=True, day="2018-05-14")
+            == 0
+        )
 
         assert len(report.get_active_days_list()) == 5
         day_list = report.get_active_days_list()
@@ -334,11 +357,29 @@ class TestNewShiftLeaderReport:
         runs = RunInfo.objects.all().order_by("run_number")
         report = NewShiftLeaderReport(runs)
 
-        assert [1, 2, 3, 4, 5, 6, 7, 8,
-                9] == report.collisions().express().run_numbers()
+        assert [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+        ] == report.collisions().express().run_numbers()
         assert [10, 11, 12, 15, 16, 17] == report.collisions().prompt().run_numbers()
-        assert [21, 22, 23, 24, 25, 26, 27, 28,
-                29] == report.cosmics().express().run_numbers()
+        assert [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+        ] == report.cosmics().express().run_numbers()
         assert [30, 31, 32, 35, 36, 37] == report.cosmics().prompt().run_numbers()
 
         assert [1, 2, 3, 4, 5] == report.collisions().express().good().run_numbers()

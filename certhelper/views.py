@@ -394,6 +394,7 @@ class RunRegistryView(TemplateView):
         run_list = request.POST.get("run_list")
 
         run_registry = TrackerRunRegistryClient()
+
         if run_list:
             run_numbers = number_string_to_list(run_list)
             data = run_registry.get_runs_by_list(run_numbers)
@@ -420,6 +421,7 @@ class RunRegistryLumiSectionView(TemplateView):
         run_list = request.POST.get("run_list")
 
         run_registry = TrackerRunRegistryClient()
+
         if run_list:
             run_numbers = number_string_to_list(run_list)
             data = run_registry.get_lumi_sections_by_list(run_numbers)

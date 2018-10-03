@@ -37,7 +37,9 @@ def assert_view_requires_staff(view):
     req = RequestFactory().get("/")
     req.user = mixer.blend(User, is_staff=True)
     resp = get_view_response(view, req)
-    assert resp.status_code == 200 or resp.status_code == 302 and "login" not in resp.url
+    assert (
+        resp.status_code == 200 or resp.status_code == 302 and "login" not in resp.url
+    )
 
 
 def get_view_response(view, req):
@@ -62,11 +64,13 @@ def test_authentication():
 class TestCreateRun:
     def test_invalid(self):
         the_type = mixer.blend("certhelper.Type")
-        the_reference_run = mixer.blend("certhelper.ReferenceRun", runtype=the_type.runtype)
+        the_reference_run = mixer.blend(
+            "certhelper.ReferenceRun", runtype=the_type.runtype
+        )
         data = {
-            'type': the_type.pk,
-            'reference_run': the_reference_run.pk,
-            'run_number': 123445
+            "type": the_type.pk,
+            "reference_run": the_reference_run.pk,
+            "run_number": 123445,
         }
 
         form = RunInfoForm(data=data)
@@ -83,19 +87,21 @@ class TestCreateRun:
 
     def test_valid(self):
         the_type = mixer.blend("certhelper.Type")
-        the_reference_run = mixer.blend("certhelper.ReferenceRun", runtype=the_type.runtype)
+        the_reference_run = mixer.blend(
+            "certhelper.ReferenceRun", runtype=the_type.runtype
+        )
         data = {
-            'type': the_type.pk,
-            'reference_run': the_reference_run.pk,
-            'run_number': 123445,
-            'trackermap': "Exists",
-            'number_of_ls': 12,
-            'int_luminosity': 42,
-            'pixel': "Good",
-            'sistrip': "Good",
-            'tracking': "Good",
-            'comment': "",
-            'date': "2018-01-01"
+            "type": the_type.pk,
+            "reference_run": the_reference_run.pk,
+            "run_number": 123445,
+            "trackermap": "Exists",
+            "number_of_ls": 12,
+            "int_luminosity": 42,
+            "pixel": "Good",
+            "sistrip": "Good",
+            "tracking": "Good",
+            "comment": "",
+            "date": "2018-01-01",
         }
 
         form = RunInfoForm(data=data)
@@ -140,20 +146,25 @@ class TestUpdateRun:
 
     def test_post(self):
         assert not RunInfo.objects.all().exists()
-        run = mixer.blend("certhelper.RunInfo", run_number=654321, type__runtype="Collisions", reference_run__runtype="Collisions")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            run_number=654321,
+            type__runtype="Collisions",
+            reference_run__runtype="Collisions",
+        )
         assert RunInfo.objects.all().exists()
         data = {
-            'type': run.type.pk,
-            'reference_run': run.reference_run.pk,
-            'run_number': 123445,
-            'trackermap': run.trackermap,
-            'number_of_ls': 12,
-            'int_luminosity': 42,
-            'pixel': "Good",
-            'sistrip': "Good",
-            'tracking': "Good",
-            'comment': "",
-            'date': run.date
+            "type": run.type.pk,
+            "reference_run": run.reference_run.pk,
+            "run_number": 123445,
+            "trackermap": run.trackermap,
+            "number_of_ls": 12,
+            "int_luminosity": 42,
+            "pixel": "Good",
+            "sistrip": "Good",
+            "tracking": "Good",
+            "comment": "",
+            "date": run.date,
         }
 
         form = RunInfoForm(data=data)
@@ -161,7 +172,9 @@ class TestUpdateRun:
         assert {} == form.errors
         assert True is form.is_valid()
 
-        req = RequestFactory().post(reverse("certhelper:update", kwargs={'pk': run.pk}), data=form.data)
+        req = RequestFactory().post(
+            reverse("certhelper:update", kwargs={"pk": run.pk}), data=form.data
+        )
         req.user = run.userid
         view = UpdateRun.as_view()
         resp = view(req, pk=run.pk)
@@ -192,14 +205,14 @@ class TestListRuns:
         req = RequestFactory().get("/")
         req.user = mixer.blend(User)
         req.GET = req.GET.copy()
-        req.GET['category'] = "1"
-        req.GET['subcategory'] = "2"
-        req.GET['subsubcategory'] = "3"
-        req.GET['date_range_0'] = "2018-06-13"
-        req.GET['date_range_1'] = "2018-06-13"
-        req.GET['runs_0'] = "42"
-        req.GET['runs_1'] = "1728"
-        req.GET['type'] = "3"
+        req.GET["category"] = "1"
+        req.GET["subcategory"] = "2"
+        req.GET["subsubcategory"] = "3"
+        req.GET["date_range_0"] = "2018-06-13"
+        req.GET["date_range_1"] = "2018-06-13"
+        req.GET["runs_0"] = "42"
+        req.GET["runs_1"] = "1728"
+        req.GET["type"] = "3"
         resp = get_view_response(listruns, req)
         assert resp.status_code == 200
 
@@ -222,14 +235,14 @@ class TestSummaryView:
         mixer.blend("certhelper.SubSubCategory")
 
         req.GET["date"] = "2018-06-01"
-        req.GET['category'] = "1"
-        req.GET['subcategory'] = "1"
-        req.GET['subsubcategory'] = "1"
-        req.GET['date_range_0'] = "2018-06-13"
-        req.GET['date_range_1'] = "2018-06-13"
-        req.GET['runs_0'] = "42"
-        req.GET['runs_1'] = "1728"
-        req.GET['type'] = "3"
+        req.GET["category"] = "1"
+        req.GET["subcategory"] = "1"
+        req.GET["subsubcategory"] = "1"
+        req.GET["date_range_0"] = "2018-06-13"
+        req.GET["date_range_1"] = "2018-06-13"
+        req.GET["runs_0"] = "42"
+        req.GET["runs_1"] = "1728"
+        req.GET["type"] = "3"
         resp = get_view_response(summaryView, req)
         assert resp.status_code == 200
 
@@ -239,14 +252,14 @@ class TestSummaryView:
         req.GET = req.GET.copy()
 
         req.GET["date"] = "20sfd18-06-01"
-        req.GET['category'] = "1"
-        req.GET['subcategory'] = "2"
-        req.GET['subsubcategory'] = "3"
-        req.GET['date_range_0'] = "201-asasgsa6-13"
-        req.GET['date_range_1'] = "BLUME"
-        req.GET['runs_0'] = "sadfasdf"
-        req.GET['runs_1'] = "ýxkushd"
-        req.GET['type'] = " asad /4332re"
+        req.GET["category"] = "1"
+        req.GET["subcategory"] = "2"
+        req.GET["subsubcategory"] = "3"
+        req.GET["date_range_0"] = "201-asasgsa6-13"
+        req.GET["date_range_1"] = "BLUME"
+        req.GET["runs_0"] = "sadfasdf"
+        req.GET["runs_1"] = "ýxkushd"
+        req.GET["type"] = " asad /4332re"
         resp = get_view_response(summaryView, req)
         assert resp.status_code == 200
 

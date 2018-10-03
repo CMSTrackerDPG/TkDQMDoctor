@@ -39,7 +39,9 @@ def client_with_superuser_logged_in(client, django_user_model):
     """
     username = "example"
     password = "VerySecurePasswort"
-    django_user_model.objects.create_superuser(username=username, password=password, email="")
+    django_user_model.objects.create_superuser(
+        username=username, password=password, email=""
+    )
     assert client.login(username="example", password="VerySecurePasswort")
     return client
 

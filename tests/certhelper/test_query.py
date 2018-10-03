@@ -12,36 +12,112 @@ class TestRunInfoQuerySet:
     def test_compare_list_if_certified(self):
         t1 = mixer.blend("certhelper.Type", runtype="Cosmics")
         t2 = mixer.blend("certhelper.Type", runtype="Collisions")
-        mixer.blend("certhelper.RunInfo", run_number=1234, type=t1, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=8765, pixel="Good", sistrip="Good",
-                    tracking="Bad")
-        mixer.blend("certhelper.RunInfo", run_number=4321, type=t1, pixel="Good",
-                    sistrip="Good", tracking="Bad")
-        mixer.blend("certhelper.RunInfo", run_number=6543, pixel="Good", sistrip="Good",
-                    tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=6655, type=t1, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=9876, pixel="Good", sistrip="Good",
-                    tracking="Bad")
-        mixer.blend("certhelper.RunInfo", run_number=444, type=t1, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=444, type=t2, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=333, type=t1, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=333, type=t2, pixel="Good",
-                    sistrip="Good", tracking="Bad")
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=1234,
+            type=t1,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=8765,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Bad",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=4321,
+            type=t1,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Bad",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=6543,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=6655,
+            type=t1,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=9876,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Bad",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=444,
+            type=t1,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=444,
+            type=t2,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=333,
+            type=t1,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=333,
+            type=t2,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Bad",
+        )
         mixer.blend("certhelper.RunInfo", run_number=999)
-        mixer.blend("certhelper.RunInfo", run_number=800, type=t2, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=4321, type=t2, pixel="Good",
-                    sistrip="Good", tracking="Good")
-        mixer.blend("certhelper.RunInfo", run_number=1234, type=t2, pixel="Good",
-                    sistrip="Good", tracking="Good")
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=800,
+            type=t2,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=4321,
+            type=t2,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
+        mixer.blend(
+            "certhelper.RunInfo",
+            run_number=1234,
+            type=t2,
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
 
         d = RunInfo.objects.all().compare_list_if_certified(
-            [333, 1234, 6655, "800", 4321, 7777, 9876, "abde", 8765, 6543, 888, 444])
+            [333, 1234, 6655, "800", 4321, 7777, 9876, "abde", 8765, 6543, 888, 444]
+        )
 
         assert set([1234, 6655, 6543, 444, "800"]) == set(d["good"])
         assert set([9876, 8765]) == set(d["bad"])
@@ -210,11 +286,11 @@ class TestRunInfoQuerySet:
     def test_days(self, runs_for_slr):
         days = RunInfo.objects.all().days()
         assert 5 == len(days)
-        assert '2018-05-14' == days[0]
-        assert '2018-05-15' == days[1]
-        assert '2018-05-17' == days[2]
-        assert '2018-05-18' == days[3]
-        assert '2018-05-20' == days[4]
+        assert "2018-05-14" == days[0]
+        assert "2018-05-15" == days[1]
+        assert "2018-05-17" == days[2]
+        assert "2018-05-18" == days[3]
+        assert "2018-05-20" == days[4]
 
     def test_slr_per_day(self, runs_for_slr):
         runs = RunInfo.objects.all()
@@ -311,23 +387,23 @@ class TestRunInfoQuerySet:
         assert 5 == len(runs)
 
         for run in runs[0]:
-            assert to_date('2018-05-14') == run.date
+            assert to_date("2018-05-14") == run.date
             assert "Monday" == to_weekdayname(run.date)
 
         for run in runs[1]:
-            assert to_date('2018-05-15') == run.date
+            assert to_date("2018-05-15") == run.date
             assert "Tuesday" == to_weekdayname(run.date)
 
         for run in runs[2]:
-            assert to_date('2018-05-17') == run.date
+            assert to_date("2018-05-17") == run.date
             assert "Thursday" == to_weekdayname(run.date)
 
         for run in runs[3]:
-            assert to_date('2018-05-18') == run.date
+            assert to_date("2018-05-18") == run.date
             assert "Friday" == to_weekdayname(run.date)
 
         for run in runs[4]:
-            assert to_date('2018-05-20') == run.date
+            assert to_date("2018-05-20") == run.date
             assert "Sunday" == to_weekdayname(run.date)
 
     def test_print_verbose(self, shifter, runs_for_summary_report):

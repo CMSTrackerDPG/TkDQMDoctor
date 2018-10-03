@@ -18,16 +18,16 @@ class TestRunInfoForm:
         reference_run = mixer.blend("certhelper.ReferenceRun", runtype=the_type.runtype)
 
         data = {
-            'type': the_type.pk,
-            'reference_run': reference_run.pk,
-            'run_number': 123456,
-            'trackermap': "Exists",
-            'number_of_ls': 42,
-            'int_luminosity': 12.2,
-            'pixel': "Good",
-            'sistrip': "Good",
-            'tracking': "Good",
-            'date': datetime.datetime.now().date(),
+            "type": the_type.pk,
+            "reference_run": reference_run.pk,
+            "run_number": 123456,
+            "trackermap": "Exists",
+            "number_of_ls": 42,
+            "int_luminosity": 12.2,
+            "pixel": "Good",
+            "sistrip": "Good",
+            "tracking": "Good",
+            "date": datetime.datetime.now().date(),
         }
 
         form = forms.RunInfoForm(data=data)
@@ -47,9 +47,14 @@ class TestRunInfoForm:
 
         form = forms.RunInfoForm(data=newdata)
         assert form.errors == {}
-        assert form.is_valid() is True, "Different (run_number, type, ref) tuples are allowed"
+        assert (
+            form.is_valid() is True
+        ), "Different (run_number, type, ref) tuples are allowed"
 
         newdata["sistrip"] = "Bad"
         form = forms.RunInfoForm(data=newdata)
-        assert "Tracking can not be GOOD if SiStrip is BAD. Please correct." in form.errors.get("__all__")[0]
+        assert (
+            "Tracking can not be GOOD if SiStrip is BAD. Please correct."
+            in form.errors.get("__all__")[0]
+        )
         assert form.is_valid() is False

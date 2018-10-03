@@ -11,39 +11,57 @@ pytestmark = pytest.mark.django_db
 
 class TestRunInfoManager:
     def test_good(self):
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Cosmics"),
-                          sistrip="Bad")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Cosmics"),
+            sistrip="Bad",
+        )
         assert run.is_good is False
 
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Cosmics"),
-                          sistrip="Good", tracking="Bad")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Cosmics"),
+            sistrip="Good",
+            tracking="Bad",
+        )
         assert run.is_good is False
 
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Cosmics"),
-                          sistrip="Good", tracking="Good")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Cosmics"),
+            sistrip="Good",
+            tracking="Good",
+        )
         assert run.is_good is True
 
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Collisions"),
-                          sistrip="Bad")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Collisions"),
+            sistrip="Bad",
+        )
         assert run.is_good is False
 
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Collisions"),
-                          pixel="Bad")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Collisions"),
+            pixel="Bad",
+        )
         assert run.is_good is False
 
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Collisions"),
-                          tracking="Bad")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Collisions"),
+            tracking="Bad",
+        )
         assert run.is_good is False
 
-        run = mixer.blend('certhelper.RunInfo',
-                          type=mixer.blend('certhelper.Type', runtype="Collisions"),
-                          pixel="Good", sistrip="Good", tracking="Good")
+        run = mixer.blend(
+            "certhelper.RunInfo",
+            type=mixer.blend("certhelper.Type", runtype="Collisions"),
+            pixel="Good",
+            sistrip="Good",
+            tracking="Good",
+        )
         assert run.is_good is True
 
         assert len(RunInfo.objects.all()) == 7
@@ -90,19 +108,24 @@ class TestRunInfoManager:
         runs = []
 
         for condition in conditions:
-            runs.append(mixer.blend(
-                'certhelper.RunInfo',
-                type=mixer.blend('certhelper.Type', runtype=condition[0],
-                                 reco=condition[1]),
-                int_luminosity=condition[2],
-                number_of_ls=condition[3]
-            )
+            runs.append(
+                mixer.blend(
+                    "certhelper.RunInfo",
+                    type=mixer.blend(
+                        "certhelper.Type", runtype=condition[0], reco=condition[1]
+                    ),
+                    int_luminosity=condition[2],
+                    number_of_ls=condition[3],
+                )
             )
 
         summary = RunInfo.objects.all().summary()
 
-        a = [x for x in summary if
-             x['type__runtype'] == 'Collisions' and x['type__reco'] == 'Express']
+        a = [
+            x
+            for x in summary
+            if x["type__runtype"] == "Collisions" and x["type__reco"] == "Express"
+        ]
 
         assert len(a) == 1
         a = a[0]
@@ -118,8 +141,11 @@ class TestRunInfoManager:
         assert a["int_luminosity"] == 0.12
         assert a["number_of_ls"] == 2224
 
-        a = [x for x in summary if
-             x['type__runtype'] == 'Collisions' and x['type__reco'] == 'Prompt']
+        a = [
+            x
+            for x in summary
+            if x["type__runtype"] == "Collisions" and x["type__reco"] == "Prompt"
+        ]
 
         assert len(a) == 1
         a = a[0]
@@ -127,8 +153,11 @@ class TestRunInfoManager:
         assert a["int_luminosity"] == 123133.55
         assert a["number_of_ls"] == 10026
 
-        a = [x for x in summary if
-             x['type__runtype'] == 'Cosmics' and x['type__reco'] == 'Prompt']
+        a = [
+            x
+            for x in summary
+            if x["type__runtype"] == "Cosmics" and x["type__reco"] == "Prompt"
+        ]
 
         assert len(a) == 1
         a = a[0]
@@ -169,14 +198,16 @@ class TestRunInfoManager:
         runs = []
 
         for condition in conditions:
-            runs.append(mixer.blend(
-                'certhelper.RunInfo',
-                type=mixer.blend('certhelper.Type', runtype=condition[0],
-                                 reco=condition[1]),
-                int_luminosity=condition[2],
-                number_of_ls=condition[3],
-                date=condition[4]
-            )
+            runs.append(
+                mixer.blend(
+                    "certhelper.RunInfo",
+                    type=mixer.blend(
+                        "certhelper.Type", runtype=condition[0], reco=condition[1]
+                    ),
+                    int_luminosity=condition[2],
+                    number_of_ls=condition[3],
+                    date=condition[4],
+                )
             )
 
         summary = RunInfo.objects.all().summary_per_day()
@@ -188,11 +219,13 @@ class TestRunInfoManager:
         assert len(item) == 1
 
         assert len(get_from_summary(summary, date="2018-05-14")) == 4
-        assert len(
-            get_from_summary(summary, runtype="Collisions", date="2018-05-14")) == 2
+        assert (
+            len(get_from_summary(summary, runtype="Collisions", date="2018-05-14")) == 2
+        )
         assert len(get_from_summary(summary, reco="Express", date="2018-05-14")) == 2
-        assert len(
-            get_from_summary(summary, "Collisions", "Express", "2018-05-14")) == 1
+        assert (
+            len(get_from_summary(summary, "Collisions", "Express", "2018-05-14")) == 1
+        )
         assert len(get_from_summary(summary, date="2018-05-15")) == 1
         assert len(get_from_summary(summary, date="2018-05-16")) == 0
         assert len(get_from_summary(summary, date="2018-05-17")) == 1
@@ -200,14 +233,16 @@ class TestRunInfoManager:
         assert len(get_from_summary(summary, date="2018-05-19")) == 0
         assert len(get_from_summary(summary, date="2018-05-20")) == 3
 
-        assert get_from_summary(summary, date="2018-05-18")[0][
-                   "int_luminosity"] == 154667.12
+        assert (
+            get_from_summary(summary, date="2018-05-18")[0]["int_luminosity"]
+            == 154667.12
+        )
         assert get_from_summary(summary, date="2018-05-18")[0]["number_of_ls"] == 144
         assert get_from_summary(summary, date="2018-05-14")[2]["int_luminosity"] == 0.12
 
     def test_get_queryset(self):
-        mixer.blend('certhelper.RunInfo', run_number=123456)
-        mixer.blend('certhelper.RunInfo', run_number=234567)
+        mixer.blend("certhelper.RunInfo", run_number=123456)
+        mixer.blend("certhelper.RunInfo", run_number=234567)
 
         assert len(RunInfo.objects.all()) == 2
         assert len(RunInfo.all_objects.all()) == 2
@@ -216,11 +251,11 @@ class TestRunInfoManager:
         assert RunInfo.all_objects.exists() is False
 
     def test_alive_only(self):
-        mixer.blend('certhelper.RunInfo', run_number=123456)
-        mixer.blend('certhelper.RunInfo', run_number=234567)
-        mixer.blend('certhelper.RunInfo', run_number=345678)
-        mixer.blend('certhelper.RunInfo', run_number=456789)
-        mixer.blend('certhelper.RunInfo', run_number=567890)
+        mixer.blend("certhelper.RunInfo", run_number=123456)
+        mixer.blend("certhelper.RunInfo", run_number=234567)
+        mixer.blend("certhelper.RunInfo", run_number=345678)
+        mixer.blend("certhelper.RunInfo", run_number=456789)
+        mixer.blend("certhelper.RunInfo", run_number=567890)
 
         assert len(RunInfo.objects.all()) == 5
 
@@ -262,8 +297,25 @@ class TestRunInfoManager:
         assert cosmics["changed_bad"] == [14]
 
         check = RunInfo.objects.check_if_certified(
-            [0, "1", "2", 3, "4", 5, "6", "hase", "7", 8,
-             "10", 11, "12", "13", "14", "15", "abc"]
+            [
+                0,
+                "1",
+                "2",
+                3,
+                "4",
+                5,
+                "6",
+                "hase",
+                "7",
+                8,
+                "10",
+                11,
+                "12",
+                "13",
+                "14",
+                "15",
+                "abc",
+            ]
         )
 
         collisions = check["collisions"]
@@ -287,9 +339,7 @@ class TestRunInfoManager:
         :return:
         """
         express_type = mixer.blend(
-            "certhelper.Type",
-            reco="Express",
-            beamtype='HeavyIon-Proton'
+            "certhelper.Type", reco="Express", beamtype="HeavyIon-Proton"
         )
 
         prompt_type = mixer.blend(
@@ -298,16 +348,15 @@ class TestRunInfoManager:
             runtype=express_type.runtype,
             bfield=express_type.bfield,
             beamtype=express_type.beamtype,
-            beamenergy=express_type.beamenergy
+            beamenergy=express_type.beamenergy,
         )
 
         express_ref = mixer.blend("certhelper.ReferenceRun", reco="Express")
         prompt_ref = mixer.blend("certhelper.ReferenceRun", reco="Prompt")
 
         express_run = mixer.blend(
-            'certhelper.RunInfo',
-            type=express_type,
-            reference_run=express_ref)
+            "certhelper.RunInfo", type=express_type, reference_run=express_ref
+        )
 
         # necessary because int_luminosity is buggy for some reason:
         # -4.654900146333296E+17 != -465490014633329600.00
@@ -320,7 +369,7 @@ class TestRunInfoManager:
 
         assert {} == RunInfo.objects.check_integrity_of_run(prompt_run)
 
-        prompt_run.type.beamtype = 'Proton-Proton'
+        prompt_run.type.beamtype = "Proton-Proton"
 
         assert not prompt_run.pk
         assert "beamtype" in RunInfo.objects.check_integrity_of_run(prompt_run)
@@ -336,7 +385,7 @@ class TestRunInfoManager:
         assert "beamtype" in RunInfo.objects.check_integrity_of_run(prompt_run)
         assert "pixel" in RunInfo.objects.check_integrity_of_run(prompt_run)
 
-        prompt_run.type.beamtype = 'HeavyIon-Proton'
+        prompt_run.type.beamtype = "HeavyIon-Proton"
         express_run.pixel = "Lowstat"
         check = RunInfo.objects.check_integrity_of_run(prompt_run)
         assert "pixel" in check

@@ -10,50 +10,56 @@ from tests.utils.wait import wait_until
 
 class TestAuthentication:
     def test_anonymous(self, live_server, firefox):
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         assert firefox.title == "TkDQMDoctor: List"
         assert "Login" in firefox.page_source
         assert "Admin Settings" not in firefox.page_source
         assert "Shift Leader" not in firefox.page_source
 
     def test_login_superuser(self, live_server, firefox, superuser):
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         try_to_login_user(firefox, SUPERUSER_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Admin Settings")
         assert "Admin Settings" in firefox.page_source
         assert "Shift Leader" in firefox.page_source
 
     def test_login_shiftleader(self, live_server, firefox, shiftleader):
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         try_to_login_user(firefox, SHIFTLEADER_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Admin Settings")
         assert "Admin Settings" in firefox.page_source
         assert "Shift Leader" in firefox.page_source
 
     def test_login_shifter(self, live_server, firefox, shifter, second_shifter):
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
-        wait_until(firefox.find_element_by_link_text, "Logout {}".format(SHIFTER1_USERNAME))
+        wait_until(
+            firefox.find_element_by_link_text, "Logout {}".format(SHIFTER1_USERNAME)
+        )
         assert "Admin Settings" not in firefox.page_source
         assert "Shift Leader" not in firefox.page_source
         firefox.find_element_by_link_text("Logout {}".format(SHIFTER1_USERNAME)).click()
 
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         try_to_login_user(firefox, SHIFTER2_USERNAME, PASSWORD)
-        wait_until(firefox.find_element_by_link_text, "Logout {}".format(SHIFTER2_USERNAME))
+        wait_until(
+            firefox.find_element_by_link_text, "Logout {}".format(SHIFTER2_USERNAME)
+        )
         firefox.find_element_by_link_text("Logout {}".format(SHIFTER2_USERNAME)).click()
 
         assert "Admin Settings" not in firefox.page_source
         assert "Shift Leader" not in firefox.page_source
 
-    def test_shifter_is_shiftleader_after_login(self, live_server, firefox, shifter, superuser):
+    def test_shifter_is_shiftleader_after_login(
+        self, live_server, firefox, shifter, superuser
+    ):
         user = shifter
         assert not user.is_staff
         assert not user.is_superuser
         assert user.userprofile.is_shifter
         assert not user.userprofile.is_shiftleader
 
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         try_to_login_user(firefox, superuser.username, PASSWORD)
 
         wait_until(firefox.find_element_by_link_text, "Admin Settings")
@@ -86,7 +92,7 @@ class TestAuthentication:
         extra_data = {"groups": ["tkdqmdoctor-shiftleaders"]}
         mixer.blend(SocialAccount, user=user, extra_data=extra_data)
 
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         wait_until(firefox.find_element_by_link_text, "Login")
         try_to_login_user(firefox, user.username, PASSWORD)
 
@@ -99,7 +105,7 @@ class TestAuthentication:
         assert user.userprofile.is_shiftleader
         firefox.find_element_by_link_text("Logout shifter1").click()
 
-        firefox.get('{}'.format(live_server.url))
+        firefox.get("{}".format(live_server.url))
         try_to_login_user(firefox, superuser.username, PASSWORD)
 
         wait_until(firefox.find_element_by_link_text, "Admin Settings")

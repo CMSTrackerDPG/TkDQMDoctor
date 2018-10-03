@@ -92,9 +92,9 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         run_number_list = [
             run["run_number"]
             for run in runs.annotate_status()
-            .order_by("run_number")
-            .values("run_number", "status")
-            .annotate(times_certified=Count("run_number"))
+                .order_by("run_number")
+                .values("run_number", "status")
+                .annotate(times_certified=Count("run_number"))
         ]
 
         changed_flag_runs = [
@@ -110,8 +110,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
         return (
             self.filter(sistrip__in=good_criteria)
-            .filter(tracking__in=good_criteria)
-            .filter(Q(type__runtype="Cosmics") | Q(pixel__in=good_criteria))
+                .filter(tracking__in=good_criteria)
+                .filter(Q(type__runtype="Cosmics") | Q(pixel__in=good_criteria))
         )
 
     def bad(self):
@@ -130,8 +130,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         """
         summary_dict = (
             self.order_by("type__runtype", "type__reco")
-            .values("type__runtype", "type__reco")
-            .annotate(
+                .values("type__runtype", "type__reco")
+                .annotate(
                 runs_certified=Count("pk"),
                 int_luminosity=Sum("int_luminosity", output_field=FloatField()),
                 number_of_ls=Sum("number_of_ls"),
@@ -158,8 +158,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
     def summary_per_day(self):
         summary_dict = (
             self.order_by("date", "type__runtype", "type__reco")
-            .values("date", "type__runtype", "type__reco")
-            .annotate(
+                .values("date", "type__runtype", "type__reco")
+                .annotate(
                 runs_certified=Count("pk"),
                 int_luminosity=Sum("int_luminosity", output_field=FloatField()),
                 number_of_ls=Sum("number_of_ls"),
@@ -286,7 +286,6 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
         client = TrackerRunRegistryClient()
         return client.get_unique_fill_numbers_by_run_number(self.run_numbers())
 
-
     def pks(self):
         """
         :return: sorted list of primary keys
@@ -315,8 +314,8 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
     def reference_run_numbers(self):
         ref_dict = (
             self.order_by("reference_run__reference_run")
-            .values("reference_run__reference_run")
-            .distinct()
+                .values("reference_run__reference_run")
+                .distinct()
         )
 
         return [ref["reference_run__reference_run"] for ref in ref_dict]
