@@ -1,10 +1,37 @@
 import unittest
+from unittest.mock import MagicMock
 
+from runregistry.client import RunRegistryClient
 from runregistry.utilities import (
     transform_lowstat_to_boolean,
     list_as_comma_separated_string,
     list_to_dict,
 )
+
+
+class TestRunRegistryClient(unittest.TestCase):
+    def test_execute_query(self):
+        runregistry = RunRegistryClient()
+
+        runregistry._RunRegistryClient__get_query_id = MagicMock(return_value="o1662d3e8bb1")
+        runregistry._RunRegistryClient__get_json_response = MagicMock(return_value={
+            "data": [[247073], [247076], [247077], [247078], [247079]]
+        })
+
+        runregistry.connection_possible = MagicMock(return_value=True)
+
+        query = (
+            "select r.runnumber from runreg_global.runs r "
+            "where r.run_class_name = 'Collisions15' "
+            "and r.runnumber > 247070 and r.runnumber < 247081"
+        )
+
+        response = runregistry.execute_query(query)
+        expected_response = {"data": [[247073], [247076], [247077], [247078], [247079]]}
+
+        self.assertEqual(expected_response, response)
+        runregistry._RunRegistryClient__get_query_id.assert_called_with(query)
+        runregistry._RunRegistryClient__get_json_response.assert_called_with("/query/o1662d3e8bb1/data")
 
 
 class TestUtilities(unittest.TestCase):
