@@ -49,9 +49,12 @@ class RunRegistryClient(metaclass=Singleton):
         except requests.ConnectionError:
             return False
 
+    def retry_connection(self):
+        self.__connection_successful = self.__test_connection()
+
     def connection_possible(self):
         if self.__connection_successful is None:
-            self.__connection_successful = self.__test_connection()
+            self.retry_connection()
         return self.__connection_successful
 
     def __get_json_response(self, resource):
