@@ -40,6 +40,19 @@ class RunRegistryClient(metaclass=Singleton):
 
     def __init__(self, url=DEFAULT_URL):
         self.url = url
+        self.__connection_successful = None  # Lazy
+
+    def __test_connection(self):
+        try:
+            requests.get(self.url)
+            return True
+        except requests.ConnectionError:
+            return False
+
+    def connection_possible(self):
+        if self.__connection_successful is None:
+            self.__connection_successful = self.__test_connection()
+        return self.__connection_successful
 
     def __get_json_response(self, resource):
         response = requests.get(self.url + resource)
@@ -85,6 +98,8 @@ class RunRegistryClient(metaclass=Singleton):
         :param query: SQL query string
         :return: JSON dictionary
         """
+        if not self.connection_possible():
+            return {}
         query_id = self.__get_query_id(query)
         resource = "/query/" + query_id + "/data"
         return self.__get_json_response(resource)
@@ -155,7 +170,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "and r.rda_name != '/Global/Online/ALL'".format(where_clause)
         )
 
-        run_list = self.execute_query(query).get("data")
+        run_list = self.execute_query(query).get("data", [])
 
         keys = [
             "run_number",
@@ -191,7 +206,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             )
         )
 
-        run_list = self.execute_query(query).get("data")
+        run_list = self.execute_query(query).get("data", [])
 
         keys = [
             "run_number",
@@ -242,7 +257,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "r.rda_cmp_tracking_cause ".format(where_clause)
         )
 
-        run_list = self.execute_query(query).get("data")
+        run_list = self.execute_query(query).get("data", [])
 
         keys = [
             "run_number",
@@ -384,7 +399,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        items = self.execute_query(query)["data"]
+        items = self.execute_query(query).get("data", [])
         keys = ["run_number", "fill_number"]
         return list_to_dict(items, keys)
 
@@ -408,7 +423,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        return sorted({item[0] for item in self.execute_query(query)["data"]})
+        return sorted({item[0] for item in self.execute_query(query).get("data", [])})
 
     def get_run_numbers_by_fill_number(self, list_of_fill_numbers):
         """
@@ -430,7 +445,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        response = self.execute_query(query)["data"]
+        response = self.execute_query(query).get("data", [])
         groups = groupby(response, itemgetter(0))
         items = [(key, [item[1] for item in value]) for key, value in groups]
         keys = ["fill_number", "run_number"]
@@ -450,7 +465,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        response = self.execute_query(query)["data"]
+        response = self.execute_query(query).get("data", [])
         groups = groupby(response, itemgetter(0))
         items = [(key, [item[1] for item in value]) for key, value in groups]
         keys = ["fill_number", "run_number"]
