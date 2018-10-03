@@ -14,7 +14,16 @@ from runregistry.utilities import (
 )
 
 
-class RunRegistryClient:
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class RunRegistryClient(metaclass=Singleton):
     """
     Implements a simple client that accesses the RunRegistry through the resthub API
 
