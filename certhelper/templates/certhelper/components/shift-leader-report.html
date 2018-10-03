@@ -11,9 +11,8 @@
         </p>
     {% endfor %}
     <ul class="nav nav-tabs" xmlns="http://www.w3.org/1999/html">
-        {% comment %} TODO: LHC Fills
-        <li class="active"><a data-toggle="tab" href="#slr-lhc-fills">LHC Fills</a></li>
-        {% endcomment %}
+        <li><a data-toggle="tab" href="#slr-lhc-fills">LHC Fills</a></li>
+
         <li class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                 Day by day <span class="caret"></span>
@@ -43,9 +42,7 @@
     </ul>
 
     <div class="tab-content">
-        {% comment %} TODO: LHC Fills
         {% include "certhelper/components/shiftleader/lhc-fills.html" %}
-        {% endcomment %}
         {% include "certhelper/components/shiftleader/day-by-day.html" %}
         {% include "certhelper/components/shiftleader/weekly-cert.html" %}
         {% include "certhelper/components/shiftleader/list-of-runs.html" %}

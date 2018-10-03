@@ -66,3 +66,8 @@ def render_luminosity_table(caption, queryset):
     Used in tools/calculate_luminosity/
     """
     return {"queryset": queryset, "caption": caption}
+
+
+@register.inclusion_tag('certhelper/components/templatetags/lhc_fill_table.html')
+def render_lhc_fill_table(queryset, caption):
+    return {"queryset": queryset, "caption": caption}

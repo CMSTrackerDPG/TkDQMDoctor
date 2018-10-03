@@ -175,6 +175,9 @@ class ShiftLeaderReportBase:
     def fill_numbers(self):
         return self.runs.fill_numbers()
 
+    def fills(self):
+        return self.runs.group_run_numbers_by_fill_number()
+
     def integrated_luminosity(self):
         return self.runs.integrated_luminosity()
 

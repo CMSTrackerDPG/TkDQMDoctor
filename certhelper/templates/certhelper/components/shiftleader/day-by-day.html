@@ -5,7 +5,7 @@
         <h3>Day by day notes: {{ day.name|title }}, {{ day.date|yyyymmdd_to_ddmmyyyy }}</h3>
         <p>
         <ul>
-            <li>Fills <strong>{{ day.collisions.express.fill_numbers }}</strong>
+            <li>Fills <strong>{{ day.collisions.express.fill_numbers|join:","  }}</strong>
                 <ul>
                     <li>
                         <strong>[insert here]</strong> colliding bunches, peak lumi <strong>[insert here]</strong> x 10³⁴ cm²/s
