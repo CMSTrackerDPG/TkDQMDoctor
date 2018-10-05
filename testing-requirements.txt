@@ -1,4 +1,4 @@
-django-allauth==0.35.0
+django-allauth==0.38
 django-bootstrap3==9.1.0
 django-categories==1.6
 django-ckeditor==5.5.0
