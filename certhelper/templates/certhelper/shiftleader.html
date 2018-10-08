@@ -21,6 +21,7 @@
         </div>
         <ul class="nav nav-tabs">
             <li><a data-toggle="tab" href="#runtable">Certified Runs</a></li>
+            <li><a data-toggle="tab" href="#compare-runreg">Run Registry Comparison</a></li>
             <li><a data-toggle="tab" href="#overview">Overview</a></li>
             <li><a data-toggle="tab" href="#deleted-runs">Deleted Certifications</a></li>
             <li><a data-toggle="tab" href="#summary">Summary</a></li>
@@ -35,6 +36,33 @@
                     <div class="alert alert-danger" role="alert">No Table found.</div>
                 {% endif %}
             </div>
+
+
+            <div id="compare-runreg" class="tab-pane fade">
+                <h2>Comparison of certified runs with Run Registry</h2>
+
+                {% if filter.qs %}
+                    {% if runinfo_comparison_table %}
+                        <div class="col-sm-6">
+                            <h3>Certification Helper:</h3>
+                            {% load render_table from django_tables2 %}
+                            {% render_table runinfo_comparison_table %}
+                        </div>
+                    {% endif %}
+                    {% if run_registry_comparison_table %}
+                        <div class="col-sm-6">
+                            <h3>Run Registry:</h3>
+                            {% load render_table from django_tables2 %}
+                            {% render_table run_registry_comparison_table %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-danger" role="alert">
+                        No runs have been certified in the specified filter criteria.
+                    </div>
+                {% endif %}
+            </div>
+
 
             <div id="overview" class="tab-pane fade">
                 {% if filter.qs %}

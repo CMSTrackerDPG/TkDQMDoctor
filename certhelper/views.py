@@ -289,6 +289,12 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
             # shift leader checklist has not been created yet.
             pass
 
+        deviating, corresponding = self.filterset.qs.compare_with_run_registry()
+
+        if deviating:
+            context["runinfo_comparison_table"] = RunRegistryComparisonTable(deviating)
+            context["run_registry_comparison_table"] = RunRegistryComparisonTable(corresponding)
+
         return context
 
 

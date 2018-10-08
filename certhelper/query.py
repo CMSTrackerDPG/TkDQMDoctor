@@ -485,7 +485,6 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
             "tracking",
             "pixel_lowstat",
             "sistrip_lowstat",
-            "tracking_lowstat",
         ]
 
         run_info_tuple_set = set(self.values_list(*keys))
