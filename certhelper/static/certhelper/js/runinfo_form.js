@@ -75,6 +75,9 @@ function validate_type() {
     validate_form_field_asynchronously("runtype");
     validate_form_field_asynchronously("bfield");
     validate_form_field_asynchronously("beamtype");
+    if(get_run_number() !== ""){
+        validate_run_number();
+    }
 }
 
 function validate_run_number(){
@@ -92,10 +95,34 @@ function validate_run_number(){
             const warning_text = "Reference run seems old. Please check";
             display_validation_warning("run_number", warning_text);
         } else {
+            validate_run_with_run_registry(run_number_text);
             display_validation_success("run_number", "");
         }
     }
 }
+
+/**
+ * Checks if the run exists in the Run Registry and that the
+ * run type (Collisions/ Cosmics) is correct
+ */
+function validate_run_with_run_registry(run_number_text) {
+    $.ajax({
+        url: '/runregistry/' + run_number_text,
+        dataType: 'json',
+        success: function (data) {
+            if(data.length === 0){
+                const error_text = "Run " + run_number_text + " does not exist in Run Registry!";
+                display_validation_error("run_number", error_text);
+            } else if (data === "Run Registry is unavailable.") {
+                console.log(data)
+            } else if (data[0]["type__runtype"] !== get_selected_runtype()) {
+                const error_text = "Type is " + data[0]["type__runtype"] + " in Run Registry!";
+                display_validation_error("type", error_text);
+            }
+        }
+    });
+}
+
 
 function validate_int_luminosity(){
     const int_lumi = get_int_luminosity();
@@ -103,6 +130,9 @@ function validate_int_luminosity(){
         let runtype = get_selected_runtype();
         if(runtype === "Cosmics" && int_lumi > 0){
             const warning_text = "You certify a cosmics run. Are you sure about this value?";
+            display_validation_warning("int_luminosity", warning_text);
+        } else if(runtype === "Collisions" && parseInt(int_lumi) === 0){
+            const warning_text = "You certify a collisions run. Are you sure there is no luminosity?";
             display_validation_warning("int_luminosity", warning_text);
         } else {
             display_validation_success("int_luminosity", "");

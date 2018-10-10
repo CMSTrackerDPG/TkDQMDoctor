@@ -30,7 +30,7 @@ from certhelper.utilities.utilities import (
     get_runinfo_from_request,
     number_string_to_list,
     integer_or_none,
-)
+    convert_run_registry_to_runinfo)
 from runregistry.client import TrackerRunRegistryClient
 from .forms import *
 from .tables import *
@@ -473,3 +473,12 @@ class RunRegistryCompareView(TemplateView):
             self.template_name,
             {"table": deviating_run_table, "run_registry_table": run_registry_table},
         )
+
+
+def runregistry(request, run_number):
+    client = TrackerRunRegistryClient()
+    if not client.connection_possible():
+        return JsonResponse("Run Registry is unavailable.")
+    response = client.get_runs_by_list([run_number])
+    runs = convert_run_registry_to_runinfo(response)
+    return JsonResponse(runs, safe=False, json_dumps_params={'indent': 2})

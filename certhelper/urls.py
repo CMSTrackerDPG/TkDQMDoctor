@@ -39,6 +39,9 @@ urlpatterns = [
     url(r'^tools/view/runregistry/$', views.RunRegistryView.as_view(), name='view-runregistry'),
     url(r'^tools/view/lumisections/$', views.RunRegistryLumiSectionView.as_view(), name='view-lumisections'),
 
+    url(r'^runregistry/(?P<run_number>[0-9]+)$', views.runregistry,
+        name='runregistry'),
+
     # checklists
     # TODO one general checklists page for all checklists /checklists/
     url(r'^checklists/general$', ChecklistTemplateView.as_view(
