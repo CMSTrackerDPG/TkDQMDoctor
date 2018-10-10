@@ -527,6 +527,10 @@ class RunInfoQuerySet(SoftDeletionQuerySet):
 
         return deviating_run_info_dict, corresponding_run_registry_dict
 
+    def matches_with_run_registry(self):
+        deviating, corresponding = self.compare_with_run_registry()
+        return len(deviating) == 0
+
     def annotate_fill_number(self):
         """
         Adds the lhc fill number from the Run Registry

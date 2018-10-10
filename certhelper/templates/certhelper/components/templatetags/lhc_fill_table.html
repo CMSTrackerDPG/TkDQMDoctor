@@ -19,7 +19,7 @@
             {% for fill in queryset.fills %}
                 <tr>
                     <td class="col-sm-3">{{ fill.fill_number}}</td>
-                    <td class="col-sm-9">{{ fill.run_number|join:", "  }}</td>
+                    <td class="col-sm-9">{{ fill.run_number|join:", " }}</td>
                 </tr>
             {% endfor %}
             </tbody>

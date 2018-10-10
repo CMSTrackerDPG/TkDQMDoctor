@@ -68,6 +68,10 @@ def listruns(request):
         run_info_list = RunInfo.objects.filter(userid=request.user)
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
         table = RunInfoTable(run_info_filter.qs)
+
+        mismatching_runs, mismatching_run_registy_runs = run_info_filter.qs.compare_with_run_registry()
+        if len(mismatching_runs) != 0:
+            context["mismatching_runs"] = [run["run_number"] for run in mismatching_runs]
     else:
         run_info_list = RunInfo.objects.all()
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
@@ -76,20 +80,19 @@ def listruns(request):
     RequestConfig(request).configure(table)
 
     applied_filters = get_filters_from_request_GET(request)
-
     filter_parameters = ""
     for key, value in applied_filters.items():
         filter_parameters += "&" if filter_parameters.startswith("?") else "?"
         filter_parameters += key + "=" + value
 
+    context["filter_parameters"] = filter_parameters
+    context["table"] = table
+    context["filter"] = run_info_filter
+
     return render(
         request,
         "certhelper/list.html",
-        {
-            "table": table,
-            "filter": run_info_filter,
-            "filter_parameters": filter_parameters,
-        },
+        context,
     )
 
 
