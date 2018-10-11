@@ -59,6 +59,8 @@ def listruns(request):
     if not request_contains_filter_parameter(request):
         return HttpResponseRedirect("/%s" % get_today_filter_parameter())
 
+    context = {}
+
     """
     Make sure that the logged in user can only see his own runs
     In case the user is not logged in show all objects,
