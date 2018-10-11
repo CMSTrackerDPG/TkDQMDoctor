@@ -165,8 +165,13 @@
 
             $("#id_run_number__in").change(function(){
                 let run_numbers_list = $(this).val();
+                // Replace everything that is not a number with white space
                 run_numbers_list = run_numbers_list.replace(/[^0-9]/gmi, " ");
+                // Replace multiple whitespaces with single white space
                 run_numbers_list = run_numbers_list.replace(/\s+/g,' ');
+                // Remove whitespace at the end of string
+                run_numbers_list = run_numbers_list.trim();
+                // Separate run numbers with comma
                 run_numbers_list = run_numbers_list.replace(/\s+/g,', ');
 
                 $(this).val(run_numbers_list);
