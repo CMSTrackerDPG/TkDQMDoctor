@@ -14,7 +14,7 @@
     {% if mismatching_runs %}
         <div class="alert alert-warning">
             <strong>Warning!</strong> Your certified runs do not match with the Run Registry entries! <br>
-            Please update the following runs: <b>{{ mismatching_runs|join:", " }}</b>
+            Please update the following runs before generating the summary: <b>{{ mismatching_runs|join:", " }}</b>
         </div>
 
     {% endif %}
@@ -68,7 +68,7 @@
             //remove empty attributes from URL
             $("form").submit(function () {
                 $(this).find(":input").filter(function () {
-                    return !this.value || this.value == "0";
+                    return !this.value || this.value === "0";
                 }).attr("disabled", "disabled");
                 return true; // ensure form still submits
             });
