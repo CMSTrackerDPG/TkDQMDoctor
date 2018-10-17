@@ -30,7 +30,8 @@ from certhelper.utilities.utilities import (
     get_runinfo_from_request,
     number_string_to_list,
     integer_or_none,
-    convert_run_registry_to_runinfo)
+    convert_run_registry_to_runinfo,
+)
 from runregistry.client import TrackerRunRegistryClient
 from .forms import *
 from .tables import *
@@ -39,7 +40,9 @@ from .tables import *
 @method_decorator(login_required, name="dispatch")
 class CreateRun(generic.CreateView):
     """
-    Form which allows for creation of a new entry in RunInfo
+    Class based view to create new RunInfo instances.
+
+    Used by shifters to certify new runs.
     """
 
     model = RunInfo
@@ -48,13 +51,16 @@ class CreateRun(generic.CreateView):
     success_url = "/"
 
     def form_valid(self, form_class):
+        """
+        Adds the logged in user into the form data, when the form is valid.
+        """
         form_class.instance.userid = self.request.user
         return super(CreateRun, self).form_valid(form_class)
 
 
 def listruns(request):
     """
-    passes all RunInfo objects to list.html
+    View to list all certified runs
     """
     if not request_contains_filter_parameter(request):
         return HttpResponseRedirect("/%s" % get_today_filter_parameter())
@@ -71,9 +77,13 @@ def listruns(request):
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
         table = RunInfoTable(run_info_filter.qs)
 
-        mismatching_runs, mismatching_run_registy_runs = run_info_filter.qs.compare_with_run_registry()
+        mismatching_runs, mismatching_run_registy_runs = (
+            run_info_filter.qs.compare_with_run_registry()
+        )
         if len(mismatching_runs) != 0:
-            context["mismatching_runs"] = [run["run_number"] for run in mismatching_runs]
+            context["mismatching_runs"] = [
+                run["run_number"] for run in mismatching_runs
+            ]
     else:
         run_info_list = RunInfo.objects.all()
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
@@ -91,18 +101,13 @@ def listruns(request):
     context["table"] = table
     context["filter"] = run_info_filter
     context["run_registry_online"] = TrackerRunRegistryClient().connection_possible()
-    return render(
-        request,
-        "certhelper/list.html",
-        context,
-    )
+    return render(request, "certhelper/list.html", context)
 
 
 @method_decorator(login_required, name="dispatch")
 class ListReferences(SingleTableView):
     """
-    Display ReferenceRuns in a tableview
-    !!! USES DJANGO-TABLES2 !!! 
+    Displays all ReferenceRuns
     """
 
     model = ReferenceRun
@@ -120,14 +125,18 @@ class UpdateRun(generic.UpdateView):
     template_name = "certhelper/runinfo_form.html"
 
     def get_context_data(self, **kwargs):
+        """
+        Add extra data for the template
+        """
         context = super().get_context_data(**kwargs)
         context["checklist_not_required"] = True
         return context
 
     def same_user_or_shiftleader(self, user):
         """
-        checks if the user trying to edit the run is the same user that created the run,
-        has at least shift leader rights or is a super user (admin)
+        Checks if the user trying to edit the run is the same user
+        that created the run, has at least shift leader rights
+        or is a super user (admin)
         """
         try:
             return (
@@ -139,6 +148,9 @@ class UpdateRun(generic.UpdateView):
             return False
 
     def dispatch(self, request, *args, **kwargs):
+        """
+        Check if the user that tries to update the run has the necessary rights
+        """
         if self.same_user_or_shiftleader(request.user):
             return super(UpdateRun, self).dispatch(request, *args, **kwargs)
         return redirect_to_login(
@@ -146,6 +158,9 @@ class UpdateRun(generic.UpdateView):
         )
 
     def get_success_url(self):
+        """
+        return redirect url after updating a run
+        """
         is_same_user = self.get_object().userid == self.request.user
         return reverse("certhelper:shiftleader") if not is_same_user else "/"
 
@@ -165,7 +180,7 @@ class DeleteRun(generic.DeleteView):
 @method_decorator(login_required, name="dispatch")
 class CreateType(generic.CreateView):
     """
-    Form to create a new Type (RunType)
+    Class based view to create a new Type (RunType)
     """
 
     model = Type
@@ -176,7 +191,8 @@ class CreateType(generic.CreateView):
 
 @login_required
 def summaryView(request):
-    """ Accumulates information that is needed in the Run Summary
+    """
+    Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
     where it is then displayed.
     """
@@ -221,6 +237,10 @@ def logout_view(request):
 
 
 def logout_status(request):
+    """
+    Simple status page which should help determining
+    if the logout was successful or not
+    """
     logout_successful = not request.user.is_authenticated
     return render(
         request,
@@ -229,6 +249,7 @@ def logout_status(request):
     )
 
 
+# TODO Check if necessary
 def load_subcategories(request):
     category_id = request.GET.get("categoryid")
     if category_id:
@@ -298,7 +319,9 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
 
         if deviating:
             context["runinfo_comparison_table"] = RunRegistryComparisonTable(deviating)
-            context["run_registry_comparison_table"] = RunRegistryComparisonTable(corresponding)
+            context["run_registry_comparison_table"] = RunRegistryComparisonTable(
+                corresponding
+            )
 
         return context
 
@@ -486,4 +509,4 @@ def runregistry(request, run_number):
         return JsonResponse("Run Registry is unavailable.")
     response = client.get_runs_by_list([run_number])
     runs = convert_run_registry_to_runinfo(response)
-    return JsonResponse(runs, safe=False, json_dumps_params={'indent': 2})
+    return JsonResponse(runs, safe=False, json_dumps_params={"indent": 2})

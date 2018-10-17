@@ -48,7 +48,6 @@ function get_tracking(){
     return  $("#id_tracking").find(":selected").val()
 }
 
-
 function get_selected_component_text(component){
     return  $("#id_" + component).find(":selected").text()
 }
