@@ -2,6 +2,7 @@
 RunRegistry Client
 """
 from itertools import groupby
+from json import JSONDecodeError
 from operator import itemgetter
 
 import requests
@@ -40,9 +41,9 @@ class RunRegistryClient(metaclass=Singleton):
 
     def __init__(self, url=DEFAULT_URL):
         self.url = url
-        self.__connection_successful = None  # Lazy
+        self._connection_successful = None  # Lazy
 
-    def __test_connection(self):
+    def _test_connection(self):
         try:
             requests.get(self.url)
             return True
@@ -50,33 +51,62 @@ class RunRegistryClient(metaclass=Singleton):
             return False
 
     def retry_connection(self):
-        self.__connection_successful = self.__test_connection()
+        """
+        Retry to connect to Run Registry.
+        Updates return value of the connection_possible method.
+        """
+        self._connection_successful = self._test_connection()
 
     def connection_possible(self):
-        if self.__connection_successful is None:
+        """
+        Check if the connection to the Run Registry is possible.
+
+        Example:
+        >>> client = RunRegistryClient()
+        >>> client.connection_possible()
+        True
+
+        :return: True when connection to Run Registry was successful
+        """
+        if self._connection_successful is None:
             self.retry_connection()
-        return self.__connection_successful
+        return self._connection_successful
 
-    def __get_json_response(self, resource):
-        response = requests.get(self.url + resource)
-        return response.json()
+    def _get_json_response(self, resource, media_type=None):
+        if not self.connection_possible():
+            return {}
 
-    def __get_query_id(self, query):
+        if media_type:
+            headers = {"Accept": media_type}
+            response = requests.get(self.url + resource, headers=headers)
+            return response.content.decode("utf-8")
+
+        try:
+            response = requests.get(self.url + resource)
+            return response.json()
+        except JSONDecodeError:
+            return {}
+
+    def _get_query_id(self, query):
         """
         Converts a SQL query string into a query id (qid), that will be used to access
         the RunRegistry.
 
-        GET: /query/{query_id}
+        POST: /query
 
         :param query: SQL query string
         :return: query id
         """
         response = requests.post(self.url + "/query?", data=query)
+        if response.status_code == 400:
+            raise ValueError(response.text)
         return response.text
 
-    def execute_query(self, query):
+    def execute_query(self, query, media_type=None):
         """
         Executes an arbitrary SQL query
+
+        GET: /query/{query_id}
 
         Limitations:
          - tables referred by namespace.table
@@ -98,14 +128,15 @@ class RunRegistryClient(metaclass=Singleton):
         >>> client.execute_query(query)
         {'data': [[247073], [247076], [247077], [247078], [247079]]}
 
+        :param media_type: Desired media type, e.g. application/xml, text/json
         :param query: SQL query string
         :return: JSON dictionary
         """
         if not self.connection_possible():
             return {}
-        query_id = self.__get_query_id(query)
+        query_id = self._get_query_id(query)
         resource = "/query/" + query_id + "/data"
-        return self.__get_json_response(resource)
+        return self._get_json_response(resource, media_type)
 
     def get_table_description(self, namespace=DEFAULT_NAMESPACE, table=DEFAULT_TABLE):
         """
@@ -121,7 +152,7 @@ class RunRegistryClient(metaclass=Singleton):
         :return: json containing the table description
         """
         resource = "/table/{}/{}".format(namespace, table)
-        return self.__get_json_response(resource)
+        return self._get_json_response(resource)
 
     def get_queries(self):
         """
@@ -129,7 +160,7 @@ class RunRegistryClient(metaclass=Singleton):
 
         :return: list of queries
         """
-        return self.__get_json_response("/queries")
+        return self._get_json_response("/queries")
 
     def get_query_description(self, query_id):
         """
@@ -137,7 +168,7 @@ class RunRegistryClient(metaclass=Singleton):
 
         :return: json dictionary with query description
         """
-        return self.__get_json_response("/query/{}".format(query_id))
+        return self._get_json_response("/query/{}".format(query_id))
 
     def get_info(self):
         """
@@ -152,7 +183,7 @@ class RunRegistryClient(metaclass=Singleton):
 
         :return json with general information about the service
         """
-        return self.__get_json_response("/info")
+        return self._get_json_response("/info")
 
 
 class TrackerRunRegistryClient(RunRegistryClient):
@@ -245,8 +276,9 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "and l.rdr_rda_name = r.rda_name "
             "and l.rdr_rda_name != '/Global/Online/ALL' "
             "and l.cms_active = 1 "
-            "and l.beam1_stable = 1 "
+            "and (l.beam1_stable = 1 "
             "and l.beam2_stable = 1 "
+            "or l.rdr_rda_name LIKE '%Cosmics%') "
             "and l.TIBTID_READY = 1 "
             "and l.TOB_READY = 1 "
             "and l.TECP_READY = 1 "
