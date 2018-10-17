@@ -13,10 +13,8 @@ class TestRunRegistryClient(unittest.TestCase):
     def test_execute_query(self):
         runregistry = RunRegistryClient()
 
-        runregistry._RunRegistryClient__get_query_id = MagicMock(
-            return_value="o1662d3e8bb1"
-        )
-        runregistry._RunRegistryClient__get_json_response = MagicMock(
+        runregistry._get_query_id = MagicMock(return_value="o1662d3e8bb1")
+        runregistry._get_json_response = MagicMock(
             return_value={"data": [[247073], [247076], [247077], [247078], [247079]]}
         )
 
@@ -32,9 +30,9 @@ class TestRunRegistryClient(unittest.TestCase):
         expected_response = {"data": [[247073], [247076], [247077], [247078], [247079]]}
 
         self.assertEqual(expected_response, response)
-        runregistry._RunRegistryClient__get_query_id.assert_called_with(query)
-        runregistry._RunRegistryClient__get_json_response.assert_called_with(
-            "/query/o1662d3e8bb1/data"
+        runregistry._get_query_id.assert_called_with(query)
+        runregistry._get_json_response.assert_called_with(
+            "/query/o1662d3e8bb1/data", None
         )
 
 
