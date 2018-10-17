@@ -11,9 +11,12 @@
         <div class="alert alert-danger" role="alert">No Filter found.</div>
     {% endif %}
 
-    {% if mismatching_runs %}
-        <div class="alert alert-warning">
-            <strong>Warning!</strong> Your certified runs do not match with the Run Registry entries! <br>
+    {% if run_registry_online and mismatching_runs %}
+        <div class="alert alert-warning alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong>Warning!</strong> Your certified runs do not match the <a href="https://cmswbmoffshift.web.cern.ch/cmswbmoffshift/runregistry_offline/">Run Registry</a> entries! <br>
             Please update the following runs before generating the summary: <b>{{ mismatching_runs|join:", " }}</b>
         </div>
 

@@ -90,7 +90,7 @@ def listruns(request):
     context["filter_parameters"] = filter_parameters
     context["table"] = table
     context["filter"] = run_info_filter
-
+    context["run_registry_online"] = TrackerRunRegistryClient().connection_possible()
     return render(
         request,
         "certhelper/list.html",
