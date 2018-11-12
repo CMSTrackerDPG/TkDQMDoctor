@@ -444,7 +444,7 @@ class TrackerRunRegistryClient(RunRegistryClient):
 
         Example:
         >>> client = TrackerRunRegistryClient()
-        >>> client.get_unique_fill_numbers_by_run_number([321177, 321178, 321218])
+        >>> client.get_unique_fill_numbers_by_run_number([321177, 321178, 321218, 323500])
         [7048, 7052]
 
         :param list_of_run_numbers:
@@ -458,7 +458,8 @@ class TrackerRunRegistryClient(RunRegistryClient):
             "where {} "
             "order by r.runnumber".format(where_clause)
         )
-        return sorted({item[0] for item in self.execute_query(query).get("data", [])})
+        runs = self.execute_query(query).get("data", [])
+        return sorted({run[0] for run in runs if run[0] is not None})
 
     def get_run_numbers_by_fill_number(self, list_of_fill_numbers):
         """
