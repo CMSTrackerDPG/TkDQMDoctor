@@ -351,7 +351,7 @@ class RunInfo(SoftDeletionModel):
     run_number = models.PositiveIntegerField()
     trackermap = models.CharField(max_length=7, choices=TRACKERMAP_CHOICES)
     number_of_ls = models.PositiveIntegerField()
-    int_luminosity = models.DecimalField(max_digits=20, decimal_places=2)
+    int_luminosity = models.DecimalField(max_digits=30, decimal_places=15)
     pixel = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)
     pixel_lowstat = models.BooleanField(default=False)
     sistrip = models.CharField(max_length=10, choices=GOOD_BAD_CHOICES)

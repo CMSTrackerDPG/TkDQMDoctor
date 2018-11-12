@@ -130,7 +130,7 @@ function validate_int_luminosity(){
         if(runtype === "Cosmics" && int_lumi > 0){
             const warning_text = "You certify a cosmics run. Are you sure about this value?";
             display_validation_warning("int_luminosity", warning_text);
-        } else if(runtype === "Collisions" && parseInt(int_lumi) === 0){
+        } else if(runtype === "Collisions" && int_lumi === 0){
             const warning_text = "You certify a collisions run. Are you sure there is no luminosity?";
             display_validation_warning("int_luminosity", warning_text);
         } else {
@@ -493,6 +493,7 @@ function updateReferenceRunList(){
 
 function round_int_luminosity(){
     let int_luminosity = $("#id_int_luminosity");
+
     if(int_luminosity.val()){
         const rounded = parseFloat(int_luminosity.val()).toFixed(1);
         int_luminosity.val(rounded);

@@ -22,7 +22,7 @@ class SummaryReport:
                 "Run",
                 "Reference Run",
                 "Number of LS",
-                "Int. Luminosity",
+                "Int. Luminosity (pb⁻¹)",
                 "Pixel",
                 "Strip",
                 "Tracking",
@@ -33,7 +33,7 @@ class SummaryReport:
                 run.run_number,
                 run.reference_run.reference_run,
                 run.number_of_ls,
-                run.int_luminosity,
+                float(run.int_luminosity),
                 run.pixel,
                 run.sistrip,
                 run.tracking,
@@ -89,7 +89,7 @@ class SummaryReport:
             column_description = [
                 "Type {}".format(idx + 1),
                 "Sum of LS",
-                "Sum of int. luminosity"
+                "Sum of int. luminosity (pb⁻¹)"
             ]
 
             data = []
@@ -98,11 +98,11 @@ class SummaryReport:
 
             if good.exists():
                 data.append(
-                    ["Good", good.lumisections(), int(good.integrated_luminosity())])
+                    ["Good", good.lumisections(), good.integrated_luminosity()])
 
             if bad.exists():
                 data.append(
-                    ["Bad", bad.lumisections(), int(bad.integrated_luminosity())])
+                    ["Bad", bad.lumisections(), bad.integrated_luminosity()])
 
             table = get_ascii_table(column_description, data)
             certified_run_numbers.append(table)
