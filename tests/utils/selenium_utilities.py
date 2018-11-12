@@ -1,6 +1,9 @@
 import time
 
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    NoAlertPresentException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -167,3 +170,13 @@ def set_shift_leader_filter_date(
         year_1
     )
     browser.find_element_by_id("id_btn_filter").click()
+
+
+def dismiss_alert_popup(browser):
+    """
+    Automatically clicks on the "OK" button if a popup appears and does nothing otherwise
+    """
+    try:
+        browser.switch_to_alert().accept()  # Warning popup
+    except NoAlertPresentException:
+        pass

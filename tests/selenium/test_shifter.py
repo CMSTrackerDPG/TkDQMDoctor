@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from django.utils import timezone
 from selenium.common.exceptions import NoSuchElementException
@@ -14,6 +12,7 @@ from tests.utils.selenium_utilities import (
     fill_and_submit_add_run_form,
     fill_form_with_data,
     select_types_and_reference_runs_in_form,
+    dismiss_alert_popup,
 )
 from tests.utils.wait import wait_until, wait_for_cell
 
@@ -65,7 +64,7 @@ class TestShifter:
         wait_until(firefox.find_element_by_link_text, "Add Run").click()
         check_all_checklists(firefox, wait)
         fill_and_submit_add_run_form(firefox)
-        firefox.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(firefox)
 
         wait_until(firefox.find_element_by_link_text, "Add Run")
         wait_for_cell(firefox, "456789", MAX_WAIT=60)
@@ -77,7 +76,7 @@ class TestShifter:
         try_to_login_user(firefox, SHIFTER1_USERNAME, PASSWORD)
         wait_until(firefox.find_element_by_link_text, "Add Run").click()
         fill_and_submit_add_run_form(firefox)
-        firefox.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(firefox)
 
         wait_until(firefox.find_element_by_link_text, "Add Run")
         wait_for_cell(firefox, "456789", MAX_WAIT=60)
@@ -198,7 +197,7 @@ class TestShifter:
         website.find_element_by_link_text("Add Run").click()
         check_all_checklists(website, wait)
         fill_and_submit_add_run_form(website)
-        website.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(website)
 
         wait_until(website.find_element_by_link_text, "Add Run")
         wait_for_cell(website, "456789", MAX_WAIT=60)
@@ -213,7 +212,7 @@ class TestShifter:
         website.find_element_by_id("id_run_number").send_keys("555789")
 
         website.find_element_by_id("id_submit_add_run").click()
-        website.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(website)
 
         wait_until(website.find_element_by_link_text, "Add Run")
         wait_for_cell(website, "555789", MAX_WAIT=60)
@@ -242,7 +241,7 @@ class TestShifter:
 
         fill_form_with_data(website)
         website.find_element_by_id("id_submit_add_run").click()
-        website.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(website)
 
         alert_text = wait_until(website.find_element_by_class_name, "alert").text
         assert "Reference run is incompatible with selected Type" in alert_text
@@ -288,6 +287,8 @@ class TestShifter:
 
         fill_form_with_data(website, {"run_number": 301123})
         website.find_element_by_id("id_submit_add_run").click()
+
+        dismiss_alert_popup(website)
 
         alert_text = wait_until(website.find_element_by_class_name, "alert").text
         assert (
@@ -503,7 +504,7 @@ class TestShifter:
             website, {"pixel": "Bad", "sistrip": "Good", "tracking": "Excluded"}
         )
         website.find_element_by_id("id_submit_add_run").click()
-        website.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(website)
         wait_for_cell(website, "456789", MAX_WAIT=60)
 
         pixel = website.find_element_by_css_selector("td.pixel").get_attribute(
@@ -535,7 +536,7 @@ class TestShifter:
         website.find_element_by_id("id_sistrip_lowstat").click()
 
         website.find_element_by_id("id_submit_add_run").click()
-        website.switch_to_alert().accept()  # Warning popup
+        dismiss_alert_popup(website)
         wait_for_cell(website, "456789", MAX_WAIT=60)
 
         pixel = website.find_element_by_css_selector("td.pixel").get_attribute(
