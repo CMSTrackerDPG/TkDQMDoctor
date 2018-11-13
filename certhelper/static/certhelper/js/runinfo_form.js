@@ -32,6 +32,10 @@ function get_int_luminosity(){
     return $('#id_int_luminosity').val();
 }
 
+function get_int_luminosity_unit(){
+    return $('#id-int-luminosity-unit').text().replace("µ", "u");;
+}
+
 function get_number_of_ls(){
     return $('#id_number_of_ls').val();
 }
@@ -564,4 +568,26 @@ function change_int_luminosity_unit(new_unit){
     int_luminosity_unit.text(new_unit.replace("u", "µ"));
     int_luminosity.val(new_value_f);
     int_luminosity.attr("placeholder", "Unit: /" + new_unit);
+}
+
+/**
+ * Change the integrated luminosity to most fitting unit
+ *
+ * For Example:
+ * 0.000000266923 pb^-1 => 0.266923 ub^-1
+ * 12 pb^-1 => 12 pb^-1 (no change)
+ */
+function update_to_smallest_int_luminosity_unit(){
+    const int_lumi = get_int_luminosity();
+    const unit = get_int_luminosity_unit();
+
+    console.log("int " + int_lumi);
+    console.log("unit " + unit);
+    if(int_lumi){
+        let value = math.unit(int_lumi, unit + "^-1");
+        value = value.toNumber("pb^-1");
+        if(value < 0.001){
+            change_int_luminosity_unit("ub");
+        }
+    }
 }
