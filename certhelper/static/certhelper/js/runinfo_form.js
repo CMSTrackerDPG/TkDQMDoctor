@@ -588,6 +588,8 @@ function update_to_smallest_int_luminosity_unit(){
         value = value.toNumber("pb^-1");
         if(value < 0.001){
             change_int_luminosity_unit("ub");
+        } else {
+            change_int_luminosity_unit("pb");
         }
     }
 }
