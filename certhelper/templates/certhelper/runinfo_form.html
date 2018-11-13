@@ -142,10 +142,21 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="id_int_luminosity">Int luminosity</label>
                 <div class="col-sm-6">
+
                     <div class="input-group">
-                        {% render_field form.int_luminosity class="form-control" %}
-                        <span class="input-group-addon">pb<sup>-1</sup></span>
+                        {% render_field form.int_luminosity class="form-control int-lumi-input" %}
+
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span id="id-int-luminosity-unit">pb</span><sup>-1</sup> <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li><a id="id-unit-pb" href="#">pb<sup>-1</sup></a></li>
+                                <li><a id="id-unit-ub" href="#">µb<sup>-1</sup></a></li>
+                            </ul>
+                        </div><!-- /btn-group -->
                     </div>
+
                 </div>
                 <div class="col-sm-3 help-block"></div>
                 <div class="col-sm-offset-3 col-sm-9 ">
@@ -376,11 +387,21 @@
                 disable_lowstat_for_excluded_components(component_id);
             });
 
+            $("#id-unit-pb").click(function(){
+                change_int_luminosity_unit("pb")
+            });
+
+
+            $("#id-unit-ub").click(function(){
+                 change_int_luminosity_unit("ub")
+            });
+
             /**
              * Prevents the form to be submitted and requires the user to
              * confirm the submission if any integrity warnings exists
              */
             $("#id_runinfo_form").submit(function(){
+                change_int_luminosity_unit("pb");
                 if($(".has-error").length)
                     return confirm("The form has a few errors. Are you sure you want to submit?");
                 if($(".has-warning").length)

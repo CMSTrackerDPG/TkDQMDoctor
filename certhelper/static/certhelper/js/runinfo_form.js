@@ -126,6 +126,10 @@ function validate_run_with_run_registry(run_number_text) {
 function validate_int_luminosity(){
     const int_lumi = get_int_luminosity();
     if(int_lumi){
+        if(isNaN(int_lumi)){
+            display_validation_error("int_luminosity", "" + int_lumi + " is not a number");
+            return;
+        }
         let runtype = get_selected_runtype();
         if(runtype === "Cosmics" && int_lumi > 0){
             const warning_text = "You certify a cosmics run. Are you sure about this value?";
@@ -534,4 +538,30 @@ function update_cmswbm_link(){
     if(run_number)
         link += "?RUN=" + run_number;
     $('#id_cmswbm_link').attr("href", link);
+}
+
+math.createUnit({"b": {prefixes: "short"}}, {override: true});
+function change_int_luminosity_unit(new_unit){
+    // Locators
+    const int_luminosity_unit = $("#id-int-luminosity-unit");
+    const int_luminosity = $("#id_int_luminosity");
+
+    // Validation
+    if(isNaN(int_luminosity.val())){
+        console.error("Error: '" + int_luminosity.val() + "' is not a valid integrated luminosity value");
+        return;
+    }
+
+    // Old stuff
+    let previous_unit = int_luminosity_unit.text().replace("µ", "u");
+    const old_value = math.unit(int_luminosity.val(), previous_unit + "^-1");
+
+    // Calculate new stuff
+    const new_value = old_value.toNumber(new_unit + "^-1");
+    const new_value_f = math.format(new_value, {notation: "fixed"});
+
+    // Assign new stuff
+    int_luminosity_unit.text(new_unit.replace("u", "µ"));
+    int_luminosity.val(new_value_f);
+    int_luminosity.attr("placeholder", "Unit: /" + new_unit);
 }
