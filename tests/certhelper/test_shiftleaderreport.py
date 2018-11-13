@@ -58,9 +58,9 @@ class TestShiftLeaderReport:
         assert report.number_of_runs("Cosmics", "Express") == 7
         assert report.number_of_runs("Cosmics", "Prompt") == 1
 
-        assert report.sum_int_lum("Collisions", "Express") == 161301.36
-        assert report.sum_int_lum("Collisions", "Prompt") == 123133.55
-        assert report.sum_int_lum("Cosmics", "Express") == 0.12
+        assert 161301.363 == report.sum_int_lum("Collisions", "Express")
+        assert report.sum_int_lum("Collisions", "Prompt") == 123133.554
+        assert report.sum_int_lum("Cosmics", "Express") == 0.1234
         assert report.sum_int_lum("Cosmics", "Prompt") == 0
 
         assert report.number_of_runs("Collisions", "Express", bad_only=True) == 0
@@ -69,7 +69,7 @@ class TestShiftLeaderReport:
         assert report.number_of_runs("Cosmics", "Prompt", bad_only=True) == 1
 
         assert report.sum_int_lum("Collisions", "Express", bad_only=True) == 0
-        assert report.sum_int_lum("Collisions", "Prompt", bad_only=True) == 123133.55
+        assert report.sum_int_lum("Collisions", "Prompt", bad_only=True) == 123133.554
         assert report.sum_int_lum("Cosmics", "Express", bad_only=True) == 0
         assert report.sum_int_lum("Cosmics", "Prompt", bad_only=True) == 0
 
@@ -79,8 +79,8 @@ class TestShiftLeaderReport:
         assert report.number_of_runs("Cosmics", "Prompt", day="2018-05-14") == 1
 
         assert report.sum_int_lum("Collisions", "Express", day="2018-05-14") == 5212
-        assert report.sum_int_lum("Collisions", "Prompt", day="2018-05-14") == 1.23
-        assert report.sum_int_lum("Cosmics", "Express", day="2018-05-14") == 0.12
+        assert report.sum_int_lum("Collisions", "Prompt", day="2018-05-14") == 1.234
+        assert report.sum_int_lum("Cosmics", "Express", day="2018-05-14") == 0.1234
         assert report.sum_int_lum("Cosmics", "Prompt", day="2018-05-14") == 0
 
         assert (
@@ -110,7 +110,7 @@ class TestShiftLeaderReport:
         )
         assert (
             report.sum_int_lum("Collisions", "Prompt", bad_only=True, day="2018-05-14")
-            == 1.23
+            == 1.234
         )
         assert (
             report.sum_int_lum("Cosmics", "Express", bad_only=True, day="2018-05-14")
@@ -136,7 +136,7 @@ class TestShiftLeaderReport:
         context = report.get_context()
 
         assert context["Bad"]["Collisions"]["Express"]["int_lum"] == 0
-        assert context["Bad"]["Collisions"]["Prompt"]["int_lum"] == 123133.55
+        assert context["Bad"]["Collisions"]["Prompt"]["int_lum"] == 123133.554
         assert context["day"][0]["name"] == "Monday"
         assert context["day"][0]["date"] == "2018-05-14"
 
@@ -176,9 +176,9 @@ class TestNewShiftLeaderReport:
         assert report.cosmics().express().total_number() == 7
         assert report.cosmics().prompt().total_number() == 1
 
-        assert report.collisions().express().integrated_luminosity() == 161301.36
-        assert report.prompt().collisions().integrated_luminosity() == 123133.55
-        assert report.express().cosmics().integrated_luminosity() == 0.12
+        assert 161301.363 == report.collisions().express().integrated_luminosity()
+        assert report.prompt().collisions().integrated_luminosity() == 123133.554
+        assert report.express().cosmics().integrated_luminosity() == 0.1234
         assert report.cosmics().prompt().integrated_luminosity() == 0
 
         assert report.bad().collisions().express().total_number() == 0
@@ -187,7 +187,7 @@ class TestNewShiftLeaderReport:
         assert report.bad().prompt().cosmics().total_number() == 1
 
         assert report.bad().collisions().express().integrated_luminosity() == 0
-        assert report.bad().collisions().prompt().integrated_luminosity() == 123133.55
+        assert report.bad().collisions().prompt().integrated_luminosity() == 123133.554
         assert report.bad().cosmics().express().integrated_luminosity() == 0
         assert report.bad().cosmics().prompt().integrated_luminosity() == 0
 
@@ -218,8 +218,8 @@ class TestNewShiftLeaderReport:
         assert day.cosmics().prompt().total_number() == 1
 
         assert day.collisions().express().integrated_luminosity() == 5212
-        assert day.prompt().collisions().integrated_luminosity() == 1.23
-        assert day.express().cosmics().integrated_luminosity() == 0.12
+        assert day.prompt().collisions().integrated_luminosity() == 1.234
+        assert day.express().cosmics().integrated_luminosity() == 0.1234
         assert day.cosmics().prompt().integrated_luminosity() == 0
 
         assert day.bad().collisions().express().total_number() == 0
@@ -228,7 +228,7 @@ class TestNewShiftLeaderReport:
         assert day.bad().prompt().cosmics().total_number() == 1
 
         assert day.bad().collisions().express().integrated_luminosity() == 0
-        assert day.bad().collisions().prompt().integrated_luminosity() == 1.23
+        assert day.bad().collisions().prompt().integrated_luminosity() == 1.234
         assert day.bad().cosmics().express().integrated_luminosity() == 0
         assert day.bad().cosmics().prompt().integrated_luminosity() == 0
 
@@ -285,7 +285,7 @@ class TestNewShiftLeaderReport:
         assert day.cosmics().express().total_number() == 0
         assert day.cosmics().prompt().total_number() == 0
 
-        assert day.collisions().express().integrated_luminosity() == 154543 + 124.12
+        assert day.collisions().express().integrated_luminosity() == 154543 + 124.123
         assert day.prompt().collisions().integrated_luminosity() == 0
         assert day.express().cosmics().integrated_luminosity() == 0
         assert day.cosmics().prompt().integrated_luminosity() == 0
@@ -307,7 +307,7 @@ class TestNewShiftLeaderReport:
         assert day.cosmics().express().total_number() == 0
         assert day.cosmics().prompt().total_number() == 0
 
-        assert day.collisions().express().integrated_luminosity() == 154543 + 124.12
+        assert day.collisions().express().integrated_luminosity() == 154543 + 124.123
         assert day.prompt().collisions().integrated_luminosity() == 0
         assert day.express().cosmics().integrated_luminosity() == 0
         assert day.cosmics().prompt().integrated_luminosity() == 0

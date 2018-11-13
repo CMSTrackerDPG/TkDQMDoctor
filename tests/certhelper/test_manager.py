@@ -130,7 +130,7 @@ class TestRunInfoManager:
         assert len(a) == 1
         a = a[0]
         assert a["runs_certified"] == 8
-        assert a["int_luminosity"] == 161301.36
+        assert 161301.363 == a["int_luminosity"]
         assert a["number_of_ls"] == 71806
 
         a = get_from_summary(summary, "Cosmics", "Express")
@@ -138,7 +138,7 @@ class TestRunInfoManager:
         assert len(a) == 1
         a = a[0]
         assert a["runs_certified"] == 7
-        assert a["int_luminosity"] == 0.12
+        assert a["int_luminosity"] == 0.1234
         assert a["number_of_ls"] == 2224
 
         a = [
@@ -150,7 +150,7 @@ class TestRunInfoManager:
         assert len(a) == 1
         a = a[0]
         assert a["runs_certified"] == 3
-        assert a["int_luminosity"] == 123133.55
+        assert a["int_luminosity"] == 123133.554
         assert a["number_of_ls"] == 10026
 
         a = [
@@ -234,11 +234,10 @@ class TestRunInfoManager:
         assert len(get_from_summary(summary, date="2018-05-20")) == 3
 
         assert (
-            get_from_summary(summary, date="2018-05-18")[0]["int_luminosity"]
-            == 154667.12
+           154667.123 == get_from_summary(summary, date="2018-05-18")[0]["int_luminosity"]
         )
         assert get_from_summary(summary, date="2018-05-18")[0]["number_of_ls"] == 144
-        assert get_from_summary(summary, date="2018-05-14")[2]["int_luminosity"] == 0.12
+        assert get_from_summary(summary, date="2018-05-14")[2]["int_luminosity"] == 0.1234
 
     def test_get_queryset(self):
         mixer.blend("certhelper.RunInfo", run_number=123456)

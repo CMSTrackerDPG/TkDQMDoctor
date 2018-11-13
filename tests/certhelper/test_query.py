@@ -268,9 +268,9 @@ class TestRunInfoQuerySet:
         assert cosmics_express.total_number() == 7
         assert cosmics_prompt.total_number() == 1
 
-        assert collisions_express.integrated_luminosity() == 161301.36
-        assert collisions_prompt.integrated_luminosity() == 123133.55
-        assert cosmics_express.integrated_luminosity() == 0.12
+        assert 161301.363 == collisions_express.integrated_luminosity()
+        assert collisions_prompt.integrated_luminosity() == 123133.554
+        assert cosmics_express.integrated_luminosity() == 0.1234
         assert cosmics_prompt.integrated_luminosity() == 0
 
         assert collisions_express.bad().total_number() == 0
@@ -279,7 +279,7 @@ class TestRunInfoQuerySet:
         assert cosmics_prompt.bad().total_number() == 1
 
         assert collisions_express.bad().integrated_luminosity() == 0
-        assert collisions_prompt.bad().integrated_luminosity() == 123133.55
+        assert collisions_prompt.bad().integrated_luminosity() == 123133.554
         assert cosmics_express.bad().integrated_luminosity() == 0
         assert cosmics_prompt.bad().integrated_luminosity() == 0
 
@@ -309,8 +309,8 @@ class TestRunInfoQuerySet:
         assert cosmics_prompt.total_number() == 1
 
         assert collisions_express.integrated_luminosity() == 5212
-        assert collisions_prompt.integrated_luminosity() == 1.23
-        assert cosmics_express.integrated_luminosity() == 0.12
+        assert 1.234 == collisions_prompt.integrated_luminosity()
+        assert cosmics_express.integrated_luminosity() == 0.1234
         assert cosmics_prompt.integrated_luminosity() == 0
 
         assert collisions_express.bad().total_number() == 0
@@ -319,7 +319,7 @@ class TestRunInfoQuerySet:
         assert cosmics_prompt.bad().total_number() == 1
 
         assert collisions_express.bad().integrated_luminosity() == 0
-        assert collisions_prompt.bad().integrated_luminosity() == 1.23
+        assert collisions_prompt.bad().integrated_luminosity() == 1.234
         assert cosmics_express.bad().integrated_luminosity() == 0
         assert cosmics_prompt.bad().integrated_luminosity() == 0
 

@@ -93,16 +93,16 @@ class TestSummaryReport:
         assert 4 == len(sums)
 
         assert "| Type 1 | Sum of LS | Sum of int. luminosity |" in sums[0]
-        assert "| Bad    | 3424      | 3534                   |" in sums[0]
+        assert "| Bad    | 3424      | 3534.83 pb⁻¹           |" in sums[0]
 
         assert "| Type 2 | Sum of LS | Sum of int. luminosity |" in sums[1]
-        assert "| Bad    | 4487      | 5316                   |" in sums[1]
-        assert "| Good   | 265       | 432                    |" in sums[1]
+        assert "| Bad    | 4487      | 5316" in sums[1]
+        assert "| Good   | 265       | 432" in sums[1]
 
         assert "| Type 3 | Sum of LS | Sum of int. luminosity |" in sums[2]
-        assert "| Good   | 708       | 0                      " in sums[2]
-        assert "| Bad    | 1015      | 0                      |" in sums[2]
+        assert "| Good   | 708       | 0" in sums[2]
+        assert "| Bad    | 1015      | 0" in sums[2]
 
         assert "| Type 4 | Sum of LS | Sum of int. luminosity |" in sums[3]
-        assert "| Bad    | 2091      | 0                      |" in sums[3]
-        assert "| Good   | 341       | 0                      |" in sums[3]
+        assert "| Bad    | 2091      | 0" in sums[3]
+        assert "| Good   | 341       | 0" in sums[3]
