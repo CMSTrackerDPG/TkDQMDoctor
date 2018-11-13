@@ -4,6 +4,8 @@ from django import template
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
+from utilities.luminosity import format_integrated_luminosity
+
 register = template.Library()
 
 
@@ -99,3 +101,21 @@ def user(value, arg):
 
 def join_by(items, separator):
     return separator.join(items)
+
+@register.filter
+def format_luminosity(value):
+    """
+    shows up to 3 Decimal places and removes trailing zeros
+
+    Example:
+    >>> format_luminosity("1.4567")
+    '1.457'
+    >>> format_luminosity("13")
+    '13'
+    >>> format_luminosity("1.33000000")
+    '1.33'
+
+    :param value: integrated luminosity value in /pb
+    :return:
+    """
+    return format_integrated_luminosity(value)

@@ -2,6 +2,7 @@ import django_tables2 as tables
 
 from certhelper.utilities.utilities import render_component, render_trackermap, \
     render_boolean_cell
+from utilities.luminosity import format_integrated_luminosity
 from .models import RunInfo, ReferenceRun
 
 
@@ -29,6 +30,9 @@ class RunInfoTable(tables.Table):
                   'comment',
                   'date')
         attrs = {'class': 'table table-hover table-bordered'}
+
+    def render_int_luminosity(self, value):
+        return format_integrated_luminosity(value)
 
     def render_pixel(self, record):
         return render_component(record.pixel, record.pixel_lowstat)

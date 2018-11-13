@@ -14,12 +14,12 @@
             </li>
             <li>Number of runs certified:
                 <ul>
-                    <li>Collisions: <strong>{{ day.collisions.express.total_number }}</strong> in Stream-Express (<strong>{{ day.collisions.express.integrated_luminosity }} pb⁻¹</strong>), <strong>{{ day.collisions.prompt.total_number }}</strong> in Prompt-Reco (<strong>{{ day.collisions.prompt.integrated_luminosity }} pb⁻¹</strong>)</li>
+                    <li>Collisions: <strong>{{ day.collisions.express.total_number }}</strong> in Stream-Express (<strong>{{ day.collisions.express.integrated_luminosity|format_luminosity }}</strong>), <strong>{{ day.collisions.prompt.total_number }}</strong> in Prompt-Reco (<strong>{{ day.collisions.prompt.integrated_luminosity|format_luminosity }}</strong>)</li>
                     <li>Cosmics: <strong>{{ day.cosmics.express.total_number }}</strong> in Stream Express, <strong>{{ day.cosmics.prompt.total_number }}</strong> in Prompt Reco</li>
                 </ul>
             </li>
             <li>
-                Total number of BAD runs = <strong>{{ day.bad.total_number }}</strong> (<strong>{{ day.bad.integrated_luminosity }} pb⁻¹</strong>) (see next slide for details)
+                Total number of BAD runs = <strong>{{ day.bad.total_number }}</strong> (<strong>{{ day.bad.integrated_luminosity|format_luminosity }}</strong>) (see next slide for details)
                 <ul>
                     <li>Number of changed flags from Express to Prompt=<strong>{{ day.flag_changed.total_number }}</strong>{% if day.flag_changed.total_number > 0 %} ({{ day.flag_changed.good.run_numbers|join_good_runs }} {{ day.flag_changed.bad.run_numbers|join_bad_runs }}){% endif %}</li>
                 </ul>

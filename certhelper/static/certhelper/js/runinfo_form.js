@@ -580,9 +580,6 @@ function change_int_luminosity_unit(new_unit){
 function update_to_smallest_int_luminosity_unit(){
     const int_lumi = get_int_luminosity();
     const unit = get_int_luminosity_unit();
-
-    console.log("int " + int_lumi);
-    console.log("unit " + unit);
     if(int_lumi){
         let value = math.unit(int_lumi, unit + "^-1");
         value = value.toNumber("pb^-1");
