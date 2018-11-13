@@ -138,7 +138,7 @@ class TestShiftLeader:
             "Stream-Express: total number=8, Integrated lumi=161301.36 pb⁻¹"
             in weekly_report
         )
-        assert "BAD runs: total number=0, Integrated lumi=0 pb⁻¹" in weekly_report
+        assert "BAD runs: total number=0, Integrated lumi=0 µb⁻¹" in weekly_report
 
         assert "Cosmics:" in weekly_report
         assert "Prompt-Reco: total number=1" in weekly_report
@@ -163,7 +163,7 @@ class TestShiftLeader:
         wait_until(firefox.find_element_by_id, "slr-2018-05-14")
         day_report = firefox.find_element_by_id("slr-2018-05-14").text
 
-        assert "Collisions: 3 in Stream-Express (5212.0 pb⁻¹)" in day_report
+        assert "Collisions: 3 in Stream-Express (5212 pb⁻¹)" in day_report
         assert ", 1 in Prompt-Reco (1.23 pb⁻¹)" in day_report
         assert "Cosmics: 3 in Stream Express, 1 in Prompt Reco" in day_report
         assert "Total number of BAD runs = 3 (1.23 pb⁻¹)" in day_report
