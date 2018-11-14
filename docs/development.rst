@@ -28,19 +28,19 @@ https://www.python.org/downloads/windows/
 
 **Ubuntu**:
 
-::
+.. code:: bash
 
     sudo apt install python3
 
 **CentOS**:
 
-::
+.. code:: bash
 
     sudo yum install python36u
 
 **Arch Linux:**
 
-::
+.. code:: bash
 
     sudo pacman -S python
 
@@ -51,18 +51,18 @@ The project requires a minimum python version 3.5. To ensure that the
 correct python version is configured the ``python3 --version`` command
 be used.
 
-::
+.. code:: bash
 
     python3 --version
 
-::
+.. code:: bash
 
     Python 3.6.5
 
 Cloning the Project
 ~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: bash
 
     git clone https://github.com/ptrstn/TkDQMDoctor
     cd TkDQMDoctor
@@ -73,7 +73,7 @@ Setup Virtual Environment
 It is recommended to develop in a isolated virtual environment to ensure
 the correct package versions and avoid conflicts with other projects.
 
-::
+.. code:: bash
 
     python -m venv venv
     source venv/bin/active
@@ -92,7 +92,7 @@ repository. Since there are additional packages used exclusively for
 testing, which are not necessary in the production environment an
 additional testing-requirements.txt file exists.
 
-::
+.. code:: bash
 
     pip install -r requirements.txt
     pip install -r testing-requirements.txt
@@ -106,7 +106,7 @@ accordingly.
 In case one wants to work with a local SQLDatabase while developing then
 following environment variables should be exported.
 
-::
+.. code:: bash
 
     DJANGO_DATABASE_ENGINE=django.db.backends.sqlite3
     DJANGO_DEBUG=True
@@ -117,7 +117,7 @@ In case one wants to work with the development database (used in
 dev-tkdmdoctor.web.cern.ch) following environment variables have to be
 exported:
 
-::
+.. code:: bash
 
     DJANGO_DATABASE_ENGINE=django.db.backends.postgresql_psycopg2
     DJANGO_DATABASE_NAME=<your database name>
@@ -204,14 +204,14 @@ production website. Commits in the development branch are automatically
 deployed to dev-tkdqmdoctor.web.cern.ch every time changes are pushed to
 GitHub.
 
-::
+.. code:: bash
 
     git push origin develop
 
 When a develop branch is thoroughly tested and ready for production then
 it can be merged into the master branch:
 
-::
+.. code:: bash
 
     git checkout master
     git merge develop
@@ -222,14 +222,14 @@ Feature branches
 
 When developing new features, a new feature branch should be created.
 
-::
+.. code:: bash
 
     git checkout -b feature-mynewfeature develop
 
 After the new changes have been committed, they can be merged back into
 the develop branch.
 
-::
+.. code:: bash
 
     git checkout develop
     git merge my-new-feature
@@ -256,12 +256,63 @@ Formatter
 
 The black code formatter can be installed on the local machine via
 
-::
+.. code:: bash
 
     pip install black
 
 The project files can then be reformated with
 
-::
+.. code:: bash
 
     black [FILES...]
+
+
+Run the website locally
+-----------------------
+
+TODO runserver
+
+Migrations
+----------
+
+Whenever you make changes to ``models.py`` you should run the ``makemigrations`` command.
+
+.. code:: bash
+
+    python manage.py makemigrations
+
+The migrations can then be applied with:
+
+.. code:: bash
+
+    python manage.py migrate
+
+
+PyCharm
+-------
+
+- TODO how to setup project
+- TODO how to run project
+- TODO testing
+
+Documentation
+-------------
+
+If you want to contribute to the documentation that is hosted at
+`readthedocs`_ you should get familiar with Spinx and reStructedText
+
+-  https://docs.readthedocs.io/en/latest/intro/getting-started-with-sphinx.html
+-  http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+
+To generate a local documentation these commands have to be run:
+
+.. code:: bash
+
+   pip install sphinx
+   cd docs
+   make html
+
+After that you can open the ``index.html`` file that is located at
+``docs/_build/html``.
+
+.. _readthedocs: https://tkdqmdoctor.readthedocs.io/en/latest/

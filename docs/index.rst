@@ -17,6 +17,7 @@ Welcome to TkDQMDoctor's documentation!
    testing
    deployment
    references
+   faq
 
 Indices and tables
 ==================
