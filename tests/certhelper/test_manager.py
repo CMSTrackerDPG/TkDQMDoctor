@@ -245,9 +245,9 @@ class TestRunInfoManager:
 
         assert len(RunInfo.objects.all()) == 2
         assert len(RunInfo.all_objects.all()) == 2
-        RunInfo.objects.hard_delete()
+        RunInfo.objects.all().delete()
         assert RunInfo.objects.exists() is False
-        assert RunInfo.all_objects.exists() is False
+        assert RunInfo.all_objects.exists() is True
 
     def test_alive_only(self):
         mixer.blend("certhelper.RunInfo", run_number=123456)

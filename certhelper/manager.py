@@ -36,10 +36,6 @@ class SoftDeletionManager(models.Manager):
         """
         return self.get_queryset().alive()
 
-    # TODO check if this is necessarry
-    def hard_delete(self):
-        return self.get_queryset().hard_delete()
-
 
 class RunInfoManager(SoftDeletionManager):
     def get_queryset(self):
@@ -77,18 +73,17 @@ class RunInfoManager(SoftDeletionManager):
             flags["good"] = good_runs.run_numbers()
             flags["bad"] = bad_runs.run_numbers()
 
-            # TODO The backslash is redundant between brackets
             non_missing_prompt_run_numbers = [
-                run["run_number"] for run in prompt_runs \
-                    .order_by("run_number") \
-                    .values("run_number") \
+                run["run_number"] for run in prompt_runs
+                    .order_by("run_number")
+                    .values("run_number")
                     .distinct()
             ]
 
             non_missing_run_numbers = [
-                run["run_number"] for run in runs \
-                    .order_by("run_number") \
-                    .values("run_number") \
+                run["run_number"] for run in runs
+                    .order_by("run_number")
+                    .values("run_number")
                     .distinct()
             ]
 
