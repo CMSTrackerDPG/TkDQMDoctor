@@ -10,6 +10,10 @@ from .models import RunInfo, ReferenceRun
 
 
 class SimpleRunInfoTable(tables.Table):
+    """
+    Simple readonly RunInfo table without any edit/ delete buttons
+    """
+
     userid = tables.Column(verbose_name="Shifter")
     run_number = tables.Column()
     type = tables.Column()
@@ -28,26 +32,48 @@ class SimpleRunInfoTable(tables.Table):
         fields = ()
         attrs = {"class": "table table-hover table-bordered"}
 
-    def render_reference_run(self, record):
-        return record.reference_run.reference_run
+    def render_reference_run(self, value):
+        """
+        :return: run number of the reference run
+        """
+        return value.reference_run
 
     def render_int_luminosity(self, value):
+        """
+        :return: unit aware integrated luminosity e.g. '1.321 µb⁻¹'
+        """
         return format_integrated_luminosity(value)
 
     def render_pixel(self, record):
+        """
+        :return: colored status of Pixel
+        """
         return render_component(record.pixel, record.pixel_lowstat)
 
     def render_sistrip(self, record):
+        """
+        :return: colored status of SiStrip
+        """
         return render_component(record.sistrip, record.sistrip_lowstat)
 
     def render_tracking(self, record):
+        """
+        :return: colored status of Tracking
+        """
         return render_component(record.tracking, record.tracking_lowstat)
 
     def render_trackermap(self, value):
+        """
+        :return: colored status of the tracker map
+        """
         return render_trackermap(value)
 
 
 class RunInfoTable(SimpleRunInfoTable):
+    """
+    RunInfo table used by shifters
+    """
+
     edit_run = tables.TemplateColumn(
         '<div align="center"><a href="{% url \'certhelper:update\' record.id%}">'
         '<span class="glyphicon glyphicon-pencil"></a></div>',
@@ -60,8 +86,13 @@ class RunInfoTable(SimpleRunInfoTable):
 
 
 class ShiftleaderRunInfoTable(RunInfoTable):
+    """
+    RunInfo table used by shift leaders
+    """
+
     delete_run = tables.TemplateColumn(
-        '<div align="center"><a href="{% url \'certhelper:delete\' record.id%}">'
+        '<div align="center">'
+        "<a href=\"{% url 'certhelper:delete' record.id%}\">"
         '<span class="glyphicon glyphicon-trash"></a></div>',
         orderable=False,
         verbose_name="Delete",
@@ -89,14 +120,16 @@ class ReferenceRunTable(tables.Table):
 
 class DeletedRunInfoTable(tables.Table):
     restore_run = tables.TemplateColumn(
-        '<div align="center"><a href="{% url \'certhelper:restore_run\' record.id%}">'
+        '<div align="center">'
+        "<a href=\"{% url 'certhelper:restore_run' record.id%}\">"
         '<span class="glyphicon glyphicon-repeat"></a></div>',
         orderable=False,
     )
 
     delete_forever = tables.TemplateColumn(
-        '<div align="center"><a href="{% url \'certhelper:hard_delete_run\' record.id%}">'
-        '<span class="glyphicon glyphicon-trash " style="color:red"></a></div>',
+        '<div align="center">'
+        "<a href=\"{% url 'certhelper:hard_delete_run' record.id%}\">"
+        '<span class="glyphicon glyphicon-trash" style="color:red"></a></div>',
         orderable=False,
     )
 
