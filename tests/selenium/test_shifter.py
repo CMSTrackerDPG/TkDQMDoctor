@@ -171,16 +171,16 @@ class TestShifter:
         )
 
         assert "| Type 2 | Sum of LS | Sum of int. luminosity |" in summary.text
-        assert "| Bad    | 4487      | 5316                   |" in summary.text
-        assert "| Good   | 265       | 432                    |" in summary.text
+        assert "| Bad    | 4487      | 5316" in summary.text
+        assert "| Good   | 265       | 432" in summary.text
 
         assert "| Type 3 | Sum of LS | Sum of int. luminosity |" in summary.text
-        assert "| Good   | 708       | 0                      " in summary.text
-        assert "| Bad    | 1015      | 0                      |" in summary.text
+        assert "| Good   | 708       | 0" in summary.text
+        assert "| Bad    | 1015      | 0" in summary.text
 
         assert "| Type 4 | Sum of LS | Sum of int. luminosity |" in summary.text
-        assert "| Bad    | 2091      | 0                      |" in summary.text
-        assert "| Good   | 341       | 0                      |" in summary.text
+        assert "| Bad    | 2091      | 0" in summary.text
+        assert "| Good   | 341       | 0" in summary.text
 
     def test_can_update_certification(
         self,
