@@ -10,52 +10,6 @@ $(document).ready(function () {
         $('#date_range').css('display', 'inline');
     }
 
-    if ($("#id_subcategory").val() == "") {
-        $("#id_subcategory").hide()
-        $("#id_subsubcategory").hide()
-    }
-
-    $("#id_category").change(function () {
-        var category_id = $(this).val();  // get the selected category_id from the dropdown menu
-
-        $.ajax({
-            url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
-            data: {
-                'categoryid': category_id  // add the category_id to the GET parameters
-            },
-            success: function (data) {  // date is the return of the load_subcategories view function
-                $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
-            }
-        });
-        $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
-
-        if (category_id != "") {
-            $("#id_subcategory").show()
-        } else {
-            $("#id_subcategory").hide()
-        }
-    });
-
-    $("#id_subcategory").change(function () {
-        var subcategory_id = $(this).val();
-
-        $.ajax({
-            url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
-            data: {
-                'subcategoryid': subcategory_id
-            },
-            success: function (data) {
-                $("#id_subsubcategory").html(data);
-            }
-        });
-
-        if (subcategory_id != "") {
-            $("#id_subsubcategory").show()
-        } else {
-            $("#id_subsubcategory").hide()
-        }
-    });
-
     $("#show-filter-btn").click(function () {
         $("#more").collapse('toggle');
     });
@@ -66,9 +20,6 @@ $(document).ready(function () {
         $('#id_date_day').val(0);
         $('#id_date_month').val(0);
         $('#id_date_year').val(0);
-        $('#id_category').val("");
-        $('#id_subcategory').val("");
-        $('#id_subsubcategory').val("");
         $('#id_type').val("");
         $('#id_runs_0').val("");
         $('#id_runs_1').val("");

@@ -188,8 +188,6 @@ class TestUpdateRun:
     # DeleteRun
     # hard_deleteview
     # logout_view
-    # load_subcategories
-    # load_subsubcategories
 
 
 class TestListRuns:
@@ -205,9 +203,6 @@ class TestListRuns:
         req = RequestFactory().get("/")
         req.user = mixer.blend(User)
         req.GET = req.GET.copy()
-        req.GET["category"] = "1"
-        req.GET["subcategory"] = "2"
-        req.GET["subsubcategory"] = "3"
         req.GET["date_range_0"] = "2018-06-13"
         req.GET["date_range_1"] = "2018-06-13"
         req.GET["runs_0"] = "42"
@@ -230,14 +225,7 @@ class TestSummaryView:
         req.user = mixer.blend(User)
         req.GET = req.GET.copy()
 
-        mixer.blend("certhelper.Category")
-        mixer.blend("certhelper.SubCategory")
-        mixer.blend("certhelper.SubSubCategory")
-
         req.GET["date"] = "2018-06-01"
-        req.GET["category"] = "1"
-        req.GET["subcategory"] = "1"
-        req.GET["subsubcategory"] = "1"
         req.GET["date_range_0"] = "2018-06-13"
         req.GET["date_range_1"] = "2018-06-13"
         req.GET["runs_0"] = "42"
@@ -252,41 +240,12 @@ class TestSummaryView:
         req.GET = req.GET.copy()
 
         req.GET["date"] = "20sfd18-06-01"
-        req.GET["category"] = "1"
-        req.GET["subcategory"] = "2"
-        req.GET["subsubcategory"] = "3"
         req.GET["date_range_0"] = "201-asasgsa6-13"
         req.GET["date_range_1"] = "BLUME"
         req.GET["runs_0"] = "sadfasdf"
         req.GET["runs_1"] = "ýxkushd"
         req.GET["type"] = " asad /4332re"
         resp = get_view_response(summaryView, req)
-        assert resp.status_code == 200
-
-
-class TestLoadCategories:
-    def test_load_invalid_subcategories(self):
-        req = RequestFactory().get("/")
-        resp = load_subcategories(req)
-        assert resp.status_code == 200
-
-    def test_load_valid_subcategories(self):
-        req = RequestFactory().get("/")
-        req.GET = req.GET.copy()
-        req.GET["categoryid"] = mixer.blend("certhelper.Category").id
-        resp = load_subcategories(req)
-        assert resp.status_code == 200
-
-    def test_load_invalid_subsubcategories(self):
-        req = RequestFactory().get("/")
-        resp = load_subsubcategories(req)
-        assert resp.status_code == 200
-
-    def test_load_valid_subsubcategories(self):
-        req = RequestFactory().get("/")
-        req.GET = req.GET.copy()
-        req.GET["subcategoryid"] = mixer.blend("certhelper.SubCategory").id
-        resp = load_subsubcategories(req)
         assert resp.status_code == 200
 
 
@@ -315,7 +274,6 @@ class TestHardDeleteView:
         assert RunInfo.objects.exists()
 
     def test_hard_delete_post(self):
-
         run = mixer.blend("certhelper.RunInfo")
         req = RequestFactory().post("/")
         req.user = AnonymousUser()

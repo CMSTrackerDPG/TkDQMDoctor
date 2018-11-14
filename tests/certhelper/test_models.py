@@ -410,20 +410,10 @@ class TestRuninfo:
             t = mixer.blend("certhelper.Type")
             ref = mixer.blend("certhelper.ReferenceRun")
 
-            r1 = mixer.blend(
+            mixer.blend(
                 "certhelper.RunInfo", run_number=123456, type=t, reference_run=ref
             )
 
-            r2 = mixer.blend(
+            mixer.blend(
                 "certhelper.RunInfo", run_number=123456, type=t, reference_run=ref
             )
-
-
-class TestCategory:
-    def test_category_str(self):
-        assert str(mixer.blend("certhelper.Category", name="cat1")) == "cat1"
-        assert str(mixer.blend("certhelper.SubCategory", name="subcat1")) == "subcat1"
-        assert (
-            str(mixer.blend("certhelper.SubSubCategory", name="subsubcat1"))
-            == "subsubcat1"
-        )

@@ -47,16 +47,7 @@ def get_date_string(year, month, day):
 
 
 def get_filters_from_request_GET(request):
-    filter_candidates = [
-        "category",
-        "subcategory",
-        "subsubcategory",
-        "date_range_0",
-        "date_range_1",
-        "runs_0",
-        "runs_1",
-        "type",
-    ]
+    filter_candidates = ["date_range_0", "date_range_1", "runs_0", "runs_1", "type"]
     applied_filters = {}
     for candidate in filter_candidates:
         tmp = request.GET.get(candidate, "")

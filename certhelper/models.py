@@ -214,46 +214,6 @@ class SoftDeletionModel(models.Model):
         self.save()
 
 
-class Category(SoftDeletionModel):
-    name = models.CharField(
-        max_length=30, help_text="Title for the category of problems found"
-    )
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return str(self.name)
-
-
-# TODO make parent_category not nullable
-class SubCategory(SoftDeletionModel):
-    name = models.CharField(max_length=30)
-    parent_category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, null=True, blank=True
-    )
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return str(self.name)
-
-
-# TODO make parent_category not nullable
-class SubSubCategory(SoftDeletionModel):
-    name = models.CharField(max_length=30)
-    parent_category = models.ForeignKey(
-        SubCategory, on_delete=models.CASCADE, null=True, blank=True
-    )
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return str(self.name)
-
-
 class Type(SoftDeletionModel):
     reco = models.CharField(
         max_length=30, choices=RECO_CHOICES
@@ -360,15 +320,6 @@ class RunInfo(SoftDeletionModel):
     tracking_lowstat = models.BooleanField(default=False)
     comment = models.TextField(blank=True)
     date = models.DateField()
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True, blank=True
-    )
-    subcategory = models.ForeignKey(
-        SubCategory, on_delete=models.SET_NULL, null=True, blank=True
-    )
-    subsubcategory = models.ForeignKey(
-        SubSubCategory, on_delete=models.SET_NULL, null=True, blank=True
-    )
     problem_categories = models.ManyToManyField("categories.Category", blank=True)
 
     class Meta:

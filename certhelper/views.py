@@ -18,7 +18,7 @@ from certhelper.filters import (
     ShiftLeaderRunInfoFilter,
     ComputeLuminosityRunInfoFilter,
 )
-from certhelper.models import UserProfile, SubSubCategory, SubCategory
+from certhelper.models import UserProfile
 from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
 from certhelper.utilities.utilities import (
@@ -246,37 +246,6 @@ def logout_status(request):
         request,
         "certhelper/logout_status.html",
         {"logout_successful": logout_successful},
-    )
-
-
-# TODO Check if necessary
-def load_subcategories(request):
-    category_id = request.GET.get("categoryid")
-    if category_id:
-        subcategories = SubCategory.objects.filter(
-            parent_category=category_id
-        ).order_by("name")
-    else:
-        subcategories = SubCategory.objects.none()
-    return render(
-        request,
-        "certhelper/dropdowns/category_dropdown_list_options.html",
-        {"categories": subcategories},
-    )
-
-
-def load_subsubcategories(request):
-    subcategory_id = request.GET.get("subcategoryid")
-    if subcategory_id:
-        subsubcategories = SubSubCategory.objects.filter(
-            parent_category=subcategory_id
-        ).order_by("name")
-    else:
-        subsubcategories = SubCategory.objects.none()
-    return render(
-        request,
-        "certhelper/dropdowns/category_dropdown_list_options.html",
-        {"categories": subsubcategories},
     )
 
 
