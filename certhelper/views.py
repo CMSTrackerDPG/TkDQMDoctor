@@ -87,7 +87,7 @@ def listruns(request):
     else:
         run_info_list = RunInfo.objects.all()
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
-        table = READONLYRunInfoTable(run_info_filter.qs)
+        table = SimpleRunInfoTable(run_info_filter.qs)
 
     RequestConfig(request).configure(table)
 
