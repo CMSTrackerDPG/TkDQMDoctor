@@ -19,7 +19,7 @@ from certhelper.filters import (
     ComputeLuminosityRunInfoFilter,
 )
 from certhelper.models import UserProfile, SubSubCategory, SubCategory
-from certhelper.utilities.ShiftLeaderReport import NewShiftLeaderReport
+from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
 from certhelper.utilities.SummaryReport import SummaryReport
 from certhelper.utilities.utilities import (
     get_filters_from_request_GET,
@@ -305,7 +305,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["summary"] = SummaryReport(self.filterset.qs)
-        context["slreport"] = NewShiftLeaderReport(self.filterset.qs)
+        context["slreport"] = ShiftLeaderReport(self.filterset.qs)
         context["deleted_runs"] = DeletedRunInfoTable(
             RunInfo.all_objects.dead().order_by("-run_number")
         )

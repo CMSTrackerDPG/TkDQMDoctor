@@ -65,7 +65,7 @@ class ShiftLeaderReportDay(ShiftLeaderReportBase):
         return type(self)(runs)
 
 
-class NewShiftLeaderReport(ShiftLeaderReportBase):
+class ShiftLeaderReport(ShiftLeaderReportBase):
     def __init__(self, runs):
         self.runs = runs
 

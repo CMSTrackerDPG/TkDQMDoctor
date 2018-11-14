@@ -1,19 +1,17 @@
 import pytest
 
 from certhelper.models import RunInfo
-from certhelper.utilities.ShiftLeaderReport import (
-    NewShiftLeaderReport,
-)
+from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
 from certhelper.utilities.utilities import to_date
 from tests.utils.utilities import create_runs
 
 pytestmark = pytest.mark.django_db
 
 
-class TestNewShiftLeaderReport:
+class TestShiftLeaderReport:
     def test_weekly_certification(self, runs_for_slr):
         runs = RunInfo.objects.all()
-        report = NewShiftLeaderReport(runs)
+        report = ShiftLeaderReport(runs)
 
         assert report.collisions().express().total_number() == 8
         assert report.collisions().prompt().total_number() == 3
@@ -37,7 +35,7 @@ class TestNewShiftLeaderReport:
 
     def test_day_by_day(self, runs_for_slr):
         runs = RunInfo.objects.all()
-        report = NewShiftLeaderReport(runs)
+        report = ShiftLeaderReport(runs)
 
         day_by_day = report.day_by_day()
 
@@ -198,31 +196,31 @@ class TestNewShiftLeaderReport:
         create_runs(3, 35, "Cosmics", "Prompt", good=False)
 
         runs = RunInfo.objects.all().order_by("run_number")
-        report = NewShiftLeaderReport(runs)
+        report = ShiftLeaderReport(runs)
 
         assert [
-                   1,
-                   2,
-                   3,
-                   4,
-                   5,
-                   6,
-                   7,
-                   8,
-                   9,
-               ] == report.collisions().express().run_numbers()
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+        ] == report.collisions().express().run_numbers()
         assert [10, 11, 12, 15, 16, 17] == report.collisions().prompt().run_numbers()
         assert [
-                   21,
-                   22,
-                   23,
-                   24,
-                   25,
-                   26,
-                   27,
-                   28,
-                   29,
-               ] == report.cosmics().express().run_numbers()
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+        ] == report.cosmics().express().run_numbers()
         assert [30, 31, 32, 35, 36, 37] == report.cosmics().prompt().run_numbers()
 
         assert [1, 2, 3, 4, 5] == report.collisions().express().good().run_numbers()
@@ -246,7 +244,7 @@ class TestNewShiftLeaderReport:
         create_runs(2, 35, "Cosmics", "Prompt", good=False, date="2018-05-14")
 
         runs = RunInfo.objects.all().order_by("run_number")
-        report = NewShiftLeaderReport(runs)
+        report = ShiftLeaderReport(runs)
 
         days = report.day_by_day()
 
