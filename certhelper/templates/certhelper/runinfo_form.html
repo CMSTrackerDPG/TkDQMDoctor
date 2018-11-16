@@ -314,7 +314,8 @@
             type_locator.change(function(){
                 validate_type();
                 validate_tracking();
-                validate_int_luminosity()
+                update_int_luminosity_unit_by_type();
+                validate_int_luminosity();
             });
 
             $("#id_reference_run").change(function(){

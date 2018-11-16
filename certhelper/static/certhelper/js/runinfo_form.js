@@ -546,27 +546,24 @@ function update_cmswbm_link(){
 
 math.createUnit({"b": {prefixes: "short"}}, {override: true});
 function change_int_luminosity_unit(new_unit){
-    // Locators
     const int_luminosity_unit = $("#id-int-luminosity-unit");
     const int_luminosity = $("#id_int_luminosity");
 
-    // Validation
     if(isNaN(int_luminosity.val())){
         console.error("Error: '" + int_luminosity.val() + "' is not a valid integrated luminosity value");
         return;
     }
 
-    // Old stuff
     let previous_unit = int_luminosity_unit.text().replace("µ", "u");
-    const old_value = math.unit(int_luminosity.val(), previous_unit + "^-1");
 
-    // Calculate new stuff
-    const new_value = old_value.toNumber(new_unit + "^-1");
-    const new_value_f = math.format(new_value, {notation: "fixed"});
+    if(int_luminosity.val() !== ""){
+        const old_value = math.unit(int_luminosity.val(), previous_unit + "^-1");
+        const new_value = old_value.toNumber(new_unit + "^-1");
+        const new_value_f = math.format(new_value, {notation: "fixed"});
+        int_luminosity.val(new_value_f);
+    }
 
-    // Assign new stuff
     int_luminosity_unit.text(new_unit.replace("u", "µ"));
-    int_luminosity.val(new_value_f);
     int_luminosity.attr("placeholder", "Unit: /" + new_unit);
 }
 
@@ -588,5 +585,14 @@ function update_to_smallest_int_luminosity_unit(){
         } else {
             change_int_luminosity_unit("pb");
         }
+    }
+}
+
+function update_int_luminosity_unit_by_type(){
+    const type_text = get_selected_type().text();
+    if(type_text.toLowerCase().indexOf("heavyion") !== -1){
+        change_int_luminosity_unit("ub")
+    } else {
+        change_int_luminosity_unit("pb")
     }
 }
