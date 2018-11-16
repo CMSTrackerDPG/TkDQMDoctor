@@ -564,7 +564,7 @@ function change_int_luminosity_unit(new_unit){
     }
 
     int_luminosity_unit.text(new_unit.replace("u", "µ"));
-    int_luminosity.attr("placeholder", "Unit: /" + new_unit);
+    int_luminosity.attr("placeholder", "Unit: /" + new_unit.replace("u", "µ"));
 }
 
 /**
