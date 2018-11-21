@@ -40,14 +40,30 @@ https://www.python.org/downloads/windows/
 
 **Arch Linux:**
 
+Use an `AUR helper`_ like `yay`_ and install `python36`_
+
 .. code:: bash
 
-    sudo pacman -S python
+   yay -S python36
+
+If you do not want to use an AUR helper you can install Python 3.6
+`manually`_ with:
+
+.. code:: bash
+
+   git clone https://aur.archlinux.org/python36.git
+   cd python36
+   makepkg -si
+
+.. _AUR helper: https://wiki.archlinux.org/index.php/AUR_helpers
+.. _yay: https://github.com/Jguer/yay
+.. _python36: https://aur.archlinux.org/packages/python36/
+.. _manually: https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages
 
 Checking Python Version
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The project requires a minimum python version 3.5. To ensure that the
+The project requires the python version 3.5 or 3.6. To ensure that the
 correct python version is configured the ``python3 --version`` command
 be used.
 
