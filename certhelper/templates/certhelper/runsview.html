@@ -1,0 +1,29 @@
+{% extends 'certhelper/base.html' %}
+
+
+{% block style %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "certhelper/css/runinfo_table.css" %}" type="text/css">
+{% endblock %}
+
+
+{% block content %}
+    {% include "certhelper/components/menu.html" %}
+
+    <h1 align="center">Runs View</h1>
+
+    <form action="" method="get">
+        {{ filter.form.as_p }}
+        <input type="submit" value="filter" class="btn btn-primary"/>
+    </form>
+
+    <br/>
+    <br/>
+    <br/>
+
+    {% load django_tables2 %}
+    {% load querystring from django_tables2 %}
+
+    {{ run_numbers }}
+
+{% endblock %}

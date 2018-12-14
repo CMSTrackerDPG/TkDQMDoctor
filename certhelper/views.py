@@ -17,6 +17,7 @@ from certhelper.filters import (
     RunInfoFilter,
     ShiftLeaderRunInfoFilter,
     ComputeLuminosityRunInfoFilter,
+    RunsFilter,
 )
 from certhelper.models import UserProfile
 from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
@@ -479,3 +480,18 @@ def runregistry(request, run_number):
     response = client.get_runs_by_list([run_number])
     runs = convert_run_registry_to_runinfo(response)
     return JsonResponse(runs, safe=False, json_dumps_params={"indent": 2})
+
+
+class RunsView(ExportMixin, FilterView):
+    model = RunInfo
+    template_name = "certhelper/runsview.html"
+    filterset_class = RunsFilter
+
+    def get_context_data(self, **kwargs):
+        """
+        Add extra data for the template
+        """
+        context = super().get_context_data(**kwargs)
+
+        context["run_numbers"] = self.filterset.qs.run_numbers()
+        return context

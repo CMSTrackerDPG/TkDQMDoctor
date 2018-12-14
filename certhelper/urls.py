@@ -50,6 +50,11 @@ urlpatterns = [
         name="compare-runregistry",
     ),
     url(
+        r"^tools/view/runs/$",
+        views.RunsView.as_view(),
+        name="view-runs",
+    ),
+    url(
         r"^tools/view/runregistry/$",
         views.RunRegistryView.as_view(),
         name="view-runregistry",
