@@ -482,7 +482,7 @@ def runregistry(request, run_number):
     return JsonResponse(runs, safe=False, json_dumps_params={"indent": 2})
 
 
-class RunsView(ExportMixin, FilterView):
+class RunsView(FilterView):
     model = RunInfo
     template_name = "certhelper/runsview.html"
     filterset_class = RunsFilter
