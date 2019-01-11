@@ -73,6 +73,26 @@ class ShiftLeaderRunInfoFilter(django_filters.FilterSet):
 
     run_number__in = InFilter(field_name='run_number', lookup_expr='in')
 
+    date__gte = django_filters.DateFilter(
+        'date',
+        label='Date greater than',
+        lookup_expr='gte',
+        widget=forms.SelectDateWidget(
+            years=range(2018, timezone.now().year + 1),
+            attrs={'class': 'form-control'},
+        ),
+    )
+
+    date__lte = django_filters.DateFilter(
+        'date',
+        label='Date lass than',
+        lookup_expr='lte',
+        widget=forms.SelectDateWidget(
+            years=range(2018, timezone.now().year + 1),
+            attrs={'class': 'form-control'},
+        ),
+    )
+
     class Meta:
         model = RunInfo
         fields = {
