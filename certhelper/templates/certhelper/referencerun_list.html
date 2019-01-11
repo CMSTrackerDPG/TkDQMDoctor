@@ -1,14 +1,10 @@
-{% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
-<title>TkDQM Doc: Reference Runs</title>
+{% extends 'certhelper/base.html' %}
 
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+{% block title %}Reference Runs{% endblock %}
 
-<h1 align="center">List of reference runs</h1>
-<a href="{% url 'certhelper:list' %}" class="btn btn-link">Back to list of runs</a>
-
-
-{% load render_table from django_tables2 %}
-{% render_table table %}
+{% block content %}
+    {% include "certhelper/components/menu.html" %}
+    <h1 align="center">List of reference runs</h1>
+    {% load render_table from django_tables2 %}
+    {% render_table table %}
+{% endblock %}

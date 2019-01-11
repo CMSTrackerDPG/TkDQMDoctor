@@ -1,0 +1,36 @@
+{% extends "certhelper/base.html" %}
+
+{% block title %}RunRegistry{% endblock %}
+
+{% block style %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "certhelper/css/runinfo_table.css" %}" type="text/css">
+    <style>
+        td > span.glyphicon-ok {
+            color: #4CAF50;
+        }
+
+        td > span.glyphicon-remove {
+            color: red;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    {% include "certhelper/components/menu.html" %}
+
+    <div class="container">
+        <h1 class="text-center">View Lumi Sections</h1>
+        {% include "certhelper/components/run_number_filter_panel.html" %}
+
+    </div>
+    <div class="container-fluid">
+        {% if table %}
+            {% load render_table from django_tables2 %}
+            {% render_table table %}
+        {% endif %}
+
+    </div>
+{% endblock %}

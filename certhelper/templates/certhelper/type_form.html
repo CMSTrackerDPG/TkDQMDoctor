@@ -1,27 +1,27 @@
 {% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
+<link rel="shortcut icon" type="image/png" href="{% static "img/favicon.png" %}"/>
 <title>TkDQM Doc: Add Type</title>
 
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
+<script src="{% static "jquery/jquery.min.js" %}"></script>
+<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
 
 <h1 align="center">Add Type</h1>
 {% load myfilters %}
 
 {% if form.errors %}
-{% for field in form %}
-    {% for error in field.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
         <div class="alert alert-danger">
             <strong>{{ error|escape }}</strong>
         </div>
     {% endfor %}
-{% endfor %}
-{% for error in form.non_field_errors %}
-    <div class="alert alert-danger">
-        <strong>{{ error|escape }}</strong>
-    </div>
-{% endfor %}
 {% endif %}
 
 <form method="POST" action=""> {% csrf_token %}
@@ -45,15 +45,15 @@
         <tr>
             <td>{{form.beamenergy.label}}</td>
             <td>{{form.beamenergy|addclass:'form-control'}}</td>
-        </tr>        
+        </tr>
         <tr>
             <td>{{form.dataset.label}}</td>
             <td>{{form.dataset|addclass:'form-control'}}</td>
-        </tr>        
+        </tr>
     </table>
     <div align="center">
-            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Ok</button>
-            <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
+        <button type="submit" class="btn btn-default" id="id_submit_type"><span class="glyphicon glyphicon-ok"></span> Ok</button>
+        <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
     </div>
 </form>
 

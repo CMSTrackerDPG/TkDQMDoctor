@@ -1,277 +1,481 @@
+import re
+
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
-from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import generic
-from django_tables2 import RequestConfig, SingleTableView
+from django.views.generic import TemplateView
+from django_filters.views import FilterView
+from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 
-from certhelper.filters import RunInfoFilter
-from certhelper.utilities.RunInfoTypeList import RunInfoTypeList
-from certhelper.utilities.utilities import is_valid_date, get_filters_from_request_GET, is_valid_id
+from certhelper.filters import (
+    RunInfoFilter,
+    ShiftLeaderRunInfoFilter,
+    ComputeLuminosityRunInfoFilter,
+)
+from certhelper.models import UserProfile
+from certhelper.utilities.ShiftLeaderReport import ShiftLeaderReport
+from certhelper.utilities.SummaryReport import SummaryReport
+from certhelper.utilities.utilities import (
+    get_filters_from_request_GET,
+    request_contains_filter_parameter,
+    get_this_week_filter_parameter,
+    get_today_filter_parameter,
+    get_runs_from_request_filters,
+    get_runinfo_from_request,
+    number_string_to_list,
+    integer_or_none,
+    convert_run_registry_to_runinfo,
+)
+from runregistry.client import TrackerRunRegistryClient
 from .forms import *
 from .tables import *
 
 
+@method_decorator(login_required, name="dispatch")
 class CreateRun(generic.CreateView):
-    """Form which allows for creation of a new entry in RunInfo
+    """
+    Class based view to create new RunInfo instances.
+
+    Used by shifters to certify new runs.
     """
 
     model = RunInfo
-    form_class = RunInfoForm
-    template_name_suffix = '_form'
-    success_url = '/'
+    form_class = RunInfoWithChecklistForm
+    template_name = "certhelper/runinfo_form.html"
+    success_url = "/"
 
     def form_valid(self, form_class):
+        """
+        Adds the logged in user into the form data, when the form is valid.
+        """
         form_class.instance.userid = self.request.user
         return super(CreateRun, self).form_valid(form_class)
 
 
 def listruns(request):
-    """passes all RunInfo objects to list.html
     """
+    View to list all certified runs
+    """
+    if not request_contains_filter_parameter(request):
+        return HttpResponseRedirect("/%s" % get_today_filter_parameter())
 
-    # We make sure that the logged in user can only see his own runs
-    # In case the user is not logged in we show all objects
-    # but remove the edit and remove buttons from the tableview.
-    if request.user.is_authenticated():
+    context = {}
+
+    """
+    Make sure that the logged in user can only see his own runs
+    In case the user is not logged in show all objects,
+    but remove the edit and remove buttons from the tableview.
+    """
+    if request.user.is_authenticated:
         run_info_list = RunInfo.objects.filter(userid=request.user)
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
         table = RunInfoTable(run_info_filter.qs)
+
+        mismatching_runs, mismatching_run_registy_runs = (
+            run_info_filter.qs.compare_with_run_registry()
+        )
+        if len(mismatching_runs) != 0:
+            context["mismatching_runs"] = [
+                run["run_number"] for run in mismatching_runs
+            ]
     else:
         run_info_list = RunInfo.objects.all()
         run_info_filter = RunInfoFilter(request.GET, queryset=run_info_list)
-        table = READONLYRunInfoTable(run_info_filter.qs)
+        table = SimpleRunInfoTable(run_info_filter.qs)
 
     RequestConfig(request).configure(table)
 
     applied_filters = get_filters_from_request_GET(request)
-
     filter_parameters = ""
     for key, value in applied_filters.items():
-        filter_parameters += '&' if filter_parameters.startswith('?') else '?'
+        filter_parameters += "&" if filter_parameters.startswith("?") else "?"
         filter_parameters += key + "=" + value
 
-    return render(request, 'certhelper/list.html', {
-        'table': table,
-        'filter': run_info_filter,
-        'filter_parameters': filter_parameters,
-    })
+    context["filter_parameters"] = filter_parameters
+    context["table"] = table
+    context["filter"] = run_info_filter
+    context["run_registry_online"] = TrackerRunRegistryClient().connection_possible()
+    return render(request, "certhelper/list.html", context)
 
 
+@method_decorator(login_required, name="dispatch")
 class ListReferences(SingleTableView):
-    """Display ReferenceRuns in a tableview
-    !!! USES DJANGO-TABLES2 !!! 
+    """
+    Displays all ReferenceRuns
     """
 
     model = ReferenceRun
     table_class = ReferenceRunTable
 
 
+@method_decorator(login_required, name="dispatch")
 class UpdateRun(generic.UpdateView):
-    """Updates a specific Run from the RunInfo table
+    """
+    Updates a specific Run from the RunInfo table
     """
 
     model = RunInfo
-    form_class = RunInfoForm
-    success_url = '/'
-    template_name = 'certhelper/runinfo_form.html'
+    form_class = RunInfoWithChecklistForm
+    template_name = "certhelper/runinfo_form.html"
 
-    def form_valid(self, form_class):
-        form_class.instance.userid = self.request.user
-        return super(UpdateRun, self).form_valid(form_class)
+    def get_context_data(self, **kwargs):
+        """
+        Add extra data for the template
+        """
+        context = super().get_context_data(**kwargs)
+        context["checklist_not_required"] = True
+        return context
+
+    def same_user_or_shiftleader(self, user):
+        """
+        Checks if the user trying to edit the run is the same user
+        that created the run, has at least shift leader rights
+        or is a super user (admin)
+        """
+        try:
+            return (
+                self.get_object().userid == user
+                or user.is_superuser
+                or user.userprofile.has_shift_leader_rights
+            )
+        except UserProfile.DoesNotExist:
+            return False
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Check if the user that tries to update the run has the necessary rights
+        """
+        if self.same_user_or_shiftleader(request.user):
+            return super(UpdateRun, self).dispatch(request, *args, **kwargs)
+        return redirect_to_login(
+            request.get_full_path(), login_url=reverse("admin:login")
+        )
+
+    def get_success_url(self):
+        """
+        return redirect url after updating a run
+        """
+        is_same_user = self.get_object().userid == self.request.user
+        return reverse("certhelper:shiftleader") if not is_same_user else "/"
 
 
+@method_decorator(login_required, name="dispatch")
 class DeleteRun(generic.DeleteView):
-    """Deletes a specific Run from the RunInfo table    
+    """
+    Deletes a specific Run from the RunInfo table
     """
 
     model = RunInfo
     form_class = RunInfoForm
-    success_url = '/'
-    template_name_suffix = '_delete_form'
+    success_url = "/shiftleader/"
+    template_name_suffix = "_delete_form"
 
 
+@method_decorator(login_required, name="dispatch")
 class CreateType(generic.CreateView):
-    """Form to create a new Type (RunType)
+    """
+    Class based view to create a new Type (RunType)
     """
 
     model = Type
     form_class = TypeForm
-    template_name_suffix = '_form'
-    success_url = '/create'
+    template_name_suffix = "_form"
+    success_url = "/create"
 
 
+@login_required
 def summaryView(request):
-    """ Accumulates information that is needed in the Run Summary
+    """
+    Accumulates information that is needed in the Run Summary
     stores it in the 'context' object and passes that object to summary.html
     where it is then displayed.
     """
-    runs = RunInfo.objects.filter(userid=request.user)
-
-    date_filter_value = request.GET.get('date', None)
-    category_id = request.GET.get('category', None)
-    subcategory_id = request.GET.get('subcategory', None)
-    subsubcategory_id = request.GET.get('subsubcategory', None)
-
-    date_from = request.GET.get('date_range_0', None)
-    date_to = request.GET.get('date_range_1', None)
-    runs_from = request.GET.get('runs_0', None)
-    runs_to = request.GET.get('runs_1', None)
-    type_id = request.GET.get('type', None)
 
     alert_errors = []
     alert_infos = []
     alert_filters = []
 
-    if date_filter_value:
-        if is_valid_date(date_filter_value):
-            runs = runs.filter(date=date_filter_value)
-            alert_filters.append("Date: " + str(date_filter_value))
+    runs = get_runs_from_request_filters(
+        request, alert_errors, alert_infos, alert_filters
+    )
 
-        else:
-            alert_errors.append("Invalid Date: " + str(date_filter_value))
-            runs = RunInfo.objects.none()
+    summary = SummaryReport(runs)
 
-    if date_from:
-        if is_valid_date(date_from):
-            runs = runs.filter(date__gte=date_from)
-            alert_filters.append("Date from: " + str(date_from))
-        else:
-            alert_errors.append("Invalid Date: " + str(date_from))
-            runs = RunInfo.objects.none()
+    context = {
+        "refs": summary.reference_runs(),
+        "runs": summary.runs_checked_per_type(),
+        "tk_maps": summary.tracker_maps_per_type(),
+        "certified_runs": summary.certified_runs_per_type(),
+        "sums": summary.sum_of_quantities_per_type(),
+        "alert_errors": alert_errors,
+        "alert_infos": alert_infos,
+        "alert_filters": alert_filters,
+    }
 
-    if date_to:
-        if is_valid_date(date_to):
-            runs = runs.filter(date__lte=date_to)
-            alert_filters.append("Date to: " + str(date_to))
-        else:
-            alert_errors.append("Invalid Date: " + str(date_to))
-            runs = RunInfo.objects.none()
-
-    if runs_from:
-        try:
-            runs = runs.filter(run_number__gte=runs_from)
-            alert_filters.append("Runs from: " + str(runs_from))
-        except:
-            alert_errors.append("Invalid Run Number: " + str(runs_from))
-            runs = RunInfo.objects.none()
-
-    if runs_to:
-        try:
-            runs = runs.filter(run_number__lte=runs_to)
-            alert_filters.append("Runs to: " + str(runs_to))
-        except:
-            alert_errors.append("Invalid Run Number: " + str(runs_to))
-            runs = RunInfo.objects.none()
-
-    if category_id:
-        if is_valid_id(category_id, Category):
-            runs = runs.filter(category=category_id)
-            alert_filters.append("Category: " + str(category_id))
-            if subcategory_id:
-                if is_valid_id(subcategory_id, SubCategory):
-                    runs = runs.filter(subcategory=subcategory_id)
-                    alert_filters.append("Subcategory: " + str(subcategory_id))
-
-                    if subsubcategory_id:
-                        if is_valid_id(subsubcategory_id, SubSubCategory):
-                            runs = runs.filter(subsubcategory=subsubcategory_id)
-                            alert_filters.append("SubSubcategory: " + str(subsubcategory_id))
-                        else:
-                            alert_errors.append("Invalid SubSubCategory ID: " + str(subsubcategory_id))
-                            runs = RunInfo.objects.none()
-                else:
-                    alert_errors.append("Invalid SubCategory ID: " + str(subcategory_id))
-                    runs = RunInfo.objects.none()
-        else:
-            alert_errors.append("Invalid Category ID: " + str(category_id))
-            runs = RunInfo.objects.none()
-
-    if type_id:
-        if is_valid_id(type_id, Type):
-            runs = runs.filter(type=type_id)
-            alert_filters.append("Type: " + str(type_id))
-        else:
-            alert_errors.append("Invalid Type: " + str(type_id))
-            runs = RunInfo.objects.none()
-
-    if not date_filter_value and not category_id and not type_id and not date_from and not date_to and not runs_from and not runs_to:
-        alert_infos.append("No filters applied. Showing every run you have ever certified!")
-    context = {}
-
-    reference_run_ids = runs.values_list('reference_run').distinct()
-    context['refs'] = ReferenceRun.objects.filter(id__in=reference_run_ids)
-
-    runs = runs.order_by('type', 'run_number')  # Make sure runs are sorted by type
-
-    runinfotypelists = []  # create one runinfotypelist per type
-
-    for run in runs:
-        if len(runinfotypelists) == 0 or run.type != runinfotypelists[-1].type:
-            runinfotypelists.append(RunInfoTypeList(run.type, len(runinfotypelists) + 1))
-        runinfotypelists[-1].add_run(run)
-
-    context['runs'] = []
-    context['tk_maps'] = []
-    context['certified_runs'] = []
-    context['sums'] = []
-
-    for runinfotypelist in runinfotypelists:
-        context['runs'].append(runinfotypelist.get_runinfo_ascii_table())
-        context['tk_maps'].append(runinfotypelist.get_tracker_maps_info())
-        context['certified_runs'].append(runinfotypelist.get_certified_runs_info())
-        context['sums'].append(runinfotypelist.get_sums_ascii_table())
-
-    context['alert_errors'] = alert_errors
-    context['alert_infos'] = alert_infos
-    context['alert_filters'] = alert_filters
+    return render(request, "certhelper/summary.html", context)
 
 
-    return render(request, 'certhelper/summary.html', context)
-
-
-def clearsession(request):
-    """Deletes all the entries in the RunInfo table and redicrets to '/'.
-    """
-
-    if request.method == 'POST':
-        RunInfo.objects.filter(userid=request.user).delete()
-        return HttpResponseRedirect('/')
-
-    return render(request, 'certhelper/clearsession.html')
-
-
+@login_required
 def logout_view(request):
-    """ Logout current user
+    """
+    Logout current user (also from CERN)
     """
     if request.user.is_authenticated:
         logout(request)
-        callback_url = 'https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl=http%3A//'
-        callback_url += request.META['HTTP_HOST']
-        callback_url += reverse('certhelper:logout_status')
+        callback_url = "https://login.cern.ch/adfs/ls/?wa=wsignout1.0&ReturnUrl="
+        callback_url += "http%3A//"
+        callback_url += request.META["HTTP_HOST"]
+        callback_url += reverse("certhelper:logout_status")
         return HttpResponseRedirect(callback_url)
+    return HttpResponseRedirect("/")
 
 
 def logout_status(request):
-    logout_successful = False
-    if not request.user.is_authenticated:
-        logout_successful = True
-    return render(request, 'certhelper/logout_status.html', {'logout_successful': logout_successful})
+    """
+    Simple status page which should help determining
+    if the logout was successful or not
+    """
+    logout_successful = not request.user.is_authenticated
+    return render(
+        request,
+        "certhelper/logout_status.html",
+        {"logout_successful": logout_successful},
+    )
 
 
-def load_subcategories(request):
-    category_id = request.GET.get('categoryid')
-    if (category_id):
-        subcategories = SubCategory.objects.filter(parent_category=category_id).order_by('name')
-    else:
-        subcategories = SubCategory.objects.none()
-    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subcategories})
+@staff_member_required
+def shiftleader_view(request):
+    """
+    if no filter parameters are specified than every run from every user will be listed
+    to prevent this we make sure that at least one filter is applied.
+
+    if someone wants to list all runs form all users then he has to specify that explicitly
+    in the filter (setting everything to nothing)
+    """
+    if request_contains_filter_parameter(request):
+        return ShiftLeaderView.as_view()(request=request)
+    return HttpResponseRedirect("/shiftleader/%s" % get_this_week_filter_parameter())
 
 
-def load_subsubcategories(request):
-    subcategory_id = request.GET.get('subcategoryid')
-    if (subcategory_id):
-        subsubcategories = SubSubCategory.objects.filter(parent_category=subcategory_id).order_by('name')
-    else:
-        subsubcategories = SubCategory.objects.none()
-    return render(request, 'certhelper/dropdowns/category_dropdown_list_options.html', {'categories': subsubcategories})
+# TODO lazy load summary
+@method_decorator(staff_member_required, name="dispatch")
+class ShiftLeaderView(SingleTableMixin, FilterView):
+    table_class = ShiftleaderRunInfoTable
+    model = RunInfo
+    template_name = "certhelper/shiftleader.html"
+    filterset_class = ShiftLeaderRunInfoFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["summary"] = SummaryReport(self.filterset.qs)
+        context["slreport"] = ShiftLeaderReport(self.filterset.qs)
+        context["deleted_runs"] = DeletedRunInfoTable(
+            RunInfo.all_objects.dead().order_by("-run_number")
+        )
+        try:
+            context["slchecklist"] = Checklist.objects.get(identifier="shiftleader")
+        except Checklist.DoesNotExist:
+            # shift leader checklist has not been created yet.
+            pass
+
+        deviating, corresponding = self.filterset.qs.compare_with_run_registry()
+
+        if deviating:
+            context["runinfo_comparison_table"] = RunRegistryComparisonTable(deviating)
+            context["run_registry_comparison_table"] = RunRegistryComparisonTable(
+                corresponding
+            )
+
+        return context
+
+
+# TODO superuser required
+@staff_member_required
+def hard_deleteview(request, run_number):
+    try:
+        run = RunInfo.all_objects.get(run_number=run_number)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the runnumber {} doesnt exist".format(run_number))
+    except RunInfo.MultipleObjectsReturned:
+        raise Http404(
+            "Multiple certifications with the runnumber {} exist".format(run_number)
+        )
+
+    if request.method == "POST":
+        run.hard_delete()
+        return HttpResponseRedirect("/")
+
+    return render(request, "certhelper/hard_delete.html", {"run": run})
+
+
+@staff_member_required
+def hard_delete_run_view(request, pk):
+    try:
+        run = RunInfo.all_objects.get(pk=pk)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the id {} doesnt exist".format(pk))
+
+    if request.method == "POST":
+        run.hard_delete()
+        return HttpResponseRedirect("/shiftleader/")
+
+    return render(request, "certhelper/hard_delete.html", {"run": run})
+
+
+@staff_member_required
+def restore_run_view(request, pk):
+    try:
+        run = RunInfo.all_objects.get(pk=pk)
+    except RunInfo.DoesNotExist:
+        raise Http404("The run with the id {} doesnt exist".format(pk))
+
+    if request.method == "POST":
+        run.restore()
+        return HttpResponseRedirect("/shiftleader/")
+
+    return render(request, "certhelper/restore.html", {"run": run})
+
+
+@login_required
+def validate_central_certification_list(request):
+    text = request.GET.get("text", None)
+    run_numbers = re.sub("[^0-9]", " ", text).split()  # only run_numbers
+    run_numbers = set(run_numbers)  # remove duplicates
+    data = RunInfo.objects.check_if_certified(run_numbers)
+    return JsonResponse(data)
+
+
+# TODO update Checklist by Checklist model, return 404 if page doesnt exist
+class ChecklistTemplateView(TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["checklist_base_template_name"] = "certhelper/checklists/base.html"
+        return context
+
+
+@login_required
+def check_integrity_of_run(request):
+    """
+    Checks if a run with the same number but different type already exists and checks
+    if all the attributes (int. lumi, number of ls, pixel, sistrip, ...) match.
+
+    :param request:
+    :return: JsonResponse containing the attributes that do not match and their
+    expected value
+    """
+    try:
+        assert integer_or_none(request.GET.get("run_number", None))
+        run = get_runinfo_from_request(request)
+        data = RunInfo.objects.check_integrity_of_run(run)
+        return JsonResponse(data)
+    except AssertionError:
+        return JsonResponse({})
+
+
+@method_decorator(login_required, name="dispatch")
+class ComputeLuminosityView(FilterView):
+    template_name = "certhelper/compute_luminosity.html"
+    filterset_class = ComputeLuminosityRunInfoFilter
+
+
+@method_decorator(login_required, name="dispatch")
+class RunRegistryView(TemplateView):
+    template_name = "certhelper/runregistry.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        run_min = request.POST.get("run_min")
+        run_max = request.POST.get("run_max")
+        run_list = request.POST.get("run_list")
+
+        run_registry = TrackerRunRegistryClient()
+
+        if run_list:
+            run_numbers = number_string_to_list(run_list)
+            data = run_registry.get_runs_by_list(run_numbers)
+        elif run_min and run_max:
+            data = run_registry.get_runs_by_range(run_min, run_max)
+        else:
+            data = {}
+
+        table = RunRegistryTable(data)
+
+        return render(request, self.template_name, {"table": table})
+
+
+@method_decorator(login_required, name="dispatch")
+class RunRegistryLumiSectionView(TemplateView):
+    template_name = "certhelper/lumisections.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        run_min = request.POST.get("run_min")
+        run_max = request.POST.get("run_max")
+        run_list = request.POST.get("run_list")
+
+        run_registry = TrackerRunRegistryClient()
+
+        if run_list:
+            run_numbers = number_string_to_list(run_list)
+            data = run_registry.get_lumi_sections_by_list(run_numbers)
+        elif run_min and run_max:
+            data = run_registry.get_lumi_sections_by_range(run_min, run_max)
+        else:
+            data = {}
+
+        table = RunRegistryLumiSectionTable(data)
+        return render(request, self.template_name, {"table": table})
+
+
+@method_decorator(login_required, name="dispatch")
+class RunRegistryCompareView(TemplateView):
+    template_name = "certhelper/compare_runregistry.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        run_min = request.POST.get("run_min")
+        run_max = request.POST.get("run_max")
+        run_list = request.POST.get("run_list")
+
+        if run_list:
+            run_numbers = number_string_to_list(run_list)
+            runs = RunInfo.objects.filter(run_number__in=run_numbers)
+        elif run_min and run_max:
+            runs = RunInfo.objects.filter(
+                run_number__gte=run_min, run_number__lte=run_max
+            )
+            runs.print()
+        else:
+            runs = RunInfo.objects.none()
+
+        deviating, corresponding = runs.compare_with_run_registry()
+
+        deviating_run_table = RunRegistryComparisonTable(deviating)
+        run_registry_table = RunRegistryComparisonTable(corresponding)
+
+        return render(
+            request,
+            self.template_name,
+            {"table": deviating_run_table, "run_registry_table": run_registry_table},
+        )
+
+
+def runregistry(request, run_number):
+    client = TrackerRunRegistryClient()
+    if not client.connection_possible():
+        return JsonResponse("Run Registry is unavailable.")
+    response = client.get_runs_by_list([run_number])
+    runs = convert_run_registry_to_runinfo(response)
+    return JsonResponse(runs, safe=False, json_dumps_params={"indent": 2})

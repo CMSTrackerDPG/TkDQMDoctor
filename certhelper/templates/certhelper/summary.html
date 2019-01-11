@@ -1,18 +1,15 @@
+{% extends 'certhelper/base.html' %}
+
+{% block title %}Summary{% endblock title %}
+
+{% block content %}
 {% load static %}
-<link rel="shortcut icon" type="image/png" href="{% static "certhelper/img/favicon.png" %}"/>
-<title>TkDQM Doc: Summary</title>
-
-<script src="{% static "certhelper/jquery/jquery.min.js" %}"></script>
-<script src="{% static "certhelper/bootstrap/js/bootstrap.min.js" %}"></script>
-<script src="{% static "certhelper/ascii-table/ascii-table.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "certhelper/bootstrap/css/bootstrap.min.css" %}">
-
+{% include "certhelper/components/menu.html" %}
 <h1 align="center">Summary</h1>
-<a href="{% url 'certhelper:list' %}" class="btn btn-link">Back to list of runs</a>
 <a href="#comment_div" class="btn btn-link" onclick="show_special_comment_area()"><span class="glyphicon glyphicon-comment"></span> Add Special Comment</a>
 <a href="#links_div" class="btn btn-link" onclick="show_links_area()">
 	<span class="glyphicon glyphicon-globe"></span> Add Links
-</a></br>
+</a><br>
 
 <!-- **INFO** When is a RUN marked as 'Good'?
 Depends on runtype:
@@ -78,8 +75,9 @@ Depends on runtype:
 <div id=links_div style="display: none;"><div id=linksarea><textarea rows="4" cols="40" id=links_textarea form="usrform" placeholder="Enter text here" ></textarea>
 <div align="center"><button type="button" class="btn btn-default" onclick="write_to_text_area()"><span class="glyphicon glyphicon-ok"></span>OK</button></div></div></div>
 </pre>
+{% endblock content %}
 
-
+{% block script %}
 <script>
     function show_special_comment_area() {
         $('#comment_div').css('display', 'inline-block');
@@ -88,7 +86,7 @@ Depends on runtype:
     }
 
     function write_to_comment_area() {
-        var t = $('#special_comment_textarea').val();
+        let t = $('#special_comment_textarea').val();
         $('#specialcomment_text').html(t);
         $('#formarea').css('display', 'None');
         $('#specialcomment_text').css('display', 'inline-block');
@@ -105,9 +103,10 @@ Depends on runtype:
    }
 
    function write_to_text_area() {
-       var t = $('#links_textarea').val();
+       let t = $('#links_textarea').val();
        $('#links_text').html(t);
        $('#linksarea').css('display', 'None');
        $('#links_text').css('display', 'inline-block');
    }
 </script>
+{% endblock script %}

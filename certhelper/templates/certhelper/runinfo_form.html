@@ -1,11 +1,30 @@
 {% extends 'certhelper/base.html' %}
-{% block title %}Add Run{% endblock %}
+{% block title %}List{% endblock %}
+
+{% load widget_tweaks %}
+{% load bootstrap3 %}
+{% load form_tags %}
+{% load static %}
 
 {% block style %}
     <style>
+        .add-type {
+            color: green;
+        }
+
+        .problem_categories{
+            overflow-y: scroll;
+            height:200px;
+        }
+
+
+        .checklist {
+            margin-top: 5px;
+        }
+
         /*
          * for the dynamic list of ref runs in
-         *  dropdown menu based on selected type
+         *  drop-down menu based on selected type
          */
         select option[disabled] {
             display: none;
@@ -14,272 +33,394 @@
 {% endblock style %}
 
 {% block content %}
-    <h1 align="center">Add Run</h1>
-    {{form.title}}
-    {% load myfilters %}
+    <div class="container">
+        <p>
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </p>
 
-    {% if form.errors %}
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="alert alert-danger">
-                    <strong>{{ error|escape }}</strong>
+        <form class="well form-horizontal" method="POST" action="" id="id_runinfo_form">
+            {% csrf_token %}
+            <legend style="text-align: center;">
+                <h1>
+                    {% if object %}
+                        Update Run
+                    {% else %}
+                        Add new Run
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <!-- super secret button for developers -->
+                        <span style="cursor: pointer;" onclick="checkAllChecklists();">&nbsp;</span>
+                    {% endif %}
+                </h1>
+            </legend>
+
+            {# Run type #}
+            <div class="form-group">
+                {# Checkboxes to filter Type (Collisions, Cosmics, Prompt, ... #}
+                {% include 'certhelper/components/runinfo_form/runtype_checkboxes.html' %}
+
+                <label class="col-sm-3 control-label" for="id_{{ form.type.name }}">
+                    {{ form.type.label }}
+                </label>
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        {% render_field form.type class="form-control" %}
+                        <span class="input-group-btn">
+                            {# TODO Add Type as modal instead of different page but with option as different page #}
+                            <button class="btn btn-default"
+                                    id="id_add_type"
+                                    type="button"
+                                    onclick="location.href='{% url 'certhelper:createtype' %}'">
+                                <span class="glyphicon glyphicon-plus-sign add-type"></span> Add
+                            </button>
+                        </span>
+                    </div>
                 </div>
-            {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
+                <div class="col-sm-3 help-block"></div>
             </div>
-        {% endfor %}
-    {% endif %}
 
-    <form method="POST" action=""> {% csrf_token %}
-        <table class="table table-condensed" style="max-width:650px;" align="center">
-            <tr>
-                <td>{{form.type.label}}</td>
-                <td>{{form.type|addclass:'form-control'}} </td>
-                <td><button type="button" class="btn btn-link" onclick="location.href='{% url 'certhelper:createtype' %}'"><span class="glyphicon glyphicon-plus-sign"></span> Add Type</button></td>
-            </tr>
-            <tr>
-                <td style="vertical-align: middle;">{{form.reference_run.label}}</td>
-                <td style="vertical-align: middle;">{{form.reference_run|addclass:'form-control'}}</td>
-                <td>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="radio-ref-run" id="radio-same-type" value="same-type" checked>
-                            Match Type
+            {# TODO add "Add Reference Run" button #}
+            {# Reference run #}
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-6 bottom-buffer">
+                    <div class="checkbox">
+                        <label class="col-sm-6">
+                            <input type="checkbox"
+                                   name="match_type"
+                                   id="id_match_type"
+                                   checked> Match Type
                         </label>
                     </div>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="radio-ref-run" id="radio-all" value="all">
-                            Show All
-                        </label>
+                </div>
+            </div>
+
+            {# Reference run #}
+            <div class="form-group">
+                {% render_label_and_field_for form.reference_run %}
+                <div class="col-sm-3 help-block"></div>
+                <div class="col-sm-offset-3 col-sm-9 ">
+                    <small class="form-text text-muted">
+                        Can be taken from the <a href="https://twiki.cern.ch/twiki/bin/view/CMS/TrackerOfflineReferenceRuns" target="_blank">Tracker Offline Reference Runs List</a> twiki page
+                    </small>
+                </div>
+            </div>
+
+            {# Run number #}
+            <div class="form-group">
+                {% render_label_and_field_for form.run_number %}
+                <div class="col-sm-3 help-block"></div>
+                {% render_checklist_checkbox form.checklists.general not_required=checklist_not_required %}
+            </div>
+
+            {# Trackermap #}
+            <div class="form-group">
+                {% render_label_and_field_for form.trackermap %}
+                <div class="col-sm-3 help-block"></div>
+                {% render_checklist_checkbox form.checklists.trackermap not_required=checklist_not_required %}
+            </div>
+
+            {# Number of LS #}
+            <div class="form-group">
+                {% render_label_and_field_for form.number_of_ls %}
+                <div class="col-sm-3 help-block"></div>
+            </div>
+
+            {# Int. luminosity #}
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="id_int_luminosity">Int luminosity</label>
+                <div class="col-sm-6">
+
+                    <div class="input-group">
+                        {% render_field form.int_luminosity class="form-control int-lumi-input" %}
+
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span id="id-int-luminosity-unit">pb</span><sup>-1</sup> <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li><a id="id-unit-pb" href="#">pb<sup>-1</sup></a></li>
+                                <li><a id="id-unit-ub" href="#">µb<sup>-1</sup></a></li>
+                            </ul>
+                        </div><!-- /btn-group -->
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td>{{form.run_number.label}}</td>
-                <td>{{form.run_number|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:general_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
-            </tr>
-            <tr>
-                <td>{{form.trackermap.label}}</td>
-                <td>{{form.trackermap|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:trackermap_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
-            </tr>
-            <tr>
-                <td>{{form.number_of_ls.label}}</td>
-                <td>{{form.number_of_ls|addclass:'form-control'}}</td>
-            </tr>
-            <tr>
-                <td>{{form.int_luminosity.label}} </td>
-                <td>{{form.int_luminosity|addclass:'form-control'}}</td>
-            </tr>
 
-            <tr>
-                <td>{{form.pixel.label}}</td>
-                <td>{{form.pixel|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:pixel_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
-            </tr>
+                </div>
+                <div class="col-sm-3 help-block"></div>
+                <div class="col-sm-offset-3 col-sm-9 ">
+                    <small class="form-text text-muted">
+                        Can be taken from <a id="id_cmswbm_link" href="https://cmswbm.cern.ch/cmsdb/servlet/RunSummary" target="_blank">WBM Run Summary</a> under "Run Live Lumi"
+                    </small>
+                </div>
+            </div>
 
-            <tr>
-                <td>{{form.sistrip.label}}</td>
-                <td>{{form.sistrip|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:sistrip_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
-            </tr>
+            {# Pixel #}
+            <div class="form-group">
+                <label class="col-sm-3 control-label">{{ form.pixel.label }}</label>
+                <div class="col-sm-6">
+                    <div class="row bootstrap3-multi-input">
+                        <div class="col-xs-10">
+                            {% render_field form.pixel class="form-control" %}
+                        </div>
+                        <div class="col-xs-2 checkbox">
+                            <label>
+                                {% render_field form.pixel_lowstat class="form-check-input" %}
+                                Lowstat
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 help-block"></div>
+                {% render_checklist_checkbox form.checklists.pixel not_required=checklist_not_required%}
+            </div>
 
-            <tr>
-                <td>{{form.tracking.label}}</td>
-                <td>{{form.tracking|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:tracking_checklist' %}'><span class="glyphicon glyphicon-list-alt"></span> Checklist</a></td>
-            </tr>
+            {# SiStrip #}
+            <div class="form-group">
+                <label class="col-sm-3 control-label">{{ form.sistrip.label }}</label>
+                <div class="col-sm-6">
+                    <div class="row bootstrap3-multi-input">
+                        <div class="col-xs-10">
+                            {% render_field form.sistrip class="form-control" %}
+                        </div>
+                        <div class="col-xs-2 checkbox">
+                            <label>
+                                {% render_field form.sistrip_lowstat class="form-check-input" %}
+                                Lowstat
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 help-block"></div>
+                {% render_checklist_checkbox form.checklists.sistrip not_required=checklist_not_required%}
+            </div>
 
-            <tr>
-                <td>{{form.category.label}}</td>
-                <td>{{form.category|addclass:'form-control'}}</td>
-            </tr>
+            {# Tracking #}
+            <div class="form-group">
+                <label class="col-sm-3 control-label">{{ form.tracking.label }}</label>
+                <div class="col-sm-6">
+                    <div class="row bootstrap3-multi-input">
+                        <div class="col-xs-10">
+                            {% render_field form.tracking class="form-control" %}
+                        </div>
+                        <div class="col-xs-2 checkbox">
+                            <label>
+                                {% render_field form.tracking_lowstat class="form-check-input" %}
+                                Lowstat
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 help-block"></div>
+                {% render_checklist_checkbox form.checklists.tracking not_required=checklist_not_required%}
+            </div>
 
-            <tr id="subcategory_row">
-                <td>{{form.subcategory.label}}</td>
-                <td>{{form.subcategory|addclass:'form-control'}}</td>
-            </tr>
+            {# Categories of Problems #}
+            {% bootstrap_field form.problem_categories field_class="problem_categories col-sm-6" label_class="col-sm-3"%}
 
-            <tr id="subsubcategory_row">
-                <td>{{form.subsubcategory.label}}</td>
-                <td>{{form.subsubcategory|addclass:'form-control'}}</td>
-            </tr>
+            {# Comments #}
+            {% bootstrap_field form.comment field_class="col-sm-6" label_class="col-sm-3"%}
 
-            <tr>
-                <td>{{form.comment.label}}</td>
-                <td>{{form.comment|addclass:'form-control'}}</td>
-                <td><a type="button" class="btn btn-link" href='{% url 'certhelper:comment_info' %}'><span class="glyphicon glyphicon-info-sign"></span> Info</a></td>
-            </tr>
+            {# Date #}
+            {% bootstrap_field form.date field_class="col-sm-6" label_class="col-sm-3"%}
 
-            <tr>
-                <td>{{form.date.label}}</td>
-                <td>{{form.date}}</td>
-            </tr>
+            {# Buttons #}
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-6 text-center">
+                    <button type="submit" id="id_submit_add_run" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        {% if object %}
+                            Update
+                        {% else %}
+                            Create
+                        {% endif %}</button>
+                    <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'">
+                        <span class="glyphicon glyphicon-remove"></span> Abort
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-        </table>
-        <div align="center">
-            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Ok</button>
-            <button type="button" class="btn btn-default" onclick="location.href='{% url 'certhelper:list' %}'"><span class="glyphicon glyphicon-remove"></span> Abort</button>
-        </div>
-    </form>
+    {% render_checklist_modal form.checklists.general %}
+    {% render_checklist_modal form.checklists.trackermap %}
+    {% render_checklist_modal form.checklists.pixel %}
+    {% render_checklist_modal form.checklists.sistrip %}
+    {% render_checklist_modal form.checklists.tracking %}
+{% endblock %}
 
-{% endblock content %}
 
 {% block script %}
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="{% static "certhelper/js/runinfo_form.js" %}"></script>
     <script>
-
         $(document).ready(function () {
-            if( $("#id_subcategory").val() == "" ){
-                $("#subcategory_row").hide()
-                $("#subsubcategory_row").hide()
-            }
+            let type_locator = $('#id_type');
+            let run_number_locator = $('#id_run_number');
 
-            $("#id_category").change(function () {
-                var category_id = $(this).val();  // get the selected category_id from the dropdown menu
+            /**
+             * Popup Checklist modal with items when trying to check a checklist checkbox
+             */
+            $('[id^="id_checklist_"]').each(function() {
+                popupChecklistModal($(this));
+            });
 
-                $.ajax({
-                    url: "{% url 'certhelper:ajax_load_subcategories' %}",  // pass categoryId to load_subcategories view
-                    data: {
-                        'categoryid': category_id  // add the category_id to the GET parameters
-                    },
-                    success: function (data) {  // date is the return of the load_subcategories view function
-                        $("#id_subcategory").html(data);  // replace dropdown options with with the data from load_subcategories view
-                    }
-                });
-                $('#id_subcategory').val('').trigger('change');  //trigger a change in subcategory to also update subsubcategories
+            /**
+             * Update Type-dropdown-list based on ticked checkboxes
+             */
+            $("[name='recotype'], [name='runtype'], #id_type").change(function(){
+                filterTypeOptionsByCheckboxes();
+            });
 
-                if(category_id != ""){
-                    $("#subcategory_row").show()
-                } else {
-                    $("#subcategory_row").hide()
+            /**
+             * Update Reference-run-dropdown-list based on selected Type
+             */
+            $("#id_type, #id_match_type").change(function () {
+                updateReferenceRunList()
+            });
+
+            /**
+             * Use the lowstat checkbox instead of the dropdown option
+             * Lowstat choice is still available because of historic reasons.
+             * This might be removed in future.
+             */
+            $('option[value="Lowstat"]').each(function () {
+                if(!$(this).is(":selected")){
+                    // Remove only if not selected, to not break old certifications
+                    $(this).remove();
                 }
             });
 
-            $("#id_subcategory").change(function () {
-                var subcategory_id = $(this).val();
-
-                $.ajax({
-                    url: "{% url 'certhelper:ajax_load_subsubcategories' %}",
-                    data: {
-                        'subcategoryid': subcategory_id
-                    },
-                    success: function (data) {
-                        $("#id_subsubcategory").html(data);
-                    }
-                });
-
-                if(subcategory_id != ""){
-                    $("#subsubcategory_row").show()
-                } else {
-                    $("#subsubcategory_row").hide()
-                }
+            /**
+             * Update the cmsbwm link in the help text for the int luminosity
+             */
+            run_number_locator.on('input',function(){
+                update_cmswbm_link();
             });
 
-            $("#id_sistrip").change(function () {
-                if($(this).val() == "Bad"){
-                    $("#id_tracking").val("Bad");
-                }
+            /**
+             * Validation
+             */
+            type_locator.change(function(){
+                validate_type();
+                validate_tracking();
+                update_int_luminosity_unit_by_type();
+                validate_int_luminosity();
             });
 
-            $('#id_int_luminosity').on('focusout',function(){
-                rounded = parseFloat($("#id_int_luminosity").val()).toFixed("1")
-
-                $("#id_int_luminosity").val(rounded);
+            $("#id_reference_run").change(function(){
+                validate_run_number();
             });
 
-            class RunType{
-                static get_type_text(){
-                    return $("#id_type option:selected").text().toLowerCase();
-                }
-
-                static get_word(index, text = this.get_type_text()){
-                    return text.toLowerCase().split(" ")[index];
-                }
-
-                static get_word_if_matches(allowed_choices, word_index){
-                    try {
-                        var word = this.get_word(word_index);
-                        var index = allowed_choices.indexOf(word);
-                        if (index != -1)
-                            return allowed_choices[index];
-
-                    } catch(err) {
-                        return null;
-                    }
-                    return null;
-                }
-
-                static get_reco(){
-                    var allowed_reco_choices = ["express", "prompt", "rereco"];
-                    return this.get_word_if_matches(allowed_reco_choices, 0)
-                }
-
-                static get_runtype(){
-                    var allowed_runtype_choices = ["cosmics", "collisions"];
-                    return this.get_word_if_matches(allowed_runtype_choices, 1)
-                }
-
-                static get_bfield(){
-                    var allowed_bfield_choices = ["0", "3.8"];
-                    return this.get_word_if_matches(allowed_bfield_choices, 2)
-                }
-
-                static text_matches_reco(text){
-                    return this.get_word(1, text) == this.get_reco();
-                }
-
-
-                static text_matches_runtype(text){
-                    return this.get_word(2, text) == this.get_runtype();
-                }
-
-
-                static text_matches_bfield(text){
-                    return this.get_word(3, text) == this.get_bfield();
-                }
-
-                static matches(text){
-                    var lower_text = text.toLowerCase();
-                    return this.text_matches_reco(lower_text)
-                        && this.text_matches_runtype(lower_text)
-                        && this.text_matches_bfield(lower_text)
-                }
-            }
-
-            $('input[type=radio][name=radio-ref-run]').on('change', function() {
-                update_reference_run_list();
+            run_number_locator.on('input', function(){
+                validate_run_number();
             });
 
-            $("#id_type").change(function () {
-                update_reference_run_list()
+            run_number_locator.change(function(){
+                validate_form();
             });
 
-            function update_reference_run_list(){
-                show_all_reference_runs();
-                var checked = $('input[type=radio][name=radio-ref-run]:checked').val();
-                if(checked == "same-type") {
-                    disable_not_matching_ref_runs();
-                }
-            }
+            let int_luminosity_locator = $('#id_int_luminosity');
+            int_luminosity_locator.on('input', function(){
+                validate_int_luminosity();
+            });
 
-            function disable_not_matching_ref_runs(){
-                $('#id_reference_run > option').each(function() {
-                    if(!RunType.matches($( this ).text()))
-                        $( this ).prop('disabled', true);
-                });
-            }
+            int_luminosity_locator.change(function(){
+                // round_int_luminosity(); TODO enable when HeavyIon is fixed
+                validate_int_luminosity();
+            });
 
-            function show_all_reference_runs(){
-                $('#id_reference_run > option').each(function() {
-                    $( this ).prop('disabled', false);
-                });
-            }
+            $("#id_number_of_ls").change(function(){
+                round_number_of_ls();
+                validate_number_of_ls();
+            });
+
+            $("#id_pixel, #id_pixel_lowstat").change(function(){
+                validate_pixel();
+            });
+
+            $("#id_sistrip, #id_sistrip_lowstat").change(function(){
+                validate_sistrip();
+            });
+
+            $("#id_tracking, #id_tracking_lowstat").change(function(){
+                validate_tracking();
+            });
+
+            /**
+             * Remove green borders (from validation) when jumping to the next field
+             */
+            $("form :input").focusout(function(){
+                hide_green_borders_from_successfully_validated_fields();
+            });
+
+            const components = "[name='pixel'], [name='sistrip'], [name='tracking']";
+            /**
+             * Disable lowstat checkbox when 'Excluded' is selected
+             */
+            $(components).change(function(){
+                const component_id = $(this).attr('id');
+                disable_lowstat_for_excluded_components(component_id);
+                validate_tracking()
+            });
+
+            /**
+             * Update Reference-run-dropdown-list on page load
+             */
+            if(get_selected_type().val()) // If a Type is selected
+                updateReferenceRunList();
+
+            /**
+             * Disable lowstat checkboxes on page load where necessary
+             */
+            $(components).each(function(){
+                const component_id = $(this).attr('id');
+                disable_lowstat_for_excluded_components(component_id);
+            });
+
+            $("#id-unit-pb").click(function(){
+                change_int_luminosity_unit("pb")
+            });
+
+
+            $("#id-unit-ub").click(function(){
+                 change_int_luminosity_unit("ub")
+            });
+
+            /**
+             * Prevents the form to be submitted and requires the user to
+             * confirm the submission if any integrity warnings exists
+             */
+            $("#id_runinfo_form").submit(function(){
+                change_int_luminosity_unit("pb");
+                if($(".has-error").length)
+                    return confirm("The form has a few errors. Are you sure you want to submit?");
+                if($(".has-warning").length)
+                    return confirm("The form has a few warnings. Are you sure you want to submit?");
+                return true;
+            });
+
+            {% if object %}
+                /**
+                 * Validate form on page load, when updating an existing run.
+                 */
+                validate_form();
+                hide_green_borders_from_successfully_validated_fields();
+                check_type_checkboxes_from_selected_type();
+                filterTypeOptionsByCheckboxes();
+                update_cmswbm_link();
+                update_to_smallest_int_luminosity_unit();
+            {% endif %}
         });
     </script>
 {% endblock script %}

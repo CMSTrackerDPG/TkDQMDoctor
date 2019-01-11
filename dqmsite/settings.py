@@ -13,26 +13,23 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from decouple import config
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    # safe value used for development when DJANGO_SECRET_KEY might not be set
-    '&abrvr_0h(940(q_6(=+@m9uzhc)n&qvou*g-7fzw8%oh9y^4k'
-)
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
-    'dev-tkdqmdoctor.web.cern.ch',
     'tkdqmdoctor.web.cern.ch',
+    'dev-tkdqmdoctor.web.cern.ch',
     'test-tkdqmdoctor.web.cern.ch',
-    '128.141.84.249',
     '127.0.0.1',
     'localhost'
 ]
@@ -51,11 +48,18 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'cern_oauth2',
+    'allauth.socialaccount.providers.cern',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'categories',
+    'categories.editor',
+    'nested_admin',
+    'ckeditor',
+    'dynamic_preferences',
+    # comment the following line if you don't want to use user preferences
+    # 'dynamic_preferences.users.apps.UserPreferencesConfig',
 ]
 
 MIDDLEWARE = [
@@ -67,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'dqmsite.urls'
@@ -82,6 +87,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dynamic_preferences.processors.global_preferences',
             ],
         },
     },
@@ -94,12 +100,12 @@ WSGI_APPLICATION = 'dqmsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DJANGO_DATABASE_NAME'),
-        'USER': os.environ.get('DJANGO_DATABASE_USER'),
-        'PASSWORD': os.environ.get('DJANGO_DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DJANGO_DATABASE_HOST'),
-        'PORT': os.environ.get('DJANGO_DATABASE_PORT'),
+        'ENGINE': config('DJANGO_DATABASE_ENGINE', default=''),
+        'NAME': config('DJANGO_DATABASE_NAME', default=''),
+        'USER': config('DJANGO_DATABASE_USER', default=''),
+        'PASSWORD': config('DJANGO_DATABASE_PASSWORD', default=''),
+        'HOST': config('DJANGO_DATABASE_HOST', default=''),
+        'PORT': config('DJANGO_DATABASE_PORT', default=''),
     },
 }
 
@@ -143,11 +149,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATIC_ROOT = os.path.join(BASE_DIR, 'wsgi/static')
 
 # Redirecting from the default account/profile after login
-LOGIN_REDIRECT_URL = ('/')
+LOGIN_REDIRECT_URL = '/'
 
 # Needed for django-allauth
 SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = 'false'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+ADMINS = [('Peter Stein', 'peter.stein@cern.ch')]
+
+EMAIL_HOST = config('DJANGO_EMAIL_HOST', default='localhost')
+EMAIL_PORT = config('DJANGO_EMAIL_PORT', default=25, cast=int)
+EMAIL_HOST_USER = config('DJANGO_EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('DJANGO_EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('DJANGO_EMAIL_USE_TLS', default=False, cast=bool)
+SERVER_EMAIL = config('DJANGO_SERVER_EMAIL', default='root@localhost')

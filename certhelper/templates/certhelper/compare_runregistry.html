@@ -1,0 +1,36 @@
+{% extends "certhelper/base.html" %}
+
+{% block title %}RunRegistry{% endblock %}
+
+{% block style %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "certhelper/css/runinfo_table.css" %}" type="text/css">
+{% endblock %}
+
+{% block content %}
+    {% include "certhelper/components/menu.html" %}
+
+    <div class="container">
+        <h1 class="text-center">Compare database with Run Registry</h1>
+        {% include "certhelper/components/run_number_filter_panel.html" %}
+
+    </div>
+    <div calss="container-fluid">
+        {% if table %}
+            <div class="col-sm-6">
+                <h1>Certification Helper:</h1>
+                {% load render_table from django_tables2 %}
+                {% render_table table %}
+
+            </div>
+        {% endif %}
+        {% if run_registry_table %}
+            <div class="col-sm-6">
+                <h1>Run Registry:</h1>
+                {% load render_table from django_tables2 %}
+                {% render_table run_registry_table %}
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
