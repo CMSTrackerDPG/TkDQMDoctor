@@ -495,3 +495,97 @@ class RunsView(FilterView):
 
         context["run_numbers"] = self.filterset.qs.run_numbers()
         return context
+
+
+@staff_member_required
+def problems_json(request):
+    # TODO improve this code
+    categories_dict = Category.objects.all().values()
+    for c in categories_dict:
+        category = Category.objects.get(id=c["id"])
+        c["full_display_name"] = str(category)
+        c["runs"] = list(
+            category.runinfo_set.all().values_list("run_number", "type__reco")
+        )
+    return JsonResponse(list(categories_dict), safe=False)
+
+
+@staff_member_required
+def runs_json(request):
+    # Note: "problem_categories" have to be retrieved separately,
+    # since there is no easy way to retrieve them inline
+
+    runs = RunInfo.objects.all().values(
+        "run_number",
+        "type__reco",
+        "type__runtype",
+        "type__bfield",
+        "type__beamtype",
+        "type__beamenergy",
+        "type__dataset",
+        "reference_run__reference_run",
+        "reference_run__reco",
+        "reference_run__runtype",
+        "reference_run__bfield",
+        "reference_run__beamtype",
+        "reference_run__beamenergy",
+        "reference_run__dataset",
+        "trackermap",
+        "number_of_ls",
+        "int_luminosity",
+        "pixel",
+        "sistrip",
+        "tracking",
+        "pixel_lowstat",
+        "sistrip_lowstat",
+        "tracking_lowstat",
+        "comment",
+        "date",
+    )
+
+    return JsonResponse(list(runs), safe=False)
+
+
+@staff_member_required
+def problem_runs_json(request):
+    # TODO improve this horrible code
+
+    problem_runs = RunInfo.objects.all().exclude(problem_categories=None)
+    problem_runs_dict = problem_runs.values(
+        "run_number",
+        "type__reco",
+        "type__runtype",
+        "type__bfield",
+        "type__beamtype",
+        "type__beamenergy",
+        "type__dataset",
+        "reference_run__reference_run",
+        "reference_run__reco",
+        "reference_run__runtype",
+        "reference_run__bfield",
+        "reference_run__beamtype",
+        "reference_run__beamenergy",
+        "reference_run__dataset",
+        "trackermap",
+        "number_of_ls",
+        "int_luminosity",
+        "pixel",
+        "sistrip",
+        "tracking",
+        "pixel_lowstat",
+        "sistrip_lowstat",
+        "tracking_lowstat",
+        "comment",
+        "date",
+    )
+
+    for run in problem_runs_dict:
+        problem_categories = problem_runs.get(
+            run_number=run["run_number"], type__reco=run["type__reco"]
+        ).problem_categories
+        run["problem_categories"] = [
+            (problem.id, problem.name, str(problem))
+            for problem in problem_categories.all()
+        ]
+
+    return JsonResponse(list(problem_runs_dict), safe=False)
