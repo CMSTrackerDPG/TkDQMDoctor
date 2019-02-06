@@ -583,9 +583,7 @@ def problem_runs_json(request):
         problem_categories = problem_runs.get(
             run_number=run["run_number"], type__reco=run["type__reco"]
         ).problem_categories
-        run["problem_categories"] = [
-            (problem.id, problem.name, str(problem))
-            for problem in problem_categories.all()
-        ]
+        run["problem_names"] = [str(problem) for problem in problem_categories.all()]
+        run["problem_ids"] = [problem.id for problem in problem_categories.all()]
 
     return JsonResponse(list(problem_runs_dict), safe=False)
