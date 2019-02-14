@@ -49,6 +49,7 @@ urlpatterns = [
         views.RunRegistryCompareView.as_view(),
         name="compare-runregistry",
     ),
+    url(r"^tools/view/runs/$", views.RunsView.as_view(), name="view-runs"),
     url(
         r"^tools/view/runregistry/$",
         views.RunRegistryView.as_view(),
@@ -119,4 +120,7 @@ urlpatterns = [
         views.check_integrity_of_run,
         name="ajax_check_integrity_of_run",
     ),
+    url(r"^json/problems/$", views.problems_json, name="problems_json"),
+    url(r"^json/runs/$", views.runs_json, name="runs_json"),
+    url(r"^json/problem_runs/$", views.problem_runs_json, name="problem_runs_json"),
 ]

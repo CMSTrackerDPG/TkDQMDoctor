@@ -123,3 +123,25 @@ class ComputeLuminosityRunInfoFilter(django_filters.FilterSet):
             'run_number': ['gte', 'lte', ],
             'date': ['gte', 'lte', ],
         }
+
+
+class RunsFilter(django_filters.FilterSet):
+    run_number__in = InFilter(field_name='run_number', lookup_expr='in')
+
+    class Meta:
+        model = RunInfo
+        fields = {
+            'date': ['gte', 'lte', ],
+            'run_number': ['gte', 'lte', ],
+            'problem_categories': ['exact'],
+            'type__runtype': ['exact'],
+            'type__reco': ['exact'],
+            'type__bfield': ['exact'],
+            'type__beamtype': ['exact'],
+            'type__beamenergy': ['exact'],
+            'type__dataset': ['exact'],
+            'pixel': ['exact'],
+            'sistrip': ['exact'],
+            'tracking': ['exact'],
+            'number_of_ls': ['gte', 'lte'],
+        }
