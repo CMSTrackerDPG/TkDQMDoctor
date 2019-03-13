@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+import math
 import pytest
 from mixer.backend.django import mixer
 
@@ -130,7 +131,7 @@ class TestRunInfoManager:
         assert len(a) == 1
         a = a[0]
         assert a["runs_certified"] == 8
-        assert 161301.363 == a["int_luminosity"]
+        assert math.isclose(161301.363, a["int_luminosity"], abs_tol=0.1)
         assert a["number_of_ls"] == 71806
 
         a = get_from_summary(summary, "Cosmics", "Express")

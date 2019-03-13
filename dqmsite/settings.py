@@ -27,11 +27,11 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
+    config('DJANGO_ALLOWED_HOSTS', default='localhost'),
     'tkdqmdoctor.web.cern.ch',
     'dev-tkdqmdoctor.web.cern.ch',
     'test-tkdqmdoctor.web.cern.ch',
-    '127.0.0.1',
-    'localhost'
+    '127.0.0.1'
 ]
 
 # Application definition
