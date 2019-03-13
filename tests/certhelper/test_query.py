@@ -1,3 +1,4 @@
+import math
 import pytest
 from mixer.backend.django import mixer
 
@@ -268,7 +269,7 @@ class TestRunInfoQuerySet:
         assert cosmics_express.total_number() == 7
         assert cosmics_prompt.total_number() == 1
 
-        assert 161301.363 == collisions_express.integrated_luminosity()
+        assert math.isclose(161301.363, collisions_express.integrated_luminosity(), abs_tol=0.1)
         assert collisions_prompt.integrated_luminosity() == 123133.554
         assert cosmics_express.integrated_luminosity() == 0.1234
         assert cosmics_prompt.integrated_luminosity() == 0

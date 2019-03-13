@@ -1,3 +1,4 @@
+import math
 import pytest
 
 from certhelper.models import RunInfo
@@ -18,7 +19,7 @@ class TestShiftLeaderReport:
         assert report.cosmics().express().total_number() == 7
         assert report.cosmics().prompt().total_number() == 1
 
-        assert 161301.363 == report.collisions().express().integrated_luminosity()
+        assert math.isclose(161301.363, report.collisions().express().integrated_luminosity(), abs_tol=0.1)
         assert report.prompt().collisions().integrated_luminosity() == 123133.554
         assert report.express().cosmics().integrated_luminosity() == 0.1234
         assert report.cosmics().prompt().integrated_luminosity() == 0
