@@ -43,6 +43,11 @@ configure the web application with the GitHub repository:
 14. set "Insecure Traffic" to "Redirect"
 15. under "Build Configuration" add Environment Variables (Build and
     Runtime):
+    -  this is needed for OpenShift to be able to access the site
+
+       ::
+
+             DJANGO_ALLOWED_HOSTS       <your openshift website>
 
     -  this will be used for the database credentials:
 
