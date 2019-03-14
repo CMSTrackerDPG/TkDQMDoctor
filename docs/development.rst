@@ -286,7 +286,16 @@ The project files can then be reformated with
 Run the website locally
 -----------------------
 
-TODO runserver
+.. code:: bash
+
+    python manage.py migrate
+    python manage.py collectstatic
+
+
+.. code:: bash
+
+    python manage.py runserver
+
 
 Migrations
 ----------
