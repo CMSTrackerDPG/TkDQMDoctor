@@ -32,7 +32,7 @@ configure the web application with the GitHub repository:
 6.  on "Add to Project" select your Project
 7.  choose Version 3.5 (3.6 is buggy)
 8.  Fill Application Name and Link to GitHub repository e.g.:
-    test-tkdqmdoctor https://github.com/ptrstn/TkDQMDoctor
+    test-tkdqmdoctor https://github.com/CMSTrackerDPG/TkDQMDoctor
 9.  click on "advanced options"
 10. set branch name in "Git Reference" if branch anything other than
     "master"

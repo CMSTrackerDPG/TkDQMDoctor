@@ -158,7 +158,7 @@ Coverage Reports
 If the all tests pass a coverage report is automatically uploaded to
 codecov and can be viewed on:
 
--  https://codecov.io/gh/ptrstn/TkDQMDoctor
+-  https://codecov.io/gh/CMSTrackerDPG/TkDQMDoctor
 
 The Report shows which files need further testing and how good the
 overall test coverage is.

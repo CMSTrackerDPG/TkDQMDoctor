@@ -80,7 +80,7 @@ Cloning the Project
 
 .. code:: bash
 
-    git clone https://github.com/ptrstn/TkDQMDoctor
+    git clone https://github.com/CMSTrackerDPG/TkDQMDoctor
     cd TkDQMDoctor
 
 Setup Virtual Environment
