@@ -152,6 +152,17 @@ test commands.
 Although 1.11 is used in production, the website is also tested against
 Django Version 2.0 in case of a future upgrade.
 
+In Travis CI following environment variables have to be set:
+
+.. code:: bash
+
+    DJANGO_DATABASE_ENGINE django.db.backends.postgresql_psycopg2
+    DJANGO_DATABASE_HOST localhost
+    DJANGO_DATABASE_NAME testdb
+    DJANGO_DATABASE_USER postgres
+    DJANGO_DEBUG True
+    DJANGO_SECRET_KEY dbwqabxpc2denpefq4hgfhijkl0usxi6d3tm4jk609zo85dqrw
+
 Coverage Reports
 ----------------
 
