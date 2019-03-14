@@ -50,7 +50,7 @@ already exists (https://github.com/valdasraps/resthub), it is not
 compatible with Python 3. Therefore a new client had to be written that
 is Python 3 compliant. If interested a dedicated GitHub repository for a
 Python 3 Run Registry client can be found at
-https://github.com/ptrstn/python-runregistryclient
+https://github.com/CMSTrackerDPG/runregcrawlr
 
 dqmsite
 -------
