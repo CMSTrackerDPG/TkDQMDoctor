@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.com/ptrstn/TkDQMDoctor.svg?branch=master)](https://travis-ci.com/ptrstn/TkDQMDoctor)
-[![Build Status](https://travis-ci.com/ptrstn/TkDQMDoctor.svg?branch=develop)](https://travis-ci.com/ptrstn/TkDQMDoctor)
-[![codecov](https://codecov.io/gh/ptrstn/TkDQMDoctor/branch/master/graph/badge.svg)](https://codecov.io/gh/ptrstn/TkDQMDoctor)
+[![Build Status](https://travis-ci.com/CMSTrackerDPG/TkDQMDoctor.svg?branch=master)](https://travis-ci.com/CMSTrackerDPG/TkDQMDoctor)
+[![Build Status](https://travis-ci.com/CMSTrackerDPG/TkDQMDoctor.svg?branch=develop)](https://travis-ci.com/CMSTrackerDPG/TkDQMDoctor)
+[![codecov](https://codecov.io/gh/CMSTrackerDPG/TkDQMDoctor/branch/master/graph/badge.svg)](https://codecov.io/gh/CMSTrackerDPG/TkDQMDoctor)
 [![Documentation Status](https://readthedocs.org/projects/tkdqmdoctor/badge/?version=latest)](https://tkdqmdoctor.readthedocs.io/en/latest/?badge=latest)
 
 # TkDQMDoctor
@@ -13,7 +13,7 @@
 ## Set up your environment
 
 ```bash
-git clone https://github.com/ptrstn/TkDQMDoctor
+git clone https://github.com/CMSTrackerDPG/TkDQMDoctor
 cd TkDQMDoctor    
 python3 -m venv venv
 source venv/bin/active
