@@ -137,28 +137,31 @@ Run these commands and replace with the name of your build.
 
 .. code:: bash
 
-   oc set volume dc/<your-build-name>--add --name=eos --type=persistentVolumeClaim --mount-path=/eos --claim-name=eos-volume --claim-class=eos --claim-size=1
+   oc set volume dc/<your-build-name> --add --name=eos --type=persistentVolumeClaim --mount-path=/eos --claim-name=eos-volume --claim-class=eos --claim-size=1
 
-   oc patch dc/<your-build-name>-p "$(curl --silent https://gitlab.cern.ch/paas-tools/eosclient-openshift/raw/master/eosclient-container-patch.json)"
+   oc patch dc/<your-build-name> -p "$(curl --silent https://gitlab.cern.ch/paas-tools/eosclient-openshift/raw/master/eosclient-container-patch.json)"
 
-   oc set probe dc/<your-build-name>--liveness --initial-delay-seconds=30 -- stat /eos/project/t/tkdqmdoc
+   oc set probe dc/<your-build-name> --liveness --initial-delay-seconds=30 -- stat /eos/project/t/tkdqmdoc
 
-   oc set probe dc/<your-build-name>--readiness -- stat /eos/project/t/tkdqmdoc
+   oc set probe dc/<your-build-name> --readiness -- stat /eos/project/t/tkdqmdoc
 
-if it gets stuck or you encouter some errors on openshift rerun all 4
-commands again:
+if it gets stuck or you encouter some errors on openshift like
+
+``Readiness probe failed: stat: cannot stat '/eos/project/t/tkdqmdoc': No such file or directory``
+
+then rerun all 4 commands again:
 
 .. code:: bash
 
-   oc set volume dc/<your-build-name>--add --name=eos --type=persistentVolumeClaim --mount-path=/eos --claim-name=eos-volume --claim-class=eos --claim-size=1
+   oc set volume dc/<your-build-name> --add --name=eos --type=persistentVolumeClaim --mount-path=/eos --claim-name=eos-volume --claim-class=eos --claim-size=1
 
-   oc patch dc/<your-build-name>-p "$(curl --silent https://gitlab.cern.ch/paas-tools/eosclient-openshift/raw/master/eosclient-container-patch.json)"
+   oc patch dc/<your-build-name> -p "$(curl --silent https://gitlab.cern.ch/paas-tools/eosclient-openshift/raw/master/eosclient-container-patch.json)"
 
-   oc set probe dc/<your-build-name>--liveness --initial-delay-seconds=30 -- stat /eos/project/t/tkdqmdoc
+   oc set probe dc/<your-build-name> --liveness --initial-delay-seconds=30 -- stat /eos/project/t/tkdqmdoc
 
-   oc set probe dc/<your-build-name>--readiness -- stat /eos/project/t/tkdqmdoc
+   oc set probe dc/<your-build-name> --readiness -- stat /eos/project/t/tkdqmdoc
 
-then start the built and it should work.
+Then start the built and it should work.
 
 Deployment
 ~~~~~~~~~~
