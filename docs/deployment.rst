@@ -84,6 +84,82 @@ configure the web application with the GitHub repository:
 Note: The application has to be set up only once. Once it is fully
 configured it probably has to never be touched again.
 
+Mount EOS Storage
+~~~~~~~~~~~~~~~~~
+
+The project has 1 TB of storage associated in the EOS. To mount it to
+OpenShift follow these instructions.
+
+Detailed instructions can be found at
+https://cern.service-now.com/service-portal/article.do?n=KB0005259
+
+Prerequisites
+^^^^^^^^^^^^^
+
+Download the ``os`` command line utility.
+
+https://www.okd.io/download.html
+
+On Arch Linux all you have to do is install ``origin-client-bin`` from
+the AUR.
+
+.. code:: bash
+
+   yay -S origin-client-bin
+
+Login
+^^^^^
+
+Go to the openshift website and click on your name in the top right
+corner and click on ``Copy Login Command`` and login in your terminal by
+pasting it.
+
+Select Project
+^^^^^^^^^^^^^^
+
+.. code:: bash
+
+   $ oc project <your-project-name>
+
+Create Secret
+^^^^^^^^^^^^^
+
+Replace with your password.
+
+.. code:: bash
+
+   oc create secret generic eos-credentials --type=eos.cern.ch/credentials --from-literal=keytab-user=tkdqmdoc --from-literal=keytab-pwd=<the-password>
+
+Do EOS stuff
+^^^^^^^^^^^^
+
+Run these commands and replace with the name of your build.
+
+.. code:: bash
+
+   oc set volume dc/<your-build-name>--add --name=eos --type=persistentVolumeClaim --mount-path=/eos --claim-name=eos-volume --claim-class=eos --claim-size=1
+
+   oc patch dc/<your-build-name>-p "$(curl --silent https://gitlab.cern.ch/paas-tools/eosclient-openshift/raw/master/eosclient-container-patch.json)"
+
+   oc set probe dc/<your-build-name>--liveness --initial-delay-seconds=30 -- stat /eos/project/t/tkdqmdoc
+
+   oc set probe dc/<your-build-name>--readiness -- stat /eos/project/t/tkdqmdoc
+
+if it gets stuck or you encouter some errors on openshift rerun all 4
+commands again:
+
+.. code:: bash
+
+   oc set volume dc/<your-build-name>--add --name=eos --type=persistentVolumeClaim --mount-path=/eos --claim-name=eos-volume --claim-class=eos --claim-size=1
+
+   oc patch dc/<your-build-name>-p "$(curl --silent https://gitlab.cern.ch/paas-tools/eosclient-openshift/raw/master/eosclient-container-patch.json)"
+
+   oc set probe dc/<your-build-name>--liveness --initial-delay-seconds=30 -- stat /eos/project/t/tkdqmdoc
+
+   oc set probe dc/<your-build-name>--readiness -- stat /eos/project/t/tkdqmdoc
+
+then start the built and it should work.
+
 Deployment
 ~~~~~~~~~~
 
