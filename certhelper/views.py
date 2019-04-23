@@ -250,7 +250,7 @@ def logout_status(request):
     )
 
 
-@staff_member_required
+@login_required
 def shiftleader_view(request):
     """
     if no filter parameters are specified than every run from every user will be listed
@@ -265,7 +265,7 @@ def shiftleader_view(request):
 
 
 # TODO lazy load summary
-@method_decorator(staff_member_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class ShiftLeaderView(SingleTableMixin, FilterView):
     table_class = ShiftleaderRunInfoTable
     model = RunInfo
@@ -297,7 +297,7 @@ class ShiftLeaderView(SingleTableMixin, FilterView):
 
 
 # TODO superuser required
-@staff_member_required
+@login_required
 def hard_deleteview(request, run_number):
     try:
         run = RunInfo.all_objects.get(run_number=run_number)
@@ -315,7 +315,7 @@ def hard_deleteview(request, run_number):
     return render(request, "certhelper/hard_delete.html", {"run": run})
 
 
-@staff_member_required
+@login_required
 def hard_delete_run_view(request, pk):
     try:
         run = RunInfo.all_objects.get(pk=pk)
@@ -329,7 +329,7 @@ def hard_delete_run_view(request, pk):
     return render(request, "certhelper/hard_delete.html", {"run": run})
 
 
-@staff_member_required
+@login_required
 def restore_run_view(request, pk):
     try:
         run = RunInfo.all_objects.get(pk=pk)
